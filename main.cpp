@@ -1,4 +1,4 @@
-#include "log_duration.h"
+#include "profile.h"
 #include "test_runner.h"
 
 int main() {
