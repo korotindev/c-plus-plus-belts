@@ -9,19 +9,18 @@ using namespace std::chrono;
 
 class LogDuration {
 public:
-    explicit LogDuration(const string& msg = "")
-            : message(msg + ": ")
-            , start(steady_clock::now())
-    {
+    explicit LogDuration(const string &msg = "")
+            : message(msg + ": "), start(steady_clock::now()) {
     }
 
     ~LogDuration() {
         auto finish = steady_clock::now();
         auto dur = finish - start;
-        cerr << message
-             << duration_cast<milliseconds>(dur).count()
-             << " ms" << endl;
+        auto s_count = duration_cast<seconds>(dur).count();
+        auto ms_count = duration_cast<milliseconds>(dur).count();
+        cerr << message << s_count << " (s) | " << ms_count << " (ms)" << endl;
     }
+
 private:
     string message;
     steady_clock::time_point start;
