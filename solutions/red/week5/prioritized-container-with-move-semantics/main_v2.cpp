@@ -17,25 +17,13 @@ public:
     using Id = int;
     using Priority = int;
 
-    struct ObjectWrapper {
-        Id id;
-        T object;
-        Priority priority;
-    };
-
-    // Добавить объект с нулевым приоритетом
-    // с помощью перемещения и вернуть его идентификатор
     Id Add(T object) {
-        ObjectWrapper wrapper{next_id, move(object), 0};
-        auto &elements = priority_to_objects_slice[wrapper.priority];
-        auto[iter, _] = elements.insert({next_id, move(wrapper)});
-        objects_pool[next_id] = iter;
-        return next_id++;
+        const int id = objects.size();
+        objects.push_back({move(object)});
+        sorted_objects.insert({0, id});
+        return id;
     }
 
-    // Добавить все элементы диапазона [range_begin, range_end)
-    // с помощью перемещения, записав выданные им идентификаторы
-    // в диапазон [ids_begin, ...)
     template<typename ObjInputIt, typename IdOutputIt>
     void Add(ObjInputIt range_begin, ObjInputIt range_end,
              IdOutputIt ids_begin) {
@@ -45,56 +33,44 @@ public:
         }
     }
 
-    // Определить, принадлежит ли идентификатор какому-либо
-    // хранящемуся в контейнере объекту
     bool IsValid(Id id) const {
-        return objects_pool.count(id) > 0;
+        return 0 <= id && id < objects.size() && objects[id].priority != NONE_PRIORITY;
     }
 
-    // Получить объект по идентификатору
     const T &Get(Id id) const {
-        return objects_pool.at(id)->second.object;
+        return objects[id].object;
     }
 
-    // Увеличить приоритет объекта на 1
     void Promote(Id id) {
-        auto iter = objects_pool.at(id);
-        ObjectWrapper wrapper = move(iter->second);
-        auto &oldSlice = priority_to_objects_slice[wrapper.priority];
-        oldSlice.erase(iter);
-        if (oldSlice.empty()) {
-            priority_to_objects_slice.erase(wrapper.priority);
-        }
-        wrapper.priority++;
-        auto &newSlice = priority_to_objects_slice[wrapper.priority];
-        auto[newIter, _] = newSlice.insert({wrapper.id, move(wrapper)});
-        objects_pool[wrapper.id] = newIter;
+        auto &object = objects[id];
+        sorted_objects.erase({object.priority, id});
+        object.priority++;
+        sorted_objects.insert({object.priority, id});
     }
 
-    // Получить объект с максимальным приоритетом и его приоритет
     pair<const T &, int> GetMax() const {
-        auto candidatesIterator = prev(priority_to_objects_slice.end());
-        auto candidateIterator = prev(candidatesIterator->second.end());
-        return {candidateIterator->second.object, candidatesIterator->first};
+        const auto objectIterator = prev(sorted_objects.end());
+        const auto &object = objects[objectIterator->second].object;
+        return {object, objectIterator->first};
     }
 
-    // Аналогично GetMax, но удаляет элемент из контейнера
     pair<T, int> PopMax() {
-        auto candidatesIterator = prev(priority_to_objects_slice.end());
-        auto candidateIterator = prev(candidatesIterator->second.end());
-        ObjectWrapper w = move(candidateIterator->second);
-        candidatesIterator->second.erase(candidateIterator);
-        if (candidatesIterator->second.empty()) {
-            priority_to_objects_slice.erase(candidatesIterator);
-        }
-        objects_pool.erase(w.id);
-        return {move(w.object), w.priority};
+        auto objectIterator = prev(sorted_objects.end());
+        auto &objectItem = objects[objectIterator->second];
+        sorted_objects.erase(objectIterator);
+        const auto priority = objectItem.priority;
+        objectItem.priority = NONE_PRIORITY;
+        return {move(objectItem.object), priority};
     }
 
 private:
-    map<Priority, map<Id, ObjectWrapper>> priority_to_objects_slice;
-    map<Id, typename map<Id, ObjectWrapper>::iterator> objects_pool;
-    Id next_id = 0;
+    struct ObjectItem {
+        T object;
+        Priority priority = 0;
+    };
+    static const Priority NONE_PRIORITY = -1;
+    vector<ObjectItem> objects;
+    set<pair<Priority, Id>> sorted_objects;
 };
 
 
