@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(utils)
 
 add_executable(c-plus-plus-belts main.cpp)
+target_compile_options(c-plus-plus-belts PUBLIC -pthread)
 target_compile_options(c-plus-plus-belts PUBLIC -O2)
 target_compile_options(c-plus-plus-belts PUBLIC -Werror -Wall -Wextra -pedantic-errors -Wconversion -Wsign-conversion)
 
