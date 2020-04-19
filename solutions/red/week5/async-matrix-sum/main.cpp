@@ -1,4 +1,5 @@
 #include "test_runner.h"
+#include "profile.h"
 #include <algorithm>
 #include <cstdint>
 #include <vector>
@@ -6,62 +7,88 @@
 #include <numeric>
 
 using namespace std;
-
-template<typename Iterator>
-class PaginatorRange {
+template <typename Iterator>
+class IteratorRange {
 public:
-    PaginatorRange(Iterator range_begin, Iterator range_end) : first(range_begin), last(range_end) {}
-    Iterator begin() const { return first; }
-    Iterator end() const { return last; }
+    IteratorRange(Iterator begin, Iterator end)
+            : first(begin)
+            , last(end)
+            , size_(distance(first, last))
+    {
+    }
+
+    Iterator begin() const {
+        return first;
+    }
+
+    Iterator end() const {
+        return last;
+    }
+
+    size_t size() const {
+        return size_;
+    }
+
 private:
     Iterator first, last;
+    size_t size_;
 };
 
-template<typename Iterator>
+template <typename Iterator>
 class Paginator {
 private:
-    vector<PaginatorRange<Iterator>> ranges;
+    vector<IteratorRange<Iterator>> pages;
+
 public:
     Paginator(Iterator begin, Iterator end, size_t page_size) {
-        for(size_t left = distance(begin, end); left > 0;) {
-            size_t range_length = min(page_size, left);
-            Iterator nextRangeIterator = begin + range_length;
-            ranges.push_back({begin, nextRangeIterator});
+        for (size_t left = distance(begin, end); left > 0; ) {
+            size_t current_page_size = min(page_size, left);
+            Iterator current_page_end = next(begin, current_page_size);
+            pages.push_back({begin, current_page_end});
 
-            left -= range_length;
-            begin = nextRangeIterator;
+            left -= current_page_size;
+            begin = current_page_end;
         }
     }
 
-    auto begin() const { return ranges.begin(); }
-    auto end() const { return ranges.end(); }
+    auto begin() const {
+        return pages.begin();
+    }
+
+    auto end() const {
+        return pages.end();
+    }
+
+    size_t size() const {
+        return pages.size();
+    }
 };
 
-template<typename RandomAccessContainer>
-auto Paginate(RandomAccessContainer &container, size_t page_size) {
-    return Paginator(begin(container), end(container), page_size);
+template <typename C>
+auto Paginate(C& c, size_t page_size) {
+    return Paginator(begin(c), end(c), page_size);
 }
 
-int64_t CalculateMatrixSum(const vector<vector<int>> &matrix) {
-    int64_t result = 0;
-    vector<future<int>> futures;
-    auto pages = Paginate(matrix, 2000);
-    for (auto page : pages) {
-        futures.push_back(
-                async([page] {
-                    int res = 0;
-                    for (auto row : page) {
-                        res += accumulate(row.begin(), row.end(), 0);
-                    }
-                    return res;
-                })
-        );
+template <typename ContainerOfVectors>
+int64_t SumSingleThread(const ContainerOfVectors& matrix) {
+    int64_t sum = 0;
+    for (const auto& row : matrix) {
+        for (auto item : row) {
+            sum += item;
+        }
     }
+    return sum;
+}
 
-    for (auto &f : futures) {
+int64_t CalculateMatrixSum(const vector<vector<int>>& matrix) {
+    vector<future<int64_t>> futures;
+    for (auto page : Paginate(matrix, 2000)) {
+        futures.push_back(async([=] { return SumSingleThread(page); }));
+    }
+    int64_t result = 0;
+    for (auto& f : futures) {
         result += f.get();
     }
-
     return result;
 }
 
@@ -75,7 +102,22 @@ void TestCalculateMatrixSum() {
     ASSERT_EQUAL(CalculateMatrixSum(matrix), 136);
 }
 
+void TestCalculateMatrixSumLoad() {
+    vector<vector<int>> matrix(9000);
+
+    for (auto &v : matrix) {
+        v.resize(9000);
+        generate(v.begin(), v.end(), std::rand);
+    }
+
+    {
+        LOG_DURATION("9000*9000 elements")
+        CalculateMatrixSum(matrix);
+    }
+}
+
 int main() {
     TestRunner tr;
     RUN_TEST(tr, TestCalculateMatrixSum);
+    RUN_TEST(tr, TestCalculateMatrixSumLoad);
 }
