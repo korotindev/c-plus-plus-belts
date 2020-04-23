@@ -328,25 +328,38 @@ void TestSearchServer(vector<pair<istream*, ostream *>> streams) {
 void TestMultithread() {
     {
 
-        ifstream docs("database.txt");
+        ifstream docs1("database.txt");
+        ifstream docs2("database.txt");
+        ifstream docs3("database.txt");
+        ifstream docs4("database.txt");
+        ifstream docs5("database.txt");
+        ifstream docs6("database.txt");
         ifstream qf1("queries1.txt");
         ifstream qf2("queries2.txt");
         ifstream qf3("queries3.txt");
         ifstream qf4("queries4.txt");
         ifstream qf5("queries5.txt");
+        ifstream qf6("queries6.txt");
 
         ofstream of1("results1.txt");
         ofstream of2("results2.txt");
         ofstream of3("results3.txt");
         ofstream of4("results4.txt");
         ofstream of5("results5.txt");
+        ofstream of6("results6.txt");
         vector<pair<istream*, ostream *>> streams {
-                make_pair(&docs, nullptr),
+                make_pair(&docs1, nullptr),
                 make_pair(&qf1, &of1),
+                make_pair(&docs2, nullptr),
                 make_pair(&qf2, &of2),
                 make_pair(&qf3, &of3),
+                make_pair(&docs3, nullptr),
                 make_pair(&qf4, &of4),
+                make_pair(&docs4, nullptr),
                 make_pair(&qf5, &of5),
+                make_pair(&docs5, nullptr),
+                make_pair(&qf6, &of6),
+                make_pair(&docs6, nullptr),
         };
 
         TestSearchServer(streams);
