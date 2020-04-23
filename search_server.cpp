@@ -11,7 +11,7 @@
 
 vector<string> SplitIntoWords(const string &line) {
     istringstream words_input(line);
-    return {istream_iterator<string>(words_input), istream_iterator<string>()};
+    return {make_move_iterator(istream_iterator<string>(words_input)), make_move_iterator(istream_iterator<string>())};
 }
 
 SearchServer::SearchServer(istream &document_input) {
@@ -34,7 +34,11 @@ void SearchServer::UpdateDocumentBaseSync(istream &document_input) {
 }
 
 void SearchServer::UpdateDocumentBase(istream &document_input) {
-    futures.push_back(async(launch::async, &SearchServer::UpdateDocumentBaseSync, this, ref(document_input)));
+    futures.push_back(
+            async([&] () {
+                UpdateDocumentBaseSync(document_input);
+            })
+    );
 }
 
 
@@ -71,8 +75,9 @@ void SearchServer::AddQueriesStream(
         istream &query_input, ostream &search_results_output
 ) {
     futures.push_back(
-            async(launch::async, &SearchServer::AddQueriesStreamSync, this, ref(query_input),
-                  ref(search_results_output))
+            async([&] () {
+                AddQueriesStreamSync(query_input, search_results_output);
+            })
     );
 }
 
@@ -83,7 +88,7 @@ void SearchServer::AddQueriesStreamSync(
 
     for (string current_query; getline(query_input, current_query);) {
 
-        const auto words = SplitIntoWords(current_query);
+        const auto &words = SplitIntoWords(current_query);
         {
             shared_lock lock(m);
             docId_count.assign(index.DocsCount(), {0, 0});
