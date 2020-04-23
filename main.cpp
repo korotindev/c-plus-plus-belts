@@ -329,11 +329,11 @@ void TestMultithread() {
     {
 
         ifstream docs("database.txt");
-        ifstream qf1("queries.txt");
-        ifstream qf2("queries.txt");
-        ifstream qf3("queries.txt");
-        ifstream qf4("queries.txt");
-        ifstream qf5("queries.txt");
+        ifstream qf1("queries1.txt");
+        ifstream qf2("queries2.txt");
+        ifstream qf3("queries3.txt");
+        ifstream qf4("queries4.txt");
+        ifstream qf5("queries5.txt");
 
         ofstream of1("results1.txt");
         ofstream of2("results2.txt");
