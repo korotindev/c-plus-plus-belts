@@ -17,6 +17,7 @@ using namespace std;
 class InvertedIndex {
 public:
     void Add(const string &document);
+
     void Optimize();
 
     vector<pair<size_t, size_t>> &Lookup(const string &word);
@@ -43,12 +44,16 @@ public:
     explicit SearchServer(istream &document_input);
 
     void UpdateDocumentBase(istream &document_input);
+
     void UpdateDocumentBaseSync(istream &document_input);
 
     void AddQueriesStream(istream &query_input, ostream &search_results_output);
+
     void AddQueriesStreamSync(istream &query_input, ostream &search_results_output);
 
+    static const size_t MAX_THREADS = 6;
 private:
+    bool isFirstUpdate = true;
     InvertedIndex index;
     shared_mutex m;
     vector<future<void>> futures;

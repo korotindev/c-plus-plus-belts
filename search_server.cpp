@@ -12,15 +12,11 @@ vector<string> SplitIntoWords(const string &line) {
     return {istream_iterator<string>(words_input), istream_iterator<string>()};
 }
 
-SearchServer::SearchServer(istream &document_input) {
+SearchServer::SearchServer(istream &document_input) : isFirstUpdate(true) {
     UpdateDocumentBase(document_input);
 }
 
 void SearchServer::UpdateDocumentBase(istream &document_input) {
-//    futures.push_back(
-//            async(launch::async, &SearchServer::UpdateDocumentBaseSync, this, ref(document_input))
-//    );
-
     UpdateDocumentBaseSync(document_input);
 }
 
@@ -35,7 +31,8 @@ void SearchServer::UpdateDocumentBaseSync(istream &document_input) {
 
     {
         unique_lock g(m);
-        index = move(new_index);
+        swap(index, new_index);
+        isFirstUpdate = false;
     }
 }
 
@@ -68,14 +65,28 @@ vector<pair<size_t, size_t>> &InvertedIndex::Lookup(const string &word) {
 }
 
 void SearchServer::AddQueriesStream(istream &query_input, ostream &search_results_output) {
-    futures.push_back(
-            async(launch::async, &SearchServer::AddQueriesStreamSync, this, ref(query_input),
-                  ref(search_results_output))
-    );
+    if (futures.size() >= MAX_THREADS) {
+        while (true) {
+            for (auto &fut : futures) {
+                if (fut.wait_for(1ms) == future_status::ready) {
+                    fut = async(&SearchServer::AddQueriesStreamSync, this, ref(query_input),
+                                ref(search_results_output));
+                    return;
+                }
+            }
+
+            this_thread::sleep_for(5ms);
+        }
+    } else {
+        futures.push_back(
+                async(&SearchServer::AddQueriesStreamSync, this, ref(query_input), ref(search_results_output)));
+    }
 }
 
 
 void SearchServer::AddQueriesStreamSync(istream &query_input, ostream &search_results_output) {
+    while (isFirstUpdate);
+
     vector<pair<size_t, size_t>> docId_count(index.DocsCount());
     for (string current_query; getline(query_input, current_query);) {
         const auto words = SplitIntoWords(current_query);
@@ -83,13 +94,14 @@ void SearchServer::AddQueriesStreamSync(istream &query_input, ostream &search_re
         {
             shared_lock lock(m);
             docId_count.assign(index.DocsCount(), {0, 0});
-
-            for (const auto &word : words) {
+        }
+        for (const auto &word : words) {
+            {
+                shared_lock lock(m);
                 for (const auto &doc : index.Lookup(word)) {
                     docId_count[doc.first].second += doc.second;
                     docId_count[doc.first].first = doc.first;
                 }
-
             }
         }
 
@@ -117,5 +129,6 @@ void SearchServer::AddQueriesStreamSync(istream &query_input, ostream &search_re
         }
         search_results_output << endl;
     }
+
 }
 
