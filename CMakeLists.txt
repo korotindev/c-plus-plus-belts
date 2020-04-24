@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -g -fno-sanitize-recover=null")
 
-add_executable(c-plus-plus-belts main.cpp iterator_range.h parse.h parse.cpp search_server.h search_server.cpp)
+add_executable(c-plus-plus-belts main.cpp)
 
 target_link_libraries(c-plus-plus-belts INTERFACE utils)
 
