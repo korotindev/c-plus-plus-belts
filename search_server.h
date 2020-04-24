@@ -8,9 +8,8 @@
 #include <unordered_map>
 #include <map>
 #include <string>
-#include <mutex>  // For std::unique_lock
 #include <shared_mutex>
-#include <thread>
+#include <mutex>
 #include <future>
 
 using namespace std;
@@ -18,9 +17,9 @@ using namespace std;
 class InvertedIndex {
 public:
     void Add(const string &document);
+    void Optimize();
 
-    map<string, vector<pair<size_t, size_t>>>::iterator Lookup(const string &word);
-    map<string, vector<pair<size_t, size_t>>>::iterator LookupEnd();
+    vector<pair<size_t, size_t>> &Lookup(const string &word);
 
     const string &GetDocument(size_t id) const {
         return docs[id];
@@ -30,15 +29,11 @@ public:
         return docs.size();
     }
 
-    bool Empty() {
-        return docs.empty();
-    }
-
 private:
     map<string, vector<pair<size_t, size_t>>> index;
-    map<string, map<size_t, size_t>> update_consistency_index;
+    map<string, map<size_t, size_t>> not_optimized_internal_index__;
     vector<string> docs;
-    vector<pair<size_t, size_t>> emptyDocs;
+    vector<pair<size_t, size_t>> emptyLookupResult;
 };
 
 class SearchServer {
@@ -48,12 +43,13 @@ public:
     explicit SearchServer(istream &document_input);
 
     void UpdateDocumentBase(istream &document_input);
-    void AddQueriesStream(istream &query_input, ostream &search_results_output);
     void UpdateDocumentBaseSync(istream &document_input);
+
+    void AddQueriesStream(istream &query_input, ostream &search_results_output);
     void AddQueriesStreamSync(istream &query_input, ostream &search_results_output);
 
 private:
-    shared_mutex m;
     InvertedIndex index;
+    shared_mutex m;
     vector<future<void>> futures;
 };

@@ -1,120 +1,101 @@
 #include "search_server.h"
 #include "iterator_range.h"
-
 #include <algorithm>
 #include <iterator>
 #include <sstream>
 #include <iostream>
 #include <array>
 #include <cmath>
-#include <future>
 
 vector<string> SplitIntoWords(const string &line) {
     istringstream words_input(line);
-    return {make_move_iterator(istream_iterator<string>(words_input)), make_move_iterator(istream_iterator<string>())};
+    return {istream_iterator<string>(words_input), istream_iterator<string>()};
 }
 
 SearchServer::SearchServer(istream &document_input) {
     UpdateDocumentBase(document_input);
 }
 
-void SearchServer::UpdateDocumentBaseSync(istream &document_input) {
-    if (!index.Empty()) {
-        return;
-    }
+void SearchServer::UpdateDocumentBase(istream &document_input) {
+//    futures.push_back(
+//            async(launch::async, &SearchServer::UpdateDocumentBaseSync, this, ref(document_input))
+//    );
 
+    UpdateDocumentBaseSync(document_input);
+}
+
+void SearchServer::UpdateDocumentBaseSync(istream &document_input) {
     InvertedIndex new_index;
 
     for (string current_document; getline(document_input, current_document);) {
         new_index.Add(current_document);
     }
 
-    unique_lock lock(m);
-    swap(index, new_index);
-}
+    new_index.Optimize();
 
-void SearchServer::UpdateDocumentBase(istream &document_input) {
-    futures.push_back(
-            async([&] () {
-                UpdateDocumentBaseSync(document_input);
-            })
-    );
+    {
+        unique_lock g(m);
+        index = move(new_index);
+    }
 }
-
 
 void InvertedIndex::Add(const string &document) {
     docs.push_back(document);
 
     const size_t docId = docs.size() - 1;
     for (const auto &word : SplitIntoWords(document)) {
-        auto &wordConsistencyMap = update_consistency_index[word];
-        auto wordIdInIndexIter = wordConsistencyMap.find(docId);
+        not_optimized_internal_index__[word][docId]++;
+    }
+}
 
-        if (wordIdInIndexIter != wordConsistencyMap.end()) {
-            pair<size_t, size_t> &d = index[word][wordIdInIndexIter->second];
-            d.second++;
-        } else {
-            auto &docsForWord = index[word];
-            size_t ind = docsForWord.size();
-            docsForWord.emplace_back(docId, 1);
-            wordConsistencyMap[docId] = ind;
+void InvertedIndex::Optimize() {
+    for (const auto &[word, not_optimized_index_slice] : not_optimized_internal_index__) {
+        vector<pair<size_t, size_t>> &index_slice = index[word];
+        index_slice.reserve(not_optimized_index_slice.size());
+
+        for (const auto &[doc_id, words_count] : not_optimized_index_slice) {
+            index_slice.emplace_back(doc_id, words_count);
         }
     }
 }
 
-map<string, vector<pair<size_t, size_t>>>::iterator InvertedIndex::Lookup(const string &word) {
-    return index.find(word);
+vector<pair<size_t, size_t>> &InvertedIndex::Lookup(const string &word) {
+    if (auto iter = index.find(word); iter != index.end()) {
+        return iter->second;
+    } else {
+        return emptyLookupResult;
+    }
 }
 
-map<string, vector<pair<size_t, size_t>>>::iterator InvertedIndex::LookupEnd() {
-    return index.end();
-}
-
-
-void SearchServer::AddQueriesStream(
-        istream &query_input, ostream &search_results_output
-) {
+void SearchServer::AddQueriesStream(istream &query_input, ostream &search_results_output) {
     futures.push_back(
-            async([&] () {
-                AddQueriesStreamSync(query_input, search_results_output);
-            })
+            async(launch::async, &SearchServer::AddQueriesStreamSync, this, ref(query_input),
+                  ref(search_results_output))
     );
 }
 
-void SearchServer::AddQueriesStreamSync(
-        istream &query_input, ostream &search_results_output
-) {
-    vector<pair<size_t, size_t>> docId_count;
 
+void SearchServer::AddQueriesStreamSync(istream &query_input, ostream &search_results_output) {
+    vector<pair<size_t, size_t>> docId_count(index.DocsCount());
     for (string current_query; getline(query_input, current_query);) {
+        const auto words = SplitIntoWords(current_query);
 
-        const auto &words = SplitIntoWords(current_query);
         {
             shared_lock lock(m);
             docId_count.assign(index.DocsCount(), {0, 0});
-        }
-        for (const auto &word : words) {
-            map<string, vector<pair<size_t, size_t>>>::iterator iter, iterEnd;
-            {
-                shared_lock lock(m);
-                iter = index.Lookup(word);
-                iterEnd = index.LookupEnd();
-            }
-            if (iter != iterEnd) {
-                for (const auto &doc : iter->second) {
+
+            for (const auto &word : words) {
+                for (const auto &doc : index.Lookup(word)) {
                     docId_count[doc.first].second += doc.second;
                     docId_count[doc.first].first = doc.first;
                 }
-            }
 
+            }
         }
 
-        auto docId_count_middle = begin(docId_count);
-        auto docId_count_middle_index = static_cast<long>(min(5ul, docId_count.size()));
-        advance(docId_count_middle, docId_count_middle_index);
         partial_sort(
                 begin(docId_count),
-                docId_count_middle,
+                begin(docId_count) + static_cast<long>(min(5ul, docId_count.size())),
                 end(docId_count),
                 [](auto &lhs, auto &rhs) {
                     if (lhs.second > rhs.second) {
@@ -128,15 +109,13 @@ void SearchServer::AddQueriesStreamSync(
         );
 
         search_results_output << current_query << ':';
-        size_t five = 5;
-        for (auto &elem : Head(docId_count, five)) {
+        for (auto &elem : Head(docId_count, 5ul)) {
             if (elem.second == 0) continue;
             search_results_output << " {"
                                   << "docid: " << elem.first << ", "
                                   << "hitcount: " << elem.second << '}';
         }
         search_results_output << endl;
-
     }
 }
 

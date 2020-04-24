@@ -328,12 +328,12 @@ void TestSearchServer(vector<pair<istream*, ostream *>> streams) {
 void TestMultithread() {
     {
 
-        ifstream docs1("database.txt");
-        ifstream docs2("database.txt");
-        ifstream docs3("database.txt");
-        ifstream docs4("database.txt");
-        ifstream docs5("database.txt");
-        ifstream docs6("database.txt");
+        ifstream docs1("database1.txt");
+        ifstream docs2("database2.txt");
+        ifstream docs3("database3.txt");
+        ifstream docs4("database4.txt");
+        ifstream docs5("database5.txt");
+        ifstream docs6("database6.txt");
         ifstream qf1("queries1.txt");
         ifstream qf2("queries2.txt");
         ifstream qf3("queries3.txt");
@@ -369,11 +369,11 @@ void TestMultithread() {
 int main() {
     TestRunner tr;
 
-//    RUN_TEST(tr, TestSerpFormat);
-//    RUN_TEST(tr, TestTop5);
-//    RUN_TEST(tr, TestHitcount);
-//    RUN_TEST(tr, TestRanking);
-//    RUN_TEST(tr, TestBasicSearch);
+    RUN_TEST(tr, TestSerpFormat);
+    RUN_TEST(tr, TestTop5);
+    RUN_TEST(tr, TestHitcount);
+    RUN_TEST(tr, TestRanking);
+    RUN_TEST(tr, TestBasicSearch);
     //RUN_TEST(tr, GenerateLargeTextFiles);
     //RUN_TEST(tr, TestSpeedUp);
     RUN_TEST(tr, TestMultithread);
