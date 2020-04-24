@@ -10,7 +10,8 @@ using namespace std;
 template <typename Container>
 string Join(char c, const Container& cont) {
   ostringstream os;
-  for (const auto& item : Head(cont, cont.size() - 1)) {
+  size_t size = cont.size() - 1;
+  for (const auto& item : Head(cont, size)) {
     os << item << c;
   }
   os << *rbegin(cont);
