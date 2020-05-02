@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <string>
 #include <vector>
@@ -39,6 +40,20 @@ std::ostream& operator << (std::ostream& os, const std::set<T>& s) {
 
 template <class K, class V>
 std::ostream& operator << (std::ostream& os, const std::map<K, V>& m) {
+    os << "{";
+    bool first = true;
+    for (const auto& kv : m) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        os << kv.first << ": " << kv.second;
+    }
+    return os << "}";
+}
+
+template <class K, class V>
+std::ostream& operator << (std::ostream& os, const std::unordered_map<K, V>& m) {
     os << "{";
     bool first = true;
     for (const auto& kv : m) {
