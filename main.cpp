@@ -3,7 +3,7 @@
 #include <iostream>
 
 void TestFunc() {
-  std::cout << "Hello, world!" << endl;
+  std::cout << "Hello, world!" << std::endl;
 }
 
 int main() {
@@ -12,7 +12,7 @@ int main() {
     {
         LOG_DURATION("test message")
         int slowComputation = 5 + 3;
-        std::cout << "slowComputation = " << slowComputation << endl;
+        std::cout << "slowComputation = " << slowComputation << std::endl;
     }
 
     RUN_TEST(tr, TestFunc);
