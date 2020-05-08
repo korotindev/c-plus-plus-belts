@@ -70,7 +70,7 @@ template<class T, class U>
 void AssertEqual(const T& t, const U& u, const std::string& hint = {}) {
     if (!(t == u)) {
         std::ostringstream os;
-        os << "Assertion failed: " << t << " != " << u;
+        os << "Assertion failed: " << std::endl << t << " != " << std::endl << u;
         if (!hint.empty()) {
             os << " hint: " << hint;
         }

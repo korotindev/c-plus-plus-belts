@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(utils)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic-errors -Wconversion -Wsign-conversion")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-parameter -Wno-conversion -Wno-sign-conversion")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope")
@@ -14,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -g -fno-sanitize-recover=null")
 
-add_executable(c-plus-plus-belts main.cpp)
+add_executable(c-plus-plus-belts main.cpp Textures.cpp Textures.h Common.h Solution.cpp)
 
 target_link_libraries(c-plus-plus-belts INTERFACE utils)
 
