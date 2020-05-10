@@ -67,8 +67,12 @@ public:
     for (int y = this->point.y; y < maxHeight; ++y) {
       for (int x = this->point.x; x < maxWidth; ++x) {
         Point texturePoint{x - this->point.x, y - this->point.y};
-        if (IsPointInEllipse(texturePoint, this->size) && this->IsPointInTexture(texturePoint)) {
-          image[y][x] = texture->GetImage()[texturePoint.y][texturePoint.x];
+        if (IsPointInEllipse(texturePoint, this->size)) {
+          if (this->IsPointInTexture(texturePoint)) {
+            image[y][x] = texture->GetImage()[texturePoint.y][texturePoint.x];
+          } else {
+            image[y][x] = '.';
+          }
         }
       }
     }
