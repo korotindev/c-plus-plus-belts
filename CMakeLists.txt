@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -g -fno-sanitize-recover=null")
 
-add_executable(c-plus-plus-belts main.cpp Textures.cpp Textures.h Common.h Solution.cpp)
+add_executable(c-plus-plus-belts main.cpp)
 
 target_link_libraries(c-plus-plus-belts INTERFACE utils)
 
