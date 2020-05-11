@@ -18,7 +18,7 @@ public:
     BookPtr result;
     if (cacheIter != cache.end()) {
       auto booksIter = cacheIter->second;
-      books.splice(begin(books), books, booksIter, next(booksIter));
+      books.splice(begin(books), books, booksIter);
       result = *books.begin();
     } else {
       auto unpacked_book = books_unpacker->UnpackBook(book_name);
@@ -50,10 +50,12 @@ private:
 
   shared_ptr<IBooksUnpacker> books_unpacker;
   const size_t max_memory;
-  mutex m;
   size_t allocated_space;
+
   BooksList books;
   unordered_map<string, BooksListIter> cache;
+
+  mutex m;
 };
 
 
