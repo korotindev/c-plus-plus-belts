@@ -7,63 +7,101 @@
 
 using namespace std;
 
-struct Domain {
-  string name;
-
-  bool IsSubdomainOf(const Domain& other) const {
-    auto subdomainIter = this->name.rbegin();
-    auto domainIter = other.name.rbegin();
-    while (subdomainIter != this->name.rend() && domainIter != other.name.rend()) {
-      if (*subdomainIter != *domainIter) {
-        return false;
-      }
-      subdomainIter++;
-      domainIter++;
-    }
-
-    if (domainIter == other.name.rend()) {
-      return subdomainIter == this->name.rend() ? true : *subdomainIter == '.';
-    }
-
-    return false;
-  }
-};
-
-bool operator==(const Domain& lhs, const Domain& rhs) {
-  return lhs.name == rhs.name;
-}
-
-ostream& operator<<(ostream& output, const Domain& domain) {
-  return output << "Domain{" << domain.name << '}';
-}
-
-vector<Domain> ReadDomains(istream& input) {
+vector<string> ReadDomains(istream& input) {
   size_t count;
+  vector<string> domains;
   input >> count;
-
-  vector<Domain> domains;
+  domains.reserve(count);
   for (size_t i = 0; i < count; ++i) {
     string domain;
     input >> domain;
-    domains.push_back({move(domain)});
+    domains.push_back(move(domain));
   }
   return domains;
 }
 
-bool IsBadSubdomain(const Domain& subdomain, const vector<Domain>& banned_subdomains) {
-  return any_of(
-    begin(banned_subdomains),
-    end(banned_subdomains),
-    [&subdomain](const Domain& banned_domain) {
-      return subdomain.IsSubdomainOf(banned_domain);
-    });
-}
+
+class BadSubdomainsChecker {
+public:
+  BadSubdomainsChecker(vector<string>&& domain_names) {
+    banned_domains.reserve(domain_names.size());
+    for (auto& domain_name : domain_names) {
+      banned_domains.push_back({move(domain_name)});
+    }
+    sort(banned_domains.begin(), banned_domains.end());
+
+    size_t insert_pos = 0;
+    for (auto& domain : banned_domains) {
+      if (insert_pos == 0 || !domain.IsSubdomainOf(banned_domains[insert_pos - 1])) {
+        swap(banned_domains[insert_pos++], domain);
+      }
+    }
+    banned_domains.resize(insert_pos);
+  }
+
+  bool Check(string&& domain_name) const {
+    ReversedDomain domain(move(domain_name));
+    auto it = upper_bound(banned_domains.begin(), banned_domains.end(), domain);
+    if (it == banned_domains.begin()) {
+      return false;
+    }
+    it = prev(it);
+    bool result = domain.IsSubdomainOf(*it);
+    return result;
+  }
+
+private:
+  class ReversedDomain {
+  public:
+    string name;
+
+  public:
+    ReversedDomain() {}
+    ReversedDomain(ReversedDomain&& reversed)
+      : name(move(reversed.name)) {}
+
+    ReversedDomain& operator=(ReversedDomain&& reversed) {
+      this->name = move(reversed.name);
+      return *this;
+    }
+
+    ReversedDomain(string&& domainName) {
+      reverse(domainName.begin(), domainName.end());
+      this->name = domainName;
+    }
+
+    bool IsSubdomainOf(const ReversedDomain& other) const {
+      auto subdomainIter = this->name.begin();
+      auto domainIter = other.name.begin();
+      while (subdomainIter != this->name.end() && domainIter != other.name.end()) {
+        if (*subdomainIter != *domainIter) {
+          return false;
+        }
+        subdomainIter++;
+        domainIter++;
+      }
+
+      if (domainIter == other.name.end()) {
+        return subdomainIter == this->name.end() ? true : *subdomainIter == '.';
+      }
+
+      return false;
+    }
+
+    friend bool operator<(const ReversedDomain& lhs, const ReversedDomain& rhs) {
+      return lhs.name < rhs.name;
+    }
+  };
+
+  vector<ReversedDomain> banned_domains;
+};
+
 
 void Solution(istream& input, ostream& output) {
-  auto banned_domains = ReadDomains(input);
+  BadSubdomainsChecker checker(ReadDomains(input));
   auto subdomains = ReadDomains(input);
-  for (const Domain& subdomain : subdomains) {
-    if (IsBadSubdomain(subdomain, banned_domains)) {
+  for (string& domain : subdomains) {
+    if (checker.Check(move(domain))) {
       output << "Bad\n";
     } else {
       output << "Good\n";
@@ -78,9 +116,8 @@ void TestReadDomains() {
     "google.com\n"
   );
 
-  vector<Domain> domains = ReadDomains(input);
-  vector<Domain> expected_domains = {{"yandex.ru"},
-                                     {"google.com"}};
+  vector<string> domains = ReadDomains(input);
+  vector<string> expected_domains = {"yandex.ru", "google.com"};
   ASSERT_EQUAL(domains, expected_domains);
 }
 
@@ -94,57 +131,51 @@ void TestDoubleReadDomains() {
     "mail.ru\n"
   );
 
-  vector<Domain> domains = ReadDomains(input);
-  vector<Domain> expected_domains = {{"yandex.ru"},
-                                     {"google.com"}};
+  vector<string> domains = ReadDomains(input);
+  vector<string> expected_domains = {"yandex.ru", "google.com"};
   ASSERT_EQUAL(domains, expected_domains);
   domains = ReadDomains(input);
-  expected_domains = {{"ya.ru"},
-                      {"mail.ru"}};
+  expected_domains = {"ya.ru", "mail.ru"};
   ASSERT_EQUAL(domains, expected_domains);
 }
 
-void TestSubdomainCheck() {
-  {
-    Domain subdomain{"dima.google.com"};
-    Domain domain{"google.com"};
+void TestBadSubdomainChecker() {
+  BadSubdomainsChecker checker({
+                                 "ya.ru",
+                                 "m.ya.ru",
+                                 "ok.ru",
+                                 "com",
+                                 "test.vk.ru",
+                                 "m.m.m",
+                                 "m.m",
+                                 "m",
+                                 "h.h.h",
+                               });
+  ASSERT(checker.Check("ya.ru"));
+  ASSERT(checker.Check("m.ya.ru"));
+  ASSERT(checker.Check("ok.ru"));
+  ASSERT(checker.Check("com"));
+  ASSERT(checker.Check("test.vk.ru"));
+  ASSERT(checker.Check("m.m.m"));
+  ASSERT(checker.Check("m.m"));
+  ASSERT(checker.Check("m"));
+  ASSERT(checker.Check("h.h.h"));
 
-    ASSERT(subdomain.IsSubdomainOf(domain));
-    ASSERT(!domain.IsSubdomainOf(subdomain));
-  }
-  {
-    Domain subdomain{"google.com"};
-    Domain domain{"google.com"};
 
-    ASSERT(subdomain.IsSubdomainOf(domain));
-    ASSERT(domain.IsSubdomainOf(subdomain));
-  }
-}
+  ASSERT(checker.Check("m.m.ya.ru"));
+  ASSERT(checker.Check("m.m.m.ya.ru"));
+  ASSERT(checker.Check("m.ok.ru"));
+  ASSERT(checker.Check("google.com"));
+  ASSERT(checker.Check("apple.com"));
+  ASSERT(checker.Check("m.apple.com"));
+  ASSERT(checker.Check("m.m.m.m"));
+  ASSERT(checker.Check("m.m.m.m.com"));
 
-void TestBadSubdomainCheck() {
-  vector<Domain> banned_domains = {{"ya.ru"},
-                                   {"ok.ru"}};
-
-  {
-    Domain domain{"m.ya.ru"};
-    ASSERT(IsBadSubdomain(domain, banned_domains));
-  }
-  {
-    Domain domain{"m.ok.ru"};
-    ASSERT(IsBadSubdomain(domain, banned_domains));
-  }
-  {
-    Domain domain{"ya.ru"};
-    ASSERT(IsBadSubdomain(domain, banned_domains));
-  }
-  {
-    Domain domain{"ok.ru"};
-    ASSERT(IsBadSubdomain(domain, banned_domains));
-  }
-  {
-    Domain domain{"google.com"};
-    ASSERT(!IsBadSubdomain(domain, banned_domains));
-  }
+  ASSERT(!checker.Check("vk.ru"));
+  ASSERT(!checker.Check("ru"));
+  ASSERT(!checker.Check("ru"));
+  ASSERT(!checker.Check("h.h"));
+  ASSERT(!checker.Check("h"));
 }
 
 void TestSolution() {
@@ -180,8 +211,7 @@ int main() {
   TestRunner tr;
   RUN_TEST(tr, TestReadDomains);
   RUN_TEST(tr, TestDoubleReadDomains);
-  RUN_TEST(tr, TestSubdomainCheck);
-  RUN_TEST(tr, TestBadSubdomainCheck);
+  RUN_TEST(tr, TestBadSubdomainChecker);
   RUN_TEST(tr, TestSolution);
   Solution(cin, cout);
   return 0;
