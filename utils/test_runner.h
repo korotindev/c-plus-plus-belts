@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <string>
 #include <vector>
@@ -26,6 +27,20 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& s) {
 
 template <class T>
 std::ostream& operator << (std::ostream& os, const std::set<T>& s) {
+    os << "{";
+    bool first = true;
+    for (const auto& x : s) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        os << x;
+    }
+    return os << "}";
+}
+
+template <class T>
+std::ostream& operator << (std::ostream& os, const std::unordered_set<T>& s) {
     os << "{";
     bool first = true;
     for (const auto& x : s) {
