@@ -31,12 +31,17 @@ size_t BusStorage::GetUniqueStopsCount(const std::string& busName) const {
   return 0;
 }
 
-const std::vector<std::string>& BusStorage::GetStops(const std::string& busName) const {
-  static std::vector<std::string> defaultResult;
+bool BusStorage::Exist(const std::string& busName) const {
+  auto it = storage.find(busName);
+  return it != storage.end();
+}
+
+const vector<string>& BusStorage::GetStops(const std::string& busName) const {
+  static const vector<string> defaultStops;
   if (auto it = storage.find(busName); it != storage.end()) {
     return it->second;
   }
-  return defaultResult;
+  return defaultStops;
 }
 
 void Database::EntertainStop(Stop stop) {
@@ -50,12 +55,11 @@ void Database::EntertainBus(Bus bus) {
 ReadBusResponse::ReadBusResponse(string busName_) : busName(busName_) {}
 
 unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
-  const auto& stops = busStorage.GetStops(busName);
-
-  if (stops.empty()) {
+  if (!busStorage.Exist(busName)) {
     return make_unique<ReadNoBusResponse>(busName);
   }
 
+  const auto& stops = busStorage.GetStops(busName);
   auto response = make_unique<ReadBusMetricsResponse>(busName);
 
   response->stopsCount = stops.size();
