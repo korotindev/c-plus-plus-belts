@@ -50,7 +50,6 @@ class BusStorage {
   std::unordered_map<std::string, std::unordered_set<std::string>> uniqueStorage;
 public:
   void Add(Bus bus);
-  bool CountStops(const std::string& busName) const;
   const std::vector<std::string>& GetStops(const std::string& busName) const;
   bool Exist(const std::string& busName) const;
   size_t GetUniqueStopsCount(const std::string& busName) const;

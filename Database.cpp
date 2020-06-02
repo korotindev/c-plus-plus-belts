@@ -32,8 +32,7 @@ size_t BusStorage::GetUniqueStopsCount(const std::string& busName) const {
 }
 
 bool BusStorage::Exist(const std::string& busName) const {
-  auto it = storage.find(busName);
-  return it != storage.end();
+  return storage.find(busName) != storage.end();
 }
 
 const vector<string>& BusStorage::GetStops(const std::string& busName) const {
