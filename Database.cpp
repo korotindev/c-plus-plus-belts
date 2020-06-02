@@ -24,7 +24,8 @@ double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsSto
 
 void BusStorage::Add(Bus bus) {
   storage[bus.name] = bus.stopsNames;
-  uniqueStorage[move(bus.name)].insert(move(bus.name));
+  uniqueStorage[move(bus.name)].insert(make_move_iterator(bus.stopsNames.begin()),
+                                       make_move_iterator(bus.stopsNames.end()));
 }
 
 size_t BusStorage::GetUniqueStopsCount(const std::string& busName) const {
