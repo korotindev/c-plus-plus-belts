@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-paramet
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -g -fno-sanitize-recover=null")
 
-add_executable(c-plus-plus-belts main.cpp CustomUtils.h Request.cpp Request.h Coordinate.cpp Coordinate.h)
+add_executable(c-plus-plus-belts main.cpp CustomUtils.h Request.cpp Request.h Coordinate.cpp Coordinate.h CustomUtils.cpp)
 
 target_link_libraries(c-plus-plus-belts INTERFACE utils)
 

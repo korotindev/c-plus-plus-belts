@@ -9,49 +9,39 @@
 #include <optional>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 template<typename It>
 class Range {
 public:
-    Range(It begin, It end) : begin_(begin), end_(end) {}
-    It begin() const { return begin_; }
-    It end() const { return end_; }
+  Range(It begin, It end) : begin_(begin), end_(end) {}
+
+  It begin() const { return begin_; }
+
+  It end() const { return end_; }
 
 private:
-    It begin_;
-    It end_;
+  It begin_;
+  It end_;
 };
 
-std::pair<std::string_view, std::optional<std::string_view>> SplitTwoStrict(std::string_view s, std::string_view delimiter = " ") {
-    const size_t pos = s.find(delimiter);
-    if (pos == s.npos) {
-        return {s, std::nullopt};
-    } else {
-        return {s.substr(0, pos), s.substr(pos + delimiter.length())};
-    }
-}
+std::pair<std::string_view, std::optional<std::string_view>>
+SplitTwoStrict(std::string_view s, std::string_view delimiter = " ");
 
-std::pair<std::string_view, std::string_view> SplitTwo(std::string_view s, std::string_view delimiter = " ") {
-    const auto [lhs, rhs_opt] = SplitTwoStrict(s, delimiter);
-    return {lhs, rhs_opt.value_or("")};
-}
+std::pair<std::string_view, std::string_view> SplitTwo(std::string_view s, std::string_view delimiter = " ");
 
-std::string_view ReadToken(std::string_view& s, std::string_view delimiter = " ") {
-    const auto [lhs, rhs] = SplitTwo(s, delimiter);
-    s = rhs;
-    return lhs;
-}
+std::string_view ReadToken(std::string_view& s, std::string_view delimiter = " ");
 
-double ConvertToDouble(std::string_view str) {
-    // use std::from_chars when available to git rid of string copy
-    size_t pos;
-    const double result = stod(std::string(str), &pos);
-    if (pos != str.length()) {
-        std::stringstream error;
-        error << "string " << str << " contains " << (str.length() - pos) << " trailing chars";
-        throw std::invalid_argument(error.str());
-    }
-    return result;
+double ConvertToDouble(std::string_view str);
+
+
+template<typename Number>
+Number ReadNumberOnLine(std::istream& stream) {
+  Number number;
+  stream >> number;
+  std::string dummy;
+  getline(stream, dummy);
+  return number;
 }
 
 #endif //C_PLUS_PLUS_BELTS_CUSTOMUTILS_H

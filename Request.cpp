@@ -38,7 +38,7 @@ void EntertainBusRequest::Process() const {
 };
 
 void ReadBusRequest::ParseFrom(string_view input) {
-
+  BusName = ReadToken(input);
 };
 
 void ReadBusRequest::Process() const {
