@@ -38,8 +38,11 @@ vector<string> ProcessReadRequests(Database& db, vector<RequestHolder>& requests
 
 
 void PrintResponses(const vector<string>& responses, ostream& stream = cout) {
-  for (const string& response : responses) {
-    stream << response << '\n';
+  for(size_t i = 0; i < responses.size(); i++) {
+    stream << responses[i];
+    if (i != responses.size() - 1) {
+      stream << '\n';
+    }
   }
 }
 
@@ -132,5 +135,13 @@ int main() {
   RUN_TEST(tr, TestParseRequests_withModifyConverter);
   RUN_TEST(tr, TestParseRequests_withReadConverter);
   RUN_TEST(tr, TestIntegration);
+
+  auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, cin);
+  Database db;
+  ProcessModifyRequests(db, modifyRequests);
+  auto readRequests = ParseRequests(READ_TYPES_CONVERTER, cin);
+  auto responses = ProcessReadRequests(db, readRequests);
+  PrintResponses(responses);
+
   return 0;
 }
