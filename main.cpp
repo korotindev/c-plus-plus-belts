@@ -70,6 +70,44 @@ void TestParseRequests_withModifyConverter() {
   }
 }
 
+void TestParseRequests_withModifyConverter2() {
+  stringstream input("4\n"
+                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
+                     "Bus lw5PH5: qwe > eee > qwe\n"
+                     "Bus lw5PH6: qwe - eee\n"
+                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
+  );
+  const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
+  ASSERT_EQUAL(requests.size(), 4ul);
+  {
+    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[0].get());
+    ASSERT_EQUAL(request.BusName, "256")
+    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
+                                       "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
+    ASSERT_EQUAL(request.StopsNames, stopsNames)
+  }
+  {
+    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[1].get());
+    ASSERT_EQUAL(request.BusName, "lw5PH5")
+    const vector<string> stopsNames = {"qwe", "eee", "qwe"};
+    ASSERT_EQUAL(request.StopsNames, stopsNames)
+  }
+  {
+    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[2].get());
+    ASSERT_EQUAL(request.BusName, "lw5PH6")
+    const vector<string> stopsNames = {"qwe", "eee", "qwe"};
+    ASSERT_EQUAL(request.StopsNames, stopsNames)
+  }
+  {
+    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[3].get());
+    ASSERT_EQUAL(request.BusName, "256")
+    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
+                                       "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
+    ASSERT_EQUAL(request.StopsNames, stopsNames)
+  }
+}
+
+
 void TestParseRequests_withReadConverter() {
   stringstream input("3\n"
                      "Bus 256\n"
@@ -94,10 +132,15 @@ void TestParseRequests_withReadConverter() {
 
 void TestIntegration() {
   stringstream input(
-    "10\n"
+    "15\n"
     "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
     "Stop Marushkino: 55.595884, 37.209755\n"
+    "Stop qwe: 55.611087, 37.20829\n"
+    "Stop eee: 55.595884, 37.209755\n"
     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
+    "Bus lw5PH5: qwe > eee > qwe\n"
+    "Bus lw5PH6: qwe - eee\n"
+    "Bus lw5PH7: \n"
     "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
     "Stop Rasskazovka: 55.632761, 37.333324\n"
     "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517\n"
@@ -105,9 +148,13 @@ void TestIntegration() {
     "Stop Universam: 55.587655, 37.645687\n"
     "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656\n"
     "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164\n"
-    "3\n"
+    "7\n"
     "Bus 256\n"
     "Bus 750\n"
+    "Bus 752\n"
+    "Bus lw5PH5\n"
+    "Bus lw5PH6\n"
+    "Bus lw5PH7\n"
     "Bus 751"
   );
   auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
@@ -120,6 +167,10 @@ void TestIntegration() {
   string actual(
     "Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
     "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
+    "Bus 752: not found\n"
+    "Bus lw5PH5: 3 stops on route, 2 unique stops, 3386 route length\n"
+    "Bus lw5PH6: 3 stops on route, 2 unique stops, 3386 route length\n"
+    "Bus lw5PH7: 0 stops on route, 0 unique stops, 0 route length\n"
     "Bus 751: not found\n"
   );
   ASSERT_EQUAL(output.str(), actual);
@@ -128,13 +179,14 @@ void TestIntegration() {
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestParseRequests_withModifyConverter);
+  RUN_TEST(tr, TestParseRequests_withModifyConverter2);
   RUN_TEST(tr, TestParseRequests_withReadConverter);
   RUN_TEST(tr, TestIntegration);
 
   auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, cin);
+  auto readRequests = ParseRequests(READ_TYPES_CONVERTER, cin);
   Database db;
   ProcessModifyRequests(db, modifyRequests);
-  auto readRequests = ParseRequests(READ_TYPES_CONVERTER, cin);
   auto responses = ProcessReadRequests(db, readRequests);
   PrintResponses(responses);
 
