@@ -36,11 +36,8 @@ vector<string> ProcessReadRequests(Database& db, vector<RequestHolder>& requests
 
 
 void PrintResponses(const vector<string>& responses, ostream& stream = cout) {
-  for(size_t i = 0; i < responses.size(); i++) {
-    stream << responses[i];
-    if (i != responses.size() - 1) {
-      stream << '\n';
-    }
+  for(const auto& response : responses) {
+    stream << response << '\n';
   }
 }
 
@@ -123,7 +120,7 @@ void TestIntegration() {
   string actual(
     "Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
     "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
-    "Bus 751: not found"
+    "Bus 751: not found\n"
   );
   ASSERT_EQUAL(output.str(), actual);
 }
