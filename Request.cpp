@@ -35,7 +35,7 @@ void EntertainBusRequest::Process(Database& db) {
 };
 
 void ReadBusRequest::ParseFrom(string_view input) {
-  BusName = ReadToken(input);
+  BusName = ReadToken(input, "\n");
 };
 
 string ReadBusRequest::Process(Database& db) {

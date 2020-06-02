@@ -138,7 +138,7 @@ void TestIntegration() {
     "Stop qwe: 55.611087, 37.20829\n"
     "Stop eee: 55.595884, 37.209755\n"
     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
-    "Bus lw5PH5: qwe > eee > qwe\n"
+    "Bus lw5PH5 second: qwe > eee > qwe\n"
     "Bus lw5PH6: qwe - eee\n"
     "Bus lw5PH7: \n"
     "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
@@ -152,10 +152,10 @@ void TestIntegration() {
     "Bus 256\n"
     "Bus 750\n"
     "Bus 752\n"
-    "Bus lw5PH5\n"
+    "Bus lw5PH5 second\n"
     "Bus lw5PH6\n"
     "Bus lw5PH7\n"
-    "Bus 751"
+    "Bus 751 1"
   );
   auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   Database db;
@@ -168,10 +168,10 @@ void TestIntegration() {
     "Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
     "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
     "Bus 752: not found\n"
-    "Bus lw5PH5: 3 stops on route, 2 unique stops, 3386 route length\n"
+    "Bus lw5PH5 second: 3 stops on route, 2 unique stops, 3386 route length\n"
     "Bus lw5PH6: 3 stops on route, 2 unique stops, 3386 route length\n"
     "Bus lw5PH7: 0 stops on route, 0 unique stops, 0 route length\n"
-    "Bus 751: not found\n"
+    "Bus 751 1: not found\n"
   );
   ASSERT_EQUAL(output.str(), actual);
 }
