@@ -11,79 +11,76 @@
 #include <unordered_map>
 #include <vector>
 #include "Coordinate.h"
+#include "Database.h"
 
 struct Request;
 using RequestHolder = std::unique_ptr<Request>;
 
 struct Request {
-    enum class Type {
-        EntertainStop,
-        EntertainBus,
-        ReadBus,
-    };
+  enum class Type {
+    EntertainStop,
+    EntertainBus,
+    ReadBus,
+  };
 
-    Request(Type type) : type(type) {}
+  Request(Type type) : type(type) {}
 
-    static RequestHolder Create(Type type);
-    virtual void ParseFrom(std::string_view input) = 0;
-    virtual ~Request() = default;
-
-    const Type type;
+  static RequestHolder Create(Type type);
+  virtual void ParseFrom(std::string_view input) = 0;
+  virtual ~Request() = default;
+  const Type type;
 };
 
 
 using TypeConverter = std::unordered_map<std::string_view, Request::Type>;
 const TypeConverter MODIFY_TYPES_CONVERTER = {
-        {"Bus",  Request::Type::EntertainBus},
-        {"Stop", Request::Type::EntertainStop},
+  {"Bus",  Request::Type::EntertainBus},
+  {"Stop", Request::Type::EntertainStop},
 };
 const TypeConverter READ_TYPES_CONVERTER = {
-        {"Bus", Request::Type::ReadBus},
+  {"Bus", Request::Type::ReadBus},
 };
 
-std::optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter &converter, std::string_view type_str);
+std::optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& converter, std::string_view type_str);
 
-RequestHolder ParseRequest(const TypeConverter &converter, std::string_view request_str);
+RequestHolder ParseRequest(const TypeConverter& converter, std::string_view request_str);
 
-
+template<typename ResultType>
 struct ReadRequest : Request {
-    using Request::Request;
-    virtual void Process() const = 0;
+  using Request::Request;
+  virtual ResultType Process(Database& db) = 0;
 };
 
 struct ModifyRequest : Request {
-    using Request::Request;
-    virtual void Process() const = 0;
+  using Request::Request;
+  virtual void Process(Database& db) = 0;
 };
 
 struct EntertainStopRequest : ModifyRequest {
-    EntertainStopRequest() : ModifyRequest(Type::EntertainStop) {}
+  EntertainStopRequest() : ModifyRequest(Type::EntertainStop) {}
 
-    void ParseFrom(std::string_view input) override;
-    void Process() const override;
-
-    std::string StopName;
-    double Latitude;
-    double Longitude;
+  void ParseFrom(std::string_view input) override;
+  void Process(Database& db) override;
+  std::string StopName;
+  double Latitude;
+  double Longitude;
 };
 
 struct EntertainBusRequest : ModifyRequest {
-    EntertainBusRequest() : ModifyRequest(Type::EntertainBus) {}
+  EntertainBusRequest() : ModifyRequest(Type::EntertainBus) {}
 
-    void ParseFrom(std::string_view input) override;
-    void Process() const override;
-
-    std::string BusName;
-    std::vector<std::string> StopsNames;
+  void ParseFrom(std::string_view input) override;
+  void Process(Database& db) override;
+  std::string BusName;
+  std::vector<std::string> StopsNames;
 };
 
-struct ReadBusRequest : ReadRequest {
-    ReadBusRequest() : ReadRequest(Type::ReadBus) {}
+struct ReadBusRequest : ReadRequest<std::string> {
+  ReadBusRequest() : ReadRequest(Type::ReadBus) {}
 
-    void ParseFrom(std::string_view input) override;
-    void Process() const override;
-
-    std::string BusName;
+  void ParseFrom(std::string_view input) override;
+  std::string Process(Database& db) override;
+  std::string BusName;
 };
 
 
