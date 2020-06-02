@@ -45,7 +45,8 @@ void ReadBusRequest::ParseFrom(string_view input) {
 string ReadBusRequest::Process(Database& db) {
   stringstream output;
   output.precision(6);
-  output << db.ReadBus(BusName);
+  auto responseHolder = db.ReadBus(BusName);
+  responseHolder->Print(output);
   return output.str();
 };
 

@@ -29,7 +29,7 @@ void BusStorage::Add(Bus bus) {
 
 size_t BusStorage::GetUniqueStopsCount(const std::string& busName) const {
   if (auto it = uniqueStorage.find(busName); it != uniqueStorage.end()) {
-   return it->second.size();
+    return it->second.size();
   }
   return 0;
 }
@@ -50,13 +50,21 @@ void Database::EntertainBus(Bus bus) {
   busStorage.Add(move(bus));
 }
 
-ReadBusResponse Database::ReadBus(const std::string& busName) {
+ReadBusResponse::ReadBusResponse(string busName_) : busName(busName_) {}
+
+unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
   const auto& stops = busStorage.GetStops(busName);
-  ReadBusResponse response;
-  response.stopsCount = stops.size();
-  response.uniqueStopsCount = busStorage.GetUniqueStopsCount(busName);
-  for(size_t i = 1; i < stops.size(); i++) {
-    response.routeDistance += stopsStorage.GetDistance(stops[i-1], stops[i]);
+
+  if (stops.empty()) {
+    return make_unique<ReadNoBusResponse>(busName);
+  }
+
+  auto response = make_unique<ReadBusMetricsResponse>(busName);
+
+  response->stopsCount = stops.size();
+  response->uniqueStopsCount = busStorage.GetUniqueStopsCount(busName);
+  for (size_t i = 1; i < stops.size(); i++) {
+    response->routeDistance += stopsStorage.GetDistance(stops[i - 1], stops[i]);
   }
   return response;
 }
@@ -65,10 +73,14 @@ Bus::Bus(std::string name_, std::vector<std::string> stopsNames_) : name(move(na
 
 Stop::Stop(std::string name, Coordinate coordinate) : name(move(name)), coordinate(coordinate) {}
 
-std::ostream& operator<<(std::ostream& output, const ReadBusResponse& response) {
-  output << "Bus " << response.busName << ": "
-         << response.stopsCount << " stops on route" << ", "
-         << response.uniqueStopsCount << " unique stops" << ", "
-         << response.routeDistance << " route length";
-  return output;
+void ReadNoBusResponse::Print(std::ostream& output) {
+  output << "Bus " << busName << ": not found";
 }
+
+void ReadBusMetricsResponse::Print(std::ostream& output) {
+  output << "Bus " << busName << ": "
+         << stopsCount << " stops on route" << ", "
+         << uniqueStopsCount << " unique stops" << ", "
+         << routeDistance << " route length";
+}
+

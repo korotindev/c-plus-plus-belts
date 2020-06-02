@@ -33,15 +33,14 @@ public:
 };
 
 class StopsStorage {
-  struct PairHasher
-  {
-    std::size_t operator()(std::pair<std::string, std::string> const& s) const noexcept
-    {
+  struct PairHasher {
+    std::size_t operator()(std::pair<std::string, std::string> const& s) const noexcept {
       std::size_t h1 = std::hash<std::string>{}(s.first);
       std::size_t h2 = std::hash<std::string>{}(s.second);
       return h1 ^ (h2 << 1);
     }
   };
+
   std::unordered_map<std::string, Coordinate> storage;
   mutable std::unordered_map<std::pair<std::string, std::string>, double, PairHasher> distanceStorage;
 public:
@@ -60,12 +59,23 @@ public:
 
 struct ReadBusResponse {
   std::string busName;
+  explicit ReadBusResponse(std::string busName_);
+  virtual ~ReadBusResponse() = default;
+  virtual void Print(std::ostream& output) = 0;
+};
+
+struct ReadNoBusResponse : ReadBusResponse {
+  using ReadBusResponse::ReadBusResponse;
+  void Print(std::ostream& output) override;
+};
+
+struct ReadBusMetricsResponse : ReadBusResponse {
+  using ReadBusResponse::ReadBusResponse;
+  void Print(std::ostream& output) override;
   size_t stopsCount;
   size_t uniqueStopsCount;
   double routeDistance;
 };
-
-std::ostream& operator<<(std::ostream& output, const ReadBusResponse& response);
 
 class Database {
   StopsStorage stopsStorage;
@@ -74,7 +84,7 @@ class Database {
 public:
   void EntertainStop(Stop stop);
   void EntertainBus(Bus bus);
-  ReadBusResponse ReadBus(const std::string& busName);
+  std::unique_ptr<ReadBusResponse> ReadBus(const std::string& busName);
 };
 
 
