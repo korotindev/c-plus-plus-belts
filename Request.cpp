@@ -1,7 +1,3 @@
-//
-// Created by Дмитрий Коротин on 01.06.2020.
-//
-
 #include "Request.h"
 #include "CustomUtils.h"
 
@@ -25,10 +21,10 @@ void EntertainBusRequest::ParseFrom(string_view input) {
     StopsNames.emplace_back(ReadToken(input, delimiter));
   }
 
-  if (!cyclic) {
-    int storedSize = StopsNames.size();
-    for (int i = storedSize - 2; i >= 0; i--) {
-      StopsNames.emplace_back(StopsNames[i]);
+  if (!cyclic && StopsNames.size() > 0) {
+    size_t storedSize = StopsNames.size();
+    for (size_t i = storedSize - 1; i > 0; i--) {
+      StopsNames.emplace_back(StopsNames[i - 1]);
     }
   }
 };

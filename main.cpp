@@ -1,8 +1,6 @@
 #include "test_runner.h"
-#include "profile.h"
 #include <iostream>
 #include <sstream>
-#include <iostream>
 #include "Request.h"
 #include "CustomUtils.h"
 

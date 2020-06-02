@@ -1,7 +1,3 @@
-//
-// Created by Дмитрий Коротин on 02.06.2020.
-//
-
 #include "CustomUtils.h"
 
 using namespace std;

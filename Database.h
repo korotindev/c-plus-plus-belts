@@ -1,7 +1,3 @@
-//
-// Created by Дмитрий Коротин on 02.06.2020.
-//
-
 #ifndef C_PLUS_PLUS_BELTS_DATABASE_H
 #define C_PLUS_PLUS_BELTS_DATABASE_H
 
