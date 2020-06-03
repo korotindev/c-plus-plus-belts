@@ -77,6 +77,7 @@ optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& conver
 }
 
 RequestHolder ParseRequest(const TypeConverter& converter, string_view request_str) {
+  //cerr << request_str << '\n';
   const auto request_type = ConvertRequestTypeFromString(converter, ReadToken(request_str));
   if (!request_type) {
     return nullptr;

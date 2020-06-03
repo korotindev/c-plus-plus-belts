@@ -4,8 +4,7 @@ using namespace std;
 
 void StopsStorage::Add(Stop stop) {
   for(auto &[targetStopName, distance] : stop.knownDistances) {
-    distanceStorage.try_emplace(make_pair(stop.name, targetStopName), distance);
-    distanceStorage.try_emplace(make_pair(targetStopName, stop.name), distance);
+    distanceStorage[make_pair(stop.name, targetStopName)] = distance;
   }
   storage[move(stop.name)].coordinate = stop.coordinate;
 }
@@ -15,6 +14,12 @@ double StopsStorage::GetDistanceV2(const string& lhsStopName, const string& rhsS
   if (auto it = distanceStorage.find(routePair); it != distanceStorage.end()) {
     return it->second;
   }
+
+  pair<string, string> reverseRoutePair = make_pair(rhsStopName, lhsStopName);
+  if (auto it = distanceStorage.find(reverseRoutePair); it != distanceStorage.end()) {
+    return it->second;
+  }
+
   return 0.0;
 }
 

@@ -156,3 +156,39 @@ void TestIntegrationPartC() {
     )
   );
 }
+
+void TestIntegrationPartC_byGrader() {
+  TestIntegrationGenerator(
+    (
+      "5\n"
+      "Bus bus1: stop1 > stop2 > stop1\n"
+      "Stop stop2: 38.423097, 34.731193, 914534m to stop1\n"
+      "Bus bus2: stop2 > stop1 > stop2\n"
+      "Stop stop1: 38.413523, 34.778391, 674452m to stop2\n"
+      "Bus bus3: stop2 > stop1 > stop2\n"
+      "10\n"
+      "Stop G3CI8GVWJuzWKu\n"
+      "Stop stop2\n"
+      "Bus bus1\n"
+      "Bus bus1\n"
+      "Stop stop1\n"
+      "Stop stop2\n"
+      "Bus D12sVwF2FOANXi\n"
+      "Bus bus1\n"
+      "Bus RDBiZwD\n"
+      "Bus bus3"
+    ),
+    (
+      "Stop G3CI8GVWJuzWKu: not found\n"
+      "Stop stop2: buses bus1 bus2 bus3\n"
+      "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+      "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+      "Stop stop1: buses bus1 bus2 bus3\n"
+      "Stop stop2: buses bus1 bus2 bus3\n"
+      "Bus D12sVwF2FOANXi: not found\n"
+      "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+      "Bus RDBiZwD: not found\n"
+      "Bus bus3: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+    )
+  );
+}
