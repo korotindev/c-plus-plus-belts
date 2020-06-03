@@ -12,7 +12,8 @@ void ReadBusMetricsResponse::Print(std::ostream& output) {
   output << "Bus " << busName << ": "
          << stopsCount << " stops on route" << ", "
          << uniqueStopsCount << " unique stops" << ", "
-         << routeDistance << " route length";
+         << routeDistanceV2 << " route length" << ", "
+         << routeDistanceV2 / routeDistance << " curvature";
 }
 
 ReadStopResponse::ReadStopResponse(string stopName) : stopName(std::move(stopName)) {}

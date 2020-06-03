@@ -42,6 +42,7 @@ struct ReadBusMetricsResponse : ReadBusResponse {
   size_t stopsCount;
   size_t uniqueStopsCount;
   double routeDistance;
+  double routeDistanceV2;
 };
 
 

@@ -7,7 +7,7 @@ int main() {
   TestRunner tr;
   RUN_TEST(tr, TestParseRequests_withModifyConverter);
   RUN_TEST(tr, TestParseRequests_withReadConverter);
-  RUN_TEST(tr, TestIntegrationPartB);
+  RUN_TEST(tr, TestIntegrationPartC);
 
   auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, cin);
   auto readRequests = ParseRequests(READ_TYPES_CONVERTER, cin);

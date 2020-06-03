@@ -88,8 +88,10 @@ unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
   response->stopsCount = stops.size();
   response->uniqueStopsCount = busStorage.GetUniqueStopsCount(busName);
   response->routeDistance = 0.0;
+  response->routeDistanceV2 = 0.0;
   for (size_t i = 1; i < stops.size(); i++) {
     response->routeDistance += stopsStorage.GetDistance(stops[i - 1], stops[i]);
+    response->routeDistanceV2 += stopsStorage.GetDistanceV2(stops[i - 1], stops[i]);
   }
   return response;
 }
