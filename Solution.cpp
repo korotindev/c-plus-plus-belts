@@ -68,8 +68,8 @@ void TestParseRequests_withModifyConverter() {
     ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
     ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
     vector<StopDistance> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
-                                                      {"stop2",            1000000},
-                                                      {"stop 3",           15}};
+                                                 {"stop2",            1000000},
+                                                 {"stop 3",           15}};
     ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
   }
   {
