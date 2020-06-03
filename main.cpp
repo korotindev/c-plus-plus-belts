@@ -6,7 +6,6 @@ using namespace std;
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestParseRequests_withModifyConverter);
-  RUN_TEST(tr, TestParseRequests_withModifyConverter2);
   RUN_TEST(tr, TestParseRequests_withReadConverter);
   RUN_TEST(tr, TestIntegrationPartB);
 

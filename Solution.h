@@ -15,7 +15,6 @@ std::vector<std::string> ProcessReadRequests(Database& db, std::vector<RequestHo
 void PrintResponses(const std::vector<std::string>& responses, std::ostream& stream = std::cout);
 
 void TestParseRequests_withModifyConverter();
-void TestParseRequests_withModifyConverter2();
 void TestParseRequests_withReadConverter();
 void TestIntegrationGenerator(std::string input, std::string expected);
 void TestIntegrationPartB();

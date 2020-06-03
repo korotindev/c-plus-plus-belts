@@ -38,71 +38,53 @@ void PrintResponses(const vector<string>& responses, ostream& stream) {
 }
 
 void TestParseRequests_withModifyConverter() {
-  stringstream input("3\n"
-                     "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka"
+  stringstream input("5\n"
+                     "Stop Tolstopaltsevo 1: 55.611087, 37.20829\n"
+                     "Stop Tolstopaltsevo 2: 55.611087, 37.20829, 9m to Tolstopaltsevo 1\n"
+                     "Stop Tolstopaltsevo 3: 55.611087, 37.20829, 9m to Tolstopaltsevo 2, 1000000m to stop2, 15m to stop 3\n"
+                     "Bus 256 2: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Zapadnoye\n"
+                     "Bus 750 2: Tolstopaltsevo - Marushkino - Rasskazovka"
   );
   const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
-  ASSERT_EQUAL(requests.size(), 3ul);
+  ASSERT_EQUAL(requests.size(), 5ul);
   {
     auto request = dynamic_cast<const EntertainStopRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo");
+    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 1");
     ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
     ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
+    ASSERT(request.distanceToOtherStops.empty());
   }
   {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.busName, "256")
-    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
-                                       "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
+    auto request = dynamic_cast<const EntertainStopRequest&>(*requests[1].get());
+    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 2");
+    ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
+    ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
+    vector<pair<string, int>> distanceToOtherStops = {{"Tolstopaltsevo 1", 9}};
+    ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
+  }
+  {
+    auto request = dynamic_cast<const EntertainStopRequest&>(*requests[2].get());
+    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 3");
+    ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
+    ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
+    vector<pair<string, int>> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
+                                                      {"stop2",            1000000},
+                                                      {"stop 3",           15}};
+    ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
+  }
+  {
+    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[3].get());
+    ASSERT_EQUAL(request.busName, "256 2")
+    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Zapadnoye"};
     ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
   {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.busName, "750")
+    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[4].get());
+    ASSERT_EQUAL(request.busName, "750 2")
     const vector<string> stopsNames = {"Tolstopaltsevo", "Marushkino", "Rasskazovka", "Marushkino", "Tolstopaltsevo"};
     ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
 }
-
-void TestParseRequests_withModifyConverter2() {
-  stringstream input("4\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus lw5PH5: qwe > eee > qwe\n"
-                     "Bus lw5PH6: qwe - eee\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
-  );
-  const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
-  ASSERT_EQUAL(requests.size(), 4ul);
-  {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.busName, "256")
-    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
-                                       "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
-    ASSERT_EQUAL(request.stopsNames, stopsNames)
-  }
-  {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.busName, "lw5PH5")
-    const vector<string> stopsNames = {"qwe", "eee", "qwe"};
-    ASSERT_EQUAL(request.stopsNames, stopsNames)
-  }
-  {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.busName, "lw5PH6")
-    const vector<string> stopsNames = {"qwe", "eee", "qwe"};
-    ASSERT_EQUAL(request.stopsNames, stopsNames)
-  }
-  {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[3].get());
-    ASSERT_EQUAL(request.busName, "256")
-    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
-                                       "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
-    ASSERT_EQUAL(request.stopsNames, stopsNames)
-  }
-}
-
 
 void TestParseRequests_withReadConverter() {
   stringstream input("3\n"

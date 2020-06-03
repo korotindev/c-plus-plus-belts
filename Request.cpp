@@ -6,7 +6,8 @@ using namespace std;
 void EntertainStopRequest::ParseFrom(string_view input) {
   stopName = ReadToken(input, ": ");
   latitude = ConvertToDouble(ReadToken(input, ", "));
-  longitude = ConvertToDouble(input);
+  longitude = ConvertToDouble(ReadToken(input, ", "));
+
 };
 
 void EntertainStopRequest::Process(Database& db) {
