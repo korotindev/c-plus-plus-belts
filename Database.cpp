@@ -3,18 +3,25 @@
 using namespace std;
 
 void StopsStorage::Add(Stop stop) {
+  for(auto &[targetStopName, distance] : stop.knownDistances) {
+    distanceStorage.try_emplace(make_pair(stop.name, targetStopName), distance);
+    distanceStorage.try_emplace(make_pair(targetStopName, stop.name), distance);
+  }
   storage[move(stop.name)].coordinate = stop.coordinate;
 }
 
-double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsStopName) const {
-  pair<string, string> routePair = make_pair(max(lhsStopName, rhsStopName), min(lhsStopName, rhsStopName));
+double StopsStorage::GetDistanceV2(const string& lhsStopName, const string& rhsStopName) const {
+  pair<string, string> routePair = make_pair(lhsStopName, rhsStopName);
   if (auto it = distanceStorage.find(routePair); it != distanceStorage.end()) {
     return it->second;
   }
+  return 0.0;
+}
+
+double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsStopName) const {
   auto lhsCoord = storage.find(lhsStopName)->second.coordinate;
   auto rhsCoord = storage.find(rhsStopName)->second.coordinate;
   auto distance = lhsCoord.GetDistance(rhsCoord);
-  distanceStorage[routePair] = distance;
   return distance;
 }
 
@@ -87,9 +94,14 @@ unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
   return response;
 }
 
-Bus::Bus(std::string name_, std::vector<std::string> stopsNames_) : name(move(name_)), stopsNames(move(stopsNames_)) {}
+Bus::Bus(std::string name_, std::vector<std::string> stopsNames_)
+  : name(move(name_)),
+    stopsNames(move(stopsNames_)) {}
 
-Stop::Stop(std::string name, Coordinate coordinate) : name(move(name)), coordinate(coordinate) {}
+Stop::Stop(std::string name, Coordinate coordinate, std::vector<std::pair<std::string, double>> knownDistances)
+  : name(move(name)),
+    coordinate(coordinate),
+    knownDistances(move(knownDistances)) {}
 
 
 std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName) {

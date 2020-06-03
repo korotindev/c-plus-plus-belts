@@ -17,7 +17,8 @@ class BusStorage;
 struct Stop {
   std::string name;
   Coordinate coordinate;
-  Stop(std::string, Coordinate);
+  std::vector<std::pair<std::string, double>> knownDistances;
+  Stop(std::string, Coordinate, std::vector<std::pair<std::string, double>>);
 };
 
 struct Bus {
@@ -41,14 +42,15 @@ class StopsStorage {
   };
 
   std::unordered_map<std::string, StopData> storage;
-  mutable std::unordered_map<std::pair<std::string, std::string>, double, PairHasher> distanceStorage;
+  std::unordered_map<std::pair<std::string, std::string>, double, PairHasher> distanceStorage;
 public:
   void Add(Stop stop);
   bool Exist(const std::string& busName) const;
   void AddBusToStop(const std::string& stopName, const std::string& busName);
-  double GetDistance(const std::string& lhsStopName, const std::string& rhsStopName) const;
   const std::set<std::string>& GetBuses(const std::string& stopName) const;
 
+  double GetDistance(const std::string& lhsStopName, const std::string& rhsStopName) const;
+  double GetDistanceV2(const std::string& lhsStopName, const std::string& rhsStopName) const;
 };
 
 class BusStorage {

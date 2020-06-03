@@ -16,7 +16,7 @@ void EntertainStopRequest::ParseFrom(string_view input) {
 };
 
 void EntertainStopRequest::Process(Database& db) {
-  db.EntertainStop(Stop(move(stopName), Coordinate{latitude, longitude}));
+  db.EntertainStop(Stop(move(stopName), Coordinate{latitude, longitude}, move(distanceToOtherStops)));
 };
 
 void EntertainBusRequest::ParseFrom(string_view input) {
