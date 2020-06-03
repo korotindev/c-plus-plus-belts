@@ -59,9 +59,9 @@ struct EntertainStopRequest : ModifyRequest {
 
   void ParseFrom(std::string_view input) override;
   void Process(Database& db) override;
-  std::string StopName;
-  double Latitude;
-  double Longitude;
+  std::string stopName;
+  double latitude;
+  double longitude;
 };
 
 struct EntertainBusRequest : ModifyRequest {
@@ -69,8 +69,8 @@ struct EntertainBusRequest : ModifyRequest {
 
   void ParseFrom(std::string_view input) override;
   void Process(Database& db) override;
-  std::string BusName;
-  std::vector<std::string> StopsNames;
+  std::string busName;
+  std::vector<std::string> stopsNames;
 };
 
 struct ReadBusRequest : ReadRequest<std::string> {
@@ -78,7 +78,7 @@ struct ReadBusRequest : ReadRequest<std::string> {
 
   void ParseFrom(std::string_view input) override;
   std::string Process(Database& db) override;
-  std::string BusName;
+  std::string busName;
 };
 
 struct ReadStopRequest : ReadRequest<std::string> {
@@ -86,7 +86,7 @@ struct ReadStopRequest : ReadRequest<std::string> {
 
   void ParseFrom(std::string_view input) override;
   std::string Process(Database& db) override;
-  std::string StopName;
+  std::string stopName;
 };
 
 

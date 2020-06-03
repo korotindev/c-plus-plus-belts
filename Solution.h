@@ -18,7 +18,6 @@ void TestParseRequests_withModifyConverter();
 void TestParseRequests_withModifyConverter2();
 void TestParseRequests_withReadConverter();
 void TestIntegrationGenerator(std::string input, std::string expected);
-void TestIntegrationPartA();
 void TestIntegrationPartB();
 
 #endif //C_PLUS_PLUS_BELTS_SOLUTION_H

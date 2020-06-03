@@ -47,22 +47,22 @@ void TestParseRequests_withModifyConverter() {
   ASSERT_EQUAL(requests.size(), 3ul);
   {
     auto request = dynamic_cast<const EntertainStopRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.StopName, "Tolstopaltsevo");
-    ASSERT(abs(request.Latitude - 55.611087) <= 0.0001);
-    ASSERT(abs(request.Longitude - 37.20829) <= 0.0001);
+    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo");
+    ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
+    ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
   }
   {
     auto request = dynamic_cast<const EntertainBusRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.BusName, "256")
+    ASSERT_EQUAL(request.busName, "256")
     const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
                                        "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
-    ASSERT_EQUAL(request.StopsNames, stopsNames)
+    ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
   {
     auto request = dynamic_cast<const EntertainBusRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.BusName, "750")
+    ASSERT_EQUAL(request.busName, "750")
     const vector<string> stopsNames = {"Tolstopaltsevo", "Marushkino", "Rasskazovka", "Marushkino", "Tolstopaltsevo"};
-    ASSERT_EQUAL(request.StopsNames, stopsNames)
+    ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
 }
 
@@ -77,29 +77,29 @@ void TestParseRequests_withModifyConverter2() {
   ASSERT_EQUAL(requests.size(), 4ul);
   {
     auto request = dynamic_cast<const EntertainBusRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.BusName, "256")
+    ASSERT_EQUAL(request.busName, "256")
     const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
                                        "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
-    ASSERT_EQUAL(request.StopsNames, stopsNames)
+    ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
   {
     auto request = dynamic_cast<const EntertainBusRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.BusName, "lw5PH5")
+    ASSERT_EQUAL(request.busName, "lw5PH5")
     const vector<string> stopsNames = {"qwe", "eee", "qwe"};
-    ASSERT_EQUAL(request.StopsNames, stopsNames)
+    ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
   {
     auto request = dynamic_cast<const EntertainBusRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.BusName, "lw5PH6")
+    ASSERT_EQUAL(request.busName, "lw5PH6")
     const vector<string> stopsNames = {"qwe", "eee", "qwe"};
-    ASSERT_EQUAL(request.StopsNames, stopsNames)
+    ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
   {
     auto request = dynamic_cast<const EntertainBusRequest&>(*requests[3].get());
-    ASSERT_EQUAL(request.BusName, "256")
+    ASSERT_EQUAL(request.busName, "256")
     const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Tovarnaya",
                                        "Biryulyovo Passazhirskaya", "Biryulyovo Zapadnoye"};
-    ASSERT_EQUAL(request.StopsNames, stopsNames)
+    ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
 }
 
@@ -114,15 +114,15 @@ void TestParseRequests_withReadConverter() {
   ASSERT_EQUAL(requests.size(), 3ul);
   {
     auto request = dynamic_cast<const ReadBusRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.BusName, "2 56");
+    ASSERT_EQUAL(request.busName, "2 56");
   }
   {
     auto request = dynamic_cast<const ReadStopRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.StopName, "7 50");
+    ASSERT_EQUAL(request.stopName, "7 50");
   }
   {
     auto request = dynamic_cast<const ReadBusRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.BusName, "751");
+    ASSERT_EQUAL(request.busName, "751");
   }
 }
 
@@ -137,47 +137,6 @@ void TestIntegrationGenerator(string inputText, string expectedText) {
   stringstream output;
   PrintResponses(responses, output);
   ASSERT_EQUAL(output.str(), expectedText);
-}
-
-
-void TestIntegrationPartA() {
-  TestIntegrationGenerator(
-    (
-      "15\n"
-      "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
-      "Stop Marushkino: 55.595884, 37.209755\n"
-      "Stop qwe: 55.611087, 37.20829\n"
-      "Stop eee: 55.595884, 37.209755\n"
-      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
-      "Bus lw5PH5 second: qwe > eee > qwe\n"
-      "Bus lw5PH6: qwe - eee\n"
-      "Bus lw5PH7: \n"
-      "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
-      "Stop Rasskazovka: 55.632761, 37.333324\n"
-      "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517\n"
-      "Stop Biryusinka: 55.581065, 37.64839\n"
-      "Stop Universam: 55.587655, 37.645687\n"
-      "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656\n"
-      "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164\n"
-      "7\n"
-      "Bus 256\n"
-      "Bus 750\n"
-      "Bus 752\n"
-      "Bus lw5PH5 second\n"
-      "Bus lw5PH6\n"
-      "Bus lw5PH7\n"
-      "Bus 751 1"
-    ),
-    (
-      "Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
-      "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
-      "Bus 752: not found\n"
-      "Bus lw5PH5 second: 3 stops on route, 2 unique stops, 3386 route length\n"
-      "Bus lw5PH6: 3 stops on route, 2 unique stops, 3386 route length\n"
-      "Bus lw5PH7: 0 stops on route, 0 unique stops, 0 route length\n"
-      "Bus 751 1: not found\n"
-    )
-  );
 }
 
 void TestIntegrationPartB() {

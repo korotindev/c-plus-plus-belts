@@ -4,44 +4,44 @@
 using namespace std;
 
 void EntertainStopRequest::ParseFrom(string_view input) {
-  StopName = ReadToken(input, ": ");
-  Latitude = ConvertToDouble(ReadToken(input, ", "));
-  Longitude = ConvertToDouble(input);
+  stopName = ReadToken(input, ": ");
+  latitude = ConvertToDouble(ReadToken(input, ", "));
+  longitude = ConvertToDouble(input);
 };
 
 void EntertainStopRequest::Process(Database& db) {
-  db.EntertainStop(Stop(move(StopName), Coordinate{Latitude, Longitude}));
+  db.EntertainStop(Stop(move(stopName), Coordinate{latitude, longitude}));
 };
 
 void EntertainBusRequest::ParseFrom(string_view input) {
-  BusName = ReadToken(input, ": ");
+  busName = ReadToken(input, ": ");
   bool cyclic = input.find("-") == string_view::npos;
   string delimiter = cyclic ? " > " : " - ";
   while (!input.empty()) {
-    StopsNames.emplace_back(ReadToken(input, delimiter));
+    stopsNames.emplace_back(ReadToken(input, delimiter));
   }
 
-  if (!cyclic && !StopsNames.empty()) {
-    size_t storedSize = StopsNames.size();
+  if (!cyclic && !stopsNames.empty()) {
+    size_t storedSize = stopsNames.size();
     for (size_t i = storedSize - 1; i > 0; i--) {
-      StopsNames.emplace_back(StopsNames[i - 1]);
+      stopsNames.emplace_back(stopsNames[i - 1]);
     }
   }
 };
 
 void EntertainBusRequest::Process(Database& db) {
-  Bus bus(move(BusName), move(StopsNames));
+  Bus bus(move(busName), move(stopsNames));
   db.EntertainBus(move(bus));
 };
 
 void ReadBusRequest::ParseFrom(string_view input) {
-  BusName = ReadToken(input, "\n");
+  busName = ReadToken(input, "\n");
 };
 
 string ReadBusRequest::Process(Database& db) {
   stringstream output;
   output.precision(6);
-  auto responseHolder = db.ReadBus(BusName);
+  auto responseHolder = db.ReadBus(busName);
   responseHolder->Print(output);
   return output.str();
 };
@@ -83,13 +83,13 @@ RequestHolder ParseRequest(const TypeConverter& converter, string_view request_s
 }
 
 void ReadStopRequest::ParseFrom(std::string_view input) {
-  StopName = ReadToken(input, "\n");
+  stopName = ReadToken(input, "\n");
 }
 
 std::string ReadStopRequest::Process(Database& db) {
   stringstream output;
   output.precision(6);
-  auto responseHolder = db.ReadStop(StopName);
+  auto responseHolder = db.ReadStop(stopName);
   responseHolder->Print(output);
   return output.str();
 }
