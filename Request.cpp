@@ -46,7 +46,7 @@ void ReadBusRequest::ParseFrom(string_view input) {
 
 string ReadBusRequest::Process(Database& db) {
   stringstream output;
-  output.precision(6);
+  output.precision(DEFAULT_PRECISION);
   auto responseHolder = db.ReadBus(busName);
   responseHolder->Print(output);
   return output.str();
@@ -94,7 +94,7 @@ void ReadStopRequest::ParseFrom(std::string_view input) {
 
 std::string ReadStopRequest::Process(Database& db) {
   stringstream output;
-  output.precision(6);
+  output.precision(DEFAULT_PRECISION);
   auto responseHolder = db.ReadStop(stopName);
   responseHolder->Print(output);
   return output.str();

@@ -46,6 +46,7 @@ RequestHolder ParseRequest(const TypeConverter& converter, std::string_view requ
 template<typename ResultType>
 struct ReadRequest : Request {
   using Request::Request;
+  static const size_t DEFAULT_PRECISION = 7;
   virtual ResultType Process(Database& db) = 0;
 };
 
