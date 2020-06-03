@@ -59,7 +59,7 @@ void TestParseRequests_withModifyConverter() {
     ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 2");
     ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
     ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    vector<pair<string, int>> distanceToOtherStops = {{"Tolstopaltsevo 1", 9}};
+    vector<pair<string, double>> distanceToOtherStops = {{"Tolstopaltsevo 1", 9}};
     ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
   }
   {
@@ -67,7 +67,7 @@ void TestParseRequests_withModifyConverter() {
     ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 3");
     ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
     ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    vector<pair<string, int>> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
+    vector<pair<string, double>> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
                                                       {"stop2",            1000000},
                                                       {"stop 3",           15}};
     ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);

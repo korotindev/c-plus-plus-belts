@@ -7,7 +7,12 @@ void EntertainStopRequest::ParseFrom(string_view input) {
   stopName = ReadToken(input, ": ");
   latitude = ConvertToDouble(ReadToken(input, ", "));
   longitude = ConvertToDouble(ReadToken(input, ", "));
-
+  auto token = ReadToken(input, ", ");
+  while(!token.empty()) {
+    auto distanceToTargetStop = ConvertToDouble(ReadToken(token, "m to "));
+    distanceToOtherStops.emplace_back(token, distanceToTargetStop);
+    token = ReadToken(input, ", ");
+  }
 };
 
 void EntertainStopRequest::Process(Database& db) {

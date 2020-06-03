@@ -62,7 +62,7 @@ struct EntertainStopRequest : ModifyRequest {
   std::string stopName;
   double latitude;
   double longitude;
-  std::vector<std::pair<std::string, int>> distanceToOtherStops;
+  std::vector<std::pair<std::string, double>> distanceToOtherStops;
 };
 
 struct EntertainBusRequest : ModifyRequest {
