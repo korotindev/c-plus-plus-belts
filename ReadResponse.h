@@ -1,7 +1,3 @@
-//
-// Created by Дмитрий Коротин on 03.06.2020.
-//
-
 #ifndef C_PLUS_PLUS_BELTS_READRESPONSE_H
 #define C_PLUS_PLUS_BELTS_READRESPONSE_H
 

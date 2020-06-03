@@ -3,7 +3,7 @@
 using namespace std;
 
 void StopsStorage::Add(Stop stop) {
-  storage[move(stop.name)] = stop.coordinate;
+  storage[move(stop.name)].coordinate = stop.coordinate;
 }
 
 double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsStopName) const {
@@ -11,8 +11,8 @@ double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsSto
   if (auto it = distanceStorage.find(routePair); it != distanceStorage.end()) {
     return it->second;
   }
-  auto lhsCoord = storage.find(lhsStopName)->second;
-  auto rhsCoord = storage.find(rhsStopName)->second;
+  auto lhsCoord = storage.find(lhsStopName)->second.coordinate;
+  auto rhsCoord = storage.find(rhsStopName)->second.coordinate;
   auto distance = lhsCoord.GetDistance(rhsCoord);
   distanceStorage[routePair] = distance;
   return distance;
@@ -20,9 +20,6 @@ double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsSto
 
 void BusStorage::Add(Bus bus) {
   storage[bus.name] = bus.stopsNames;
-  for(auto &stopName : bus.stopsNames) {
-    stopsToBuses[stopName].insert(bus.name);
-  }
   uniqueStorage[move(bus.name)].insert(make_move_iterator(bus.stopsNames.begin()),
                                        make_move_iterator(bus.stopsNames.end()));
 }
@@ -34,7 +31,7 @@ size_t BusStorage::GetUniqueStopsCount(const std::string& busName) const {
   return 0;
 }
 
-bool BusStorage::ExistBus(const std::string& busName) const {
+bool BusStorage::Exist(const std::string& busName) const {
   return storage.find(busName) != storage.end();
 }
 
@@ -46,16 +43,20 @@ const vector<string>& BusStorage::GetStops(const std::string& busName) const {
   return defaultStops;
 }
 
-const set<string>& BusStorage::GetBuses(const string& stopName) const {
+const set<string>& StopsStorage::GetBuses(const string& stopName) const {
   static const set<string> defaultBuses;
-  if (auto it = stopsToBuses.find(stopName); it != stopsToBuses.end()) {
-    return it->second;
+  if (auto it = storage.find(stopName); it != storage.end()) {
+    return it->second.buses;
   }
   return defaultBuses;
 }
 
-bool BusStorage::ExistStop(const std::string& stopName) const {
-  return stopsToBuses.find(stopName) != stopsToBuses.end();
+bool StopsStorage::Exist(const std::string& stopName) const {
+  return storage.find(stopName) != storage.end();
+}
+
+void StopsStorage::AddBusToStop(const std::string& stopName, const std::string& busName) {
+  storage[stopName].buses.insert(busName);
 }
 
 void Database::EntertainStop(Stop stop) {
@@ -63,11 +64,14 @@ void Database::EntertainStop(Stop stop) {
 }
 
 void Database::EntertainBus(Bus bus) {
+  for (auto& stopName : bus.stopsNames) {
+    stopsStorage.AddBusToStop(stopName, bus.name);
+  }
   busStorage.Add(move(bus));
 }
 
 unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
-  if (!busStorage.ExistBus(busName)) {
+  if (!busStorage.Exist(busName)) {
     return make_unique<ReadNoBusResponse>(busName);
   }
 
@@ -89,12 +93,12 @@ Stop::Stop(std::string name, Coordinate coordinate) : name(move(name)), coordina
 
 
 std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName) {
-  if (!busStorage.ExistStop(stopName)) {
+  if (!stopsStorage.Exist(stopName)) {
     return make_unique<ReadNoStopResponse>(stopName);
   }
 
   auto response = make_unique<ReadStopMetricsResponse>(stopName);
-  const auto& sortedBuses = busStorage.GetBuses(stopName);
+  const auto& sortedBuses = stopsStorage.GetBuses(stopName);
   response->buses = vector<string>(sortedBuses.begin(), sortedBuses.end());
   return response;
 }

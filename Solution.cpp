@@ -1,7 +1,3 @@
-//
-// Created by Дмитрий Коротин on 03.06.2020.
-//
-
 #include "Solution.h"
 
 using namespace std;
@@ -185,6 +181,25 @@ void TestIntegrationPartA() {
 }
 
 void TestIntegrationPartB() {
+  TestIntegrationGenerator(
+    (
+      "4\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
+      "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517\n"
+      "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye\n"
+      "Stop Prazhskaya: 55.611678, 37.603831\n"
+      "3\n"
+      "Stop Samara\n"
+      "Stop Prazhskaya\n"
+      "Stop Biryulyovo Zapadnoye"
+    ),
+    (
+      "Stop Samara: not found\n"
+      "Stop Prazhskaya: no buses\n"
+      "Stop Biryulyovo Zapadnoye: buses 256 828\n"
+    )
+  );
+
   TestIntegrationGenerator(
     (
       "13\n"

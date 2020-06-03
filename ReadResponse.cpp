@@ -1,7 +1,3 @@
-//
-// Created by Дмитрий Коротин on 03.06.2020.
-//
-
 #include "ReadResponse.h"
 
 using namespace std;
@@ -31,8 +27,9 @@ void ReadStopMetricsResponse::Print(ostream& output) {
   if (buses.empty()) {
     output << " no buses";
   } else {
+    output << " buses";
     for(const auto& bus : buses) {
-      output << ' ' << bus;
+      output << " " << bus;
     }
   }
 }
