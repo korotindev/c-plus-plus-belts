@@ -1,21 +1,20 @@
-#include "Solution.h"
+#include "test_runner.h"
+#include "profile.h"
+#include <iostream>
 
-using namespace std;
-
+void TestFunc() {
+  std::cout << "Hello, world!" << std::endl;
+}
 
 int main() {
-  TestRunner tr;
-  RUN_TEST(tr, TestParseRequests_withModifyConverter);
-  RUN_TEST(tr, TestParseRequests_withReadConverter);
-  RUN_TEST(tr, TestIntegrationPartC);
-  RUN_TEST(tr, TestIntegrationPartC_byGrader);
+    TestRunner tr;
 
-  auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, cin);
-  auto readRequests = ParseRequests(READ_TYPES_CONVERTER, cin);
-  Database db;
-  ProcessModifyRequests(db, modifyRequests);
-  auto responses = ProcessReadRequests(db, readRequests);
-  PrintResponses(responses);
+    {
+        LOG_DURATION("test message")
+        int slowComputation = 5 + 3;
+        std::cout << "slowComputation = " << slowComputation << std::endl;
+    }
 
-  return 0;
+    RUN_TEST(tr, TestFunc);
+    return 0;
 }
