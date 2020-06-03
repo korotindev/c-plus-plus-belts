@@ -10,7 +10,7 @@ void EntertainStopRequest::ParseFrom(string_view input) {
   auto token = ReadToken(input, ", ");
   while(!token.empty()) {
     auto distanceToTargetStop = ConvertToDouble(ReadToken(token, "m to "));
-    distanceToOtherStops.emplace_back(token, distanceToTargetStop);
+    distanceToOtherStops.push_back(StopDistance{string(token), distanceToTargetStop});
     token = ReadToken(input, ", ");
   }
 };

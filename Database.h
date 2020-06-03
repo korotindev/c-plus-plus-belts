@@ -14,12 +14,21 @@
 class StopsStorage;
 class BusStorage;
 
+struct StopDistance {
+  std::string name;
+  double distance;
+};
+
+bool operator==(const StopDistance& lhs, const StopDistance& rhs);
+std::ostream& operator<<(std::ostream& output, const StopDistance& data);
+
 struct Stop {
   std::string name;
   Coordinate coordinate;
-  std::vector<std::pair<std::string, double>> knownDistances;
-  Stop(std::string, Coordinate, std::vector<std::pair<std::string, double>>);
+  std::vector<StopDistance> knownDistances;
+  Stop(std::string, Coordinate, std::vector<StopDistance>);
 };
+
 
 struct Bus {
   std::string name;

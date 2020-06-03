@@ -100,7 +100,7 @@ Bus::Bus(std::string name_, std::vector<std::string> stopsNames_)
   : name(move(name_)),
     stopsNames(move(stopsNames_)) {}
 
-Stop::Stop(std::string name, Coordinate coordinate, std::vector<std::pair<std::string, double>> knownDistances)
+Stop::Stop(std::string name, Coordinate coordinate, std::vector<StopDistance> knownDistances)
   : name(move(name)),
     coordinate(coordinate),
     knownDistances(move(knownDistances)) {}
@@ -115,4 +115,12 @@ std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName) {
   const auto& sortedBuses = stopsStorage.GetBuses(stopName);
   response->buses = vector<string>(sortedBuses.begin(), sortedBuses.end());
   return response;
+}
+
+bool operator==(const StopDistance& lhs, const StopDistance& rhs) {
+  return make_pair(lhs.name, lhs.distance) == make_pair(rhs.name, rhs.distance);
+}
+
+std::ostream& operator<<(std::ostream& output, const StopDistance& data) {
+  return output << "StopDistance{" << data.name << ", " << data.distance << "}";
 }

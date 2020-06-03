@@ -11,11 +11,6 @@
 #include <vector>
 #include "profile.h"
 
-template<class First, class Second>
-std::ostream& operator<<(std::ostream& os, const std::pair<First, Second>& m) {
-  return os << "{" << m.first << ", " << m.second << "}";
-}
-
 template<class T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& s) {
   os << "{";

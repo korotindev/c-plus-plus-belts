@@ -59,7 +59,7 @@ void TestParseRequests_withModifyConverter() {
     ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 2");
     ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
     ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    vector<pair<string, double>> distanceToOtherStops = {{"Tolstopaltsevo 1", 9}};
+    vector<StopDistance> distanceToOtherStops = {{"Tolstopaltsevo 1", 9}};
     ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
   }
   {
@@ -67,7 +67,7 @@ void TestParseRequests_withModifyConverter() {
     ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 3");
     ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
     ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    vector<pair<string, double>> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
+    vector<StopDistance> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
                                                       {"stop2",            1000000},
                                                       {"stop 3",           15}};
     ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
@@ -147,8 +147,8 @@ void TestIntegrationPartC() {
       "Stop Biryulyovo Zapadnoye"
     ),
     (
-      "Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.361239 curvature\n"
-      "Bus 750: 5 stops on route, 3 unique stops, 27600 route length, 1.318084 curvature\n"
+      "Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.36124 curvature\n"
+      "Bus 750: 5 stops on route, 3 unique stops, 27600 route length, 1.31808 curvature\n"
       "Bus 751: not found\n"
       "Stop Samara: not found\n"
       "Stop Prazhskaya: no buses\n"
