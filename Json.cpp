@@ -82,4 +82,29 @@ namespace Json {
     return Document{LoadNode(input)};
   }
 
+  bool operator==(const Document &lhs, const Document &rhs) {
+    return lhs.GetRoot() == rhs.GetRoot();
+  }
+
+  std::ostream& operator<<(std::ostream& output, const Document &data) {
+    return output << "Document{Root:" << data.GetRoot() << "}";
+  }
+
+  std::ostream& operator<<(std::ostream& output, const Node &data) {
+    output << "Node{";
+
+    if (holds_alternative<vector<Node>>(data)) {
+      output << data.AsArray();
+    } else if (holds_alternative<map<string, Node>>(data)) {
+      output << data.AsMap();
+    } else if (holds_alternative<double>(data)) {
+      output << data.AsNumber();
+    } else if (holds_alternative<bool>(data)) {
+      output << data.AsBool();
+    } else {
+      output << data.AsString();
+    }
+    output << "}";
+    return output;
+  }
 }

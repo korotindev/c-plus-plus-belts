@@ -9,7 +9,7 @@
 
 namespace Json {
 
-  class Node : std::variant<
+  class Node : public std::variant<
     std::vector<Node>,
     std::map<std::string, Node>,
     double,
@@ -51,6 +51,9 @@ namespace Json {
 
   Document Load(std::istream& input);
 
+  bool operator==(const Document &lhs, const Document &rhs);
+  std::ostream& operator<<(std::ostream& output, const Document &rhs);
+  std::ostream& operator<<(std::ostream& output, const Node &data);
 }
 
 
