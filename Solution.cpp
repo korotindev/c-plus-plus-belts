@@ -37,78 +37,6 @@ void PrintResponses(const vector<string>& responses, ostream& stream) {
   }
 }
 
-void TestParseRequests_withModifyConverter() {
-  stringstream input("5\n"
-                     "Stop Tolstopaltsevo 1: 55.611087, 37.20829\n"
-                     "Stop Tolstopaltsevo 2: 55.611087, 37.20829, 9m to Tolstopaltsevo 1\n"
-                     "Stop Tolstopaltsevo 3: 55.611087, 37.20829, 9m to Tolstopaltsevo 2, 1000000m to stop2, 15m to stop 3\n"
-                     "Bus 256 2: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Zapadnoye\n"
-                     "Bus 750 2: Tolstopaltsevo - Marushkino - Rasskazovka"
-  );
-  const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
-  ASSERT_EQUAL(requests.size(), 5ul);
-  {
-    auto request = dynamic_cast<const EntertainStopRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 1");
-    ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
-    ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    ASSERT(request.distanceToOtherStops.empty());
-  }
-  {
-    auto request = dynamic_cast<const EntertainStopRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 2");
-    ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
-    ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    vector<StopDistance> distanceToOtherStops = {{"Tolstopaltsevo 1", 9}};
-    ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
-  }
-  {
-    auto request = dynamic_cast<const EntertainStopRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.stopName, "Tolstopaltsevo 3");
-    ASSERT(abs(request.latitude - 55.611087) <= 0.0001);
-    ASSERT(abs(request.longitude - 37.20829) <= 0.0001);
-    vector<StopDistance> distanceToOtherStops = {{"Tolstopaltsevo 2", 9},
-                                                 {"stop2",            1000000},
-                                                 {"stop 3",           15}};
-    ASSERT_EQUAL(request.distanceToOtherStops, distanceToOtherStops);
-  }
-  {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[3].get());
-    ASSERT_EQUAL(request.busName, "256 2")
-    const vector<string> stopsNames = {"Biryulyovo Zapadnoye", "Biryusinka", "Universam", "Biryulyovo Zapadnoye"};
-    ASSERT_EQUAL(request.stopsNames, stopsNames)
-  }
-  {
-    auto request = dynamic_cast<const EntertainBusRequest&>(*requests[4].get());
-    ASSERT_EQUAL(request.busName, "750 2")
-    const vector<string> stopsNames = {"Tolstopaltsevo", "Marushkino", "Rasskazovka", "Marushkino", "Tolstopaltsevo"};
-    ASSERT_EQUAL(request.stopsNames, stopsNames)
-  }
-}
-
-void TestParseRequests_withReadConverter() {
-  stringstream input("3\n"
-                     "Bus 2 56\n"
-                     "Stop 7 50\n"
-                     "Bus 751"
-  );
-  const vector<unique_ptr<Request>> requests = ParseRequests(READ_TYPES_CONVERTER, input);
-  ASSERT_EQUAL(requests.size(), 3ul);
-  {
-    auto request = dynamic_cast<const ReadBusRequest&>(*requests[0].get());
-    ASSERT_EQUAL(request.busName, "2 56");
-  }
-  {
-    auto request = dynamic_cast<const ReadStopRequest&>(*requests[1].get());
-    ASSERT_EQUAL(request.stopName, "7 50");
-  }
-  {
-    auto request = dynamic_cast<const ReadBusRequest&>(*requests[2].get());
-    ASSERT_EQUAL(request.busName, "751");
-  }
-}
-
-
 void TestIntegrationGenerator(string inputText, string expectedText) {
   stringstream input(inputText);
   auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
@@ -121,74 +49,203 @@ void TestIntegrationGenerator(string inputText, string expectedText) {
   ASSERT_EQUAL(output.str(), expectedText);
 }
 
-void TestIntegrationPartC() {
+void TestIntegrationPartD() {
   TestIntegrationGenerator(
     (
-      "13\n"
-      "Stop Tolstopaltsevo: 55.611087, 37.20829, 3900m to Marushkino\n"
-      "Stop Marushkino: 55.595884, 37.209755, 9900m to Rasskazovka\n"
-      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
-      "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
-      "Stop Rasskazovka: 55.632761, 37.333324\n"
-      "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517, 7500m to Rossoshanskaya ulitsa, 1800m to Biryusinka, 2400m to Universam\n"
-      "Stop Biryusinka: 55.581065, 37.64839, 750m to Universam\n"
-      "Stop Universam: 55.587655, 37.645687, 5600m to Rossoshanskaya ulitsa, 900m to Biryulyovo Tovarnaya\n"
-      "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656, 1300m to Biryulyovo Passazhirskaya\n"
-      "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164, 1200m to Biryulyovo Zapadnoye\n"
-      "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye\n"
-      "Stop Rossoshanskaya ulitsa: 55.595579, 37.605757\n"
-      "Stop Prazhskaya: 55.611678, 37.603831\n"
-      "6\n"
-      "Bus 256\n"
-      "Bus 750\n"
-      "Bus 751\n"
-      "Stop Samara\n"
-      "Stop Prazhskaya\n"
-      "Stop Biryulyovo Zapadnoye"
+      "{\n"
+      "  \"base_requests\": [\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Marushkino\": 3900\n"
+      "      },\n"
+      "      \"longitude\": 37.20829,\n"
+      "      \"name\": \"Tolstopaltsevo\",\n"
+      "      \"latitude\": 55.611087\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Rasskazovka\": 9900\n"
+      "      },\n"
+      "      \"longitude\": 37.209755,\n"
+      "      \"name\": \"Marushkino\",\n"
+      "      \"latitude\": 55.595884\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Bus\",\n"
+      "      \"name\": \"256\",\n"
+      "      \"stops\": [\n"
+      "        \"Biryulyovo Zapadnoye\",\n"
+      "        \"Biryusinka\",\n"
+      "        \"Universam\",\n"
+      "        \"Biryulyovo Tovarnaya\",\n"
+      "        \"Biryulyovo Passazhirskaya\",\n"
+      "        \"Biryulyovo Zapadnoye\"\n"
+      "      ],\n"
+      "      \"is_roundtrip\": true\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Bus\",\n"
+      "      \"name\": \"750\",\n"
+      "      \"stops\": [\n"
+      "        \"Tolstopaltsevo\",\n"
+      "        \"Marushkino\",\n"
+      "        \"Rasskazovka\"\n"
+      "      ],\n"
+      "      \"is_roundtrip\": false\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {},\n"
+      "      \"longitude\": 37.333324,\n"
+      "      \"name\": \"Rasskazovka\",\n"
+      "      \"latitude\": 55.632761\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Rossoshanskaya ulitsa\": 7500,\n"
+      "        \"Biryusinka\": 1800,\n"
+      "        \"Universam\": 2400\n"
+      "      },\n"
+      "      \"longitude\": 37.6517,\n"
+      "      \"name\": \"Biryulyovo Zapadnoye\",\n"
+      "      \"latitude\": 55.574371\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Universam\": 750\n"
+      "      },\n"
+      "      \"longitude\": 37.64839,\n"
+      "      \"name\": \"Biryusinka\",\n"
+      "      \"latitude\": 55.581065\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Rossoshanskaya ulitsa\": 5600,\n"
+      "        \"Biryulyovo Tovarnaya\": 900\n"
+      "      },\n"
+      "      \"longitude\": 37.645687,\n"
+      "      \"name\": \"Universam\",\n"
+      "      \"latitude\": 55.587655\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Biryulyovo Passazhirskaya\": 1300\n"
+      "      },\n"
+      "      \"longitude\": 37.653656,\n"
+      "      \"name\": \"Biryulyovo Tovarnaya\",\n"
+      "      \"latitude\": 55.592028\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {\n"
+      "        \"Biryulyovo Zapadnoye\": 1200\n"
+      "      },\n"
+      "      \"longitude\": 37.659164,\n"
+      "      \"name\": \"Biryulyovo Passazhirskaya\",\n"
+      "      \"latitude\": 55.580999\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Bus\",\n"
+      "      \"name\": \"828\",\n"
+      "      \"stops\": [\n"
+      "        \"Biryulyovo Zapadnoye\",\n"
+      "        \"Universam\",\n"
+      "        \"Rossoshanskaya ulitsa\",\n"
+      "        \"Biryulyovo Zapadnoye\"\n"
+      "      ],\n"
+      "      \"is_roundtrip\": true\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {},\n"
+      "      \"longitude\": 37.605757,\n"
+      "      \"name\": \"Rossoshanskaya ulitsa\",\n"
+      "      \"latitude\": 55.595579\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"road_distances\": {},\n"
+      "      \"longitude\": 37.603831,\n"
+      "      \"name\": \"Prazhskaya\",\n"
+      "      \"latitude\": 55.611678\n"
+      "    }\n"
+      "  ],\n"
+      "  \"stat_requests\": [\n"
+      "    {\n"
+      "      \"type\": \"Bus\",\n"
+      "      \"name\": \"256\",\n"
+      "      \"id\": 1965312327\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Bus\",\n"
+      "      \"name\": \"750\",\n"
+      "      \"id\": 519139350\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Bus\",\n"
+      "      \"name\": \"751\",\n"
+      "      \"id\": 194217464\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"name\": \"Samara\",\n"
+      "      \"id\": 746888088\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"name\": \"Prazhskaya\",\n"
+      "      \"id\": 65100610\n"
+      "    },\n"
+      "    {\n"
+      "      \"type\": \"Stop\",\n"
+      "      \"name\": \"Biryulyovo Zapadnoye\",\n"
+      "      \"id\": 1042838872\n"
+      "    }\n"
+      "  ]\n"
+      "}"
     ),
     (
-      "Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.361239 curvature\n"
-      "Bus 750: 5 stops on route, 3 unique stops, 27600 route length, 1.318084 curvature\n"
-      "Bus 751: not found\n"
-      "Stop Samara: not found\n"
-      "Stop Prazhskaya: no buses\n"
-      "Stop Biryulyovo Zapadnoye: buses 256 828\n"
-    )
-  );
-}
-
-void TestIntegrationPartC_byGrader() {
-  TestIntegrationGenerator(
-    (
-      "5\n"
-      "Bus bus1: stop1 > stop2 > stop1\n"
-      "Stop stop2: 38.423097, 34.731193, 914534m to stop1\n"
-      "Bus bus2: stop2 > stop1 > stop2\n"
-      "Stop stop1: 38.413523, 34.778391, 674452m to stop2\n"
-      "Bus bus3: stop2 > stop1 > stop2\n"
-      "10\n"
-      "Stop G3CI8GVWJuzWKu\n"
-      "Stop stop2\n"
-      "Bus bus1\n"
-      "Bus bus1\n"
-      "Stop stop1\n"
-      "Stop stop2\n"
-      "Bus D12sVwF2FOANXi\n"
-      "Bus bus1\n"
-      "Bus RDBiZwD\n"
-      "Bus bus3"
-    ),
-    (
-      "Stop G3CI8GVWJuzWKu: not found\n"
-      "Stop stop2: buses bus1 bus2 bus3\n"
-      "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
-      "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
-      "Stop stop1: buses bus1 bus2 bus3\n"
-      "Stop stop2: buses bus1 bus2 bus3\n"
-      "Bus D12sVwF2FOANXi: not found\n"
-      "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
-      "Bus RDBiZwD: not found\n"
-      "Bus bus3: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+      "[\n"
+      "  {\n"
+      "    \"route_length\": 5950,\n"
+      "    \"request_id\": 1965312327,\n"
+      "    \"curvature\": 1.36124,\n"
+      "    \"stop_count\": 6,\n"
+      "    \"unique_stop_count\": 5\n"
+      "  },\n"
+      "  {\n"
+      "    \"route_length\": 27600,\n"
+      "    \"request_id\": 519139350,\n"
+      "    \"curvature\": 1.31808,\n"
+      "    \"stop_count\": 5,\n"
+      "    \"unique_stop_count\": 3\n"
+      "  },\n"
+      "  {\n"
+      "    \"request_id\": 194217464,\n"
+      "    \"error_message\": \"not found\"\n"
+      "  },\n"
+      "  {\n"
+      "    \"request_id\": 746888088,\n"
+      "    \"error_message\": \"not found\"\n"
+      "  },\n"
+      "  {\n"
+      "    \"buses\": [],\n"
+      "    \"request_id\": 65100610\n"
+      "  },\n"
+      "  {\n"
+      "    \"buses\": [\n"
+      "      \"256\",\n"
+      "      \"828\"\n"
+      "    ],\n"
+      "    \"request_id\": 1042838872\n"
+      "  }\n"
+      "]"
     )
   );
 }
