@@ -82,7 +82,7 @@ void TestIntegrationGenerator(istream& input, ifstream& expectedOutput) {
   ProcessModifyRequests(db, modifyRequests);
   auto responses = ProcessReadRequests(db, readRequests);
   stringstream output;
-  output.precision(7);
+  output.precision(26);
   PrintResponses(responses, output);
   Json::Document resultDocument = Json::Load(output);
   Json::Document expectedDocument = Json::Load(expectedOutput);

@@ -87,17 +87,17 @@ namespace Json {
   }
 
   std::ostream& operator<<(std::ostream& output, const Document &data) {
-    return output << "Document{Root:" << data.GetRoot() << "}";
+    return output << data.GetRoot();
   }
 
   void PrintArray(std::ostream& output, const vector<Node> &nodes) {
     output << "[";
-    bool firstPrinted = false;
+    bool first = true;
     for(const auto &node : nodes) {
-      if (!firstPrinted) {
-        output << ", ";
-        firstPrinted = true;
+      if (!first) {
+        output << ",";
       }
+      first = false;
       output << node;
     }
     output << "]";
@@ -105,12 +105,12 @@ namespace Json {
 
   void PrintMap(std::ostream& output, const map<string, Node> &nodes) {
     output << "{";
-    bool firstPrinted = false;
+    bool first = true;
     for(const auto &[key, node] : nodes) {
-      if (!firstPrinted) {
-        output << ", ";
-        firstPrinted = true;
+      if (!first) {
+        output << ",";
       }
+      first = false;
       output << "\"" << key << "\":" << node;
     }
     output << "}";
@@ -118,8 +118,6 @@ namespace Json {
 
 
   std::ostream& operator<<(std::ostream& output, const Node &data) {
-    output << "Node{";
-
     if (holds_alternative<vector<Node>>(data)) {
       PrintArray(output, data.AsArray());
     } else if (holds_alternative<map<string, Node>>(data)) {
@@ -131,7 +129,6 @@ namespace Json {
     } else {
       output << data.AsString();
     }
-    output << "}";
     return output;
   }
 }
