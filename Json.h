@@ -9,9 +9,11 @@
 
 namespace Json {
 
-  class Node : std::variant<std::vector<Node>,
+  class Node : std::variant<
+    std::vector<Node>,
     std::map<std::string, Node>,
-    int,
+    double,
+    bool,
     std::string> {
   public:
     using variant::variant;
@@ -24,8 +26,12 @@ namespace Json {
       return std::get<std::map<std::string, Node>>(*this);
     }
 
-    int AsInt() const {
-      return std::get<int>(*this);
+    double AsNumber() const {
+      return std::get<double>(*this);
+    }
+
+    bool AsBool() const {
+      return std::get<bool>(*this);
     }
 
     const auto& AsString() const {

@@ -16,7 +16,7 @@ namespace Json {
   Node LoadArray(istream& input) {
     vector<Node> result;
 
-    for (char c; input >> c && c != ']'; ) {
+    for (char c; input >> c && c != ']';) {
       if (c != ',') {
         input.putback(c);
       }
@@ -26,13 +26,16 @@ namespace Json {
     return Node(move(result));
   }
 
-  Node LoadInt(istream& input) {
-    int result = 0;
-    while (isdigit(input.peek())) {
-      result *= 10;
-      result += input.get() - '0';
-    }
+  Node LoadDouble(istream& input) {
+    double result = 0;
+    input >> result;
     return Node(result);
+  }
+
+  Node LoadBool(istream& input) {
+    string line;
+    input >> line;
+    return Node(line == "true");
   }
 
   Node LoadString(istream& input) {
@@ -44,7 +47,7 @@ namespace Json {
   Node LoadDict(istream& input) {
     map<string, Node> result;
 
-    for (char c; input >> c && c != '}'; ) {
+    for (char c; input >> c && c != '}';) {
       if (c == ',') {
         input >> c;
       }
@@ -60,16 +63,18 @@ namespace Json {
   Node LoadNode(istream& input) {
     char c;
     input >> c;
-
     if (c == '[') {
       return LoadArray(input);
     } else if (c == '{') {
       return LoadDict(input);
     } else if (c == '"') {
       return LoadString(input);
+    } else if (c == 't' || c == 'f') {
+      input.putback(c);
+      return LoadBool(input);
     } else {
       input.putback(c);
-      return LoadInt(input);
+      return LoadDouble(input);
     }
   }
 

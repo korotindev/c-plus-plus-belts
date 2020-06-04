@@ -3,15 +3,16 @@
 
 using namespace std;
 
-void EntertainStopRequest::ParseFrom(string_view input) {
-  stopName = ReadToken(input, ": ");
-  latitude = ConvertToDouble(ReadToken(input, ", "));
-  longitude = ConvertToDouble(ReadToken(input, ", "));
-  auto token = ReadToken(input, ", ");
-  while(!token.empty()) {
-    auto distanceToTargetStop = ConvertToDouble(ReadToken(token, "m to "));
-    distanceToOtherStops.push_back(StopDistance{string(token), distanceToTargetStop});
-    token = ReadToken(input, ", ");
+void EntertainStopRequest::ParseFrom(map<string, Json::Node>& requestData) {
+  stopName = requestData["name"].AsString();
+  latitude = requestData["latitude"].AsNumber();
+  longitude = requestData["longitude"].AsNumber();
+  auto &roadDistances = requestData["road_distances"].AsMap();
+  for(auto& [name, distanceNode] : roadDistances) {
+    distanceToOtherStops.push_back(StopDistance{
+      name,
+      static_cast<double>(distanceNode.AsNumber())
+    });
   }
 };
 
@@ -19,15 +20,16 @@ void EntertainStopRequest::Process(Database& db) {
   db.EntertainStop(Stop(move(stopName), Coordinate{latitude, longitude}, move(distanceToOtherStops)));
 };
 
-void EntertainBusRequest::ParseFrom(string_view input) {
-  busName = ReadToken(input, ": ");
-  bool cyclic = input.find("-") == string_view::npos;
-  string delimiter = cyclic ? " > " : " - ";
-  while (!input.empty()) {
-    stopsNames.emplace_back(ReadToken(input, delimiter));
+void EntertainBusRequest::ParseFrom(map<string, Json::Node>& requestData) {
+  busName = requestData["name"].AsString();
+  bool isRoundTrip = requestData["is_roundtrip"].AsBool();
+  auto &stopsNodes = requestData["stops"].AsArray();
+
+  for(auto& stopNode : stopsNodes) {
+    stopsNames.emplace_back(stopNode.AsString());
   }
 
-  if (!cyclic && !stopsNames.empty()) {
+  if (!isRoundTrip && !stopsNames.empty()) {
     size_t storedSize = stopsNames.size();
     for (size_t i = storedSize - 1; i > 0; i--) {
       stopsNames.emplace_back(stopsNames[i - 1]);
@@ -40,8 +42,9 @@ void EntertainBusRequest::Process(Database& db) {
   db.EntertainBus(move(bus));
 };
 
-void ReadBusRequest::ParseFrom(string_view input) {
-  busName = ReadToken(input, "\n");
+void ReadBusRequest::ParseFrom(map<string, Json::Node>& requestData) {
+  busName = requestData["name"].AsString();
+  id = static_cast<size_t>(requestData["id"].AsNumber());
 };
 
 string ReadBusRequest::Process(Database& db) {
@@ -76,21 +79,22 @@ optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& conver
   }
 }
 
-RequestHolder ParseRequest(const TypeConverter& converter, string_view request_str) {
-  //cerr << request_str << '\n';
-  const auto request_type = ConvertRequestTypeFromString(converter, ReadToken(request_str));
+RequestHolder ParseRequest(const TypeConverter& converter, map<string, Json::Node> requestData) {
+  const auto rawType = requestData["type"].AsString();
+  const auto request_type = ConvertRequestTypeFromString(converter, rawType);
   if (!request_type) {
     return nullptr;
   }
   RequestHolder request = Request::Create(*request_type);
   if (request) {
-    request->ParseFrom(request_str);
+    request->ParseFrom(requestData);
   };
   return request;
 }
 
-void ReadStopRequest::ParseFrom(std::string_view input) {
-  stopName = ReadToken(input, "\n");
+void ReadStopRequest::ParseFrom(map<string, Json::Node>& requestData) {
+  stopName = requestData["name"].AsString();
+  id = static_cast<size_t>(requestData["id"].AsNumber());
 }
 
 std::string ReadStopRequest::Process(Database& db) {

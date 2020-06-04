@@ -5,9 +5,11 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <map>
 #include <vector>
 #include "Coordinate.h"
 #include "Database.h"
+#include "Json.h"
 
 struct Request;
 using RequestHolder = std::unique_ptr<Request>;
@@ -23,7 +25,7 @@ struct Request {
   Request(Type type) : type(type) {}
 
   static RequestHolder Create(Type type);
-  virtual void ParseFrom(std::string_view input) = 0;
+  virtual void ParseFrom(std::map<std::string, Json::Node>& requestData) = 0;
   virtual ~Request() = default;
   const Type type;
 };
@@ -41,11 +43,12 @@ const TypeConverter READ_TYPES_CONVERTER = {
 
 std::optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& converter, std::string_view type_str);
 
-RequestHolder ParseRequest(const TypeConverter& converter, std::string_view request_str);
+RequestHolder ParseRequest(const TypeConverter& converter, std::map<std::string, Json::Node> requestData);
 
 template<typename ResultType>
 struct ReadRequest : Request {
   using Request::Request;
+  size_t id;
   static const size_t DEFAULT_PRECISION = 7;
   virtual ResultType Process(Database& db) = 0;
 };
@@ -58,7 +61,7 @@ struct ModifyRequest : Request {
 struct EntertainStopRequest : ModifyRequest {
   EntertainStopRequest() : ModifyRequest(Type::EntertainStop) {}
 
-  void ParseFrom(std::string_view input) override;
+  void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
   void Process(Database& db) override;
   std::string stopName;
   double latitude;
@@ -69,7 +72,7 @@ struct EntertainStopRequest : ModifyRequest {
 struct EntertainBusRequest : ModifyRequest {
   EntertainBusRequest() : ModifyRequest(Type::EntertainBus) {}
 
-  void ParseFrom(std::string_view input) override;
+  void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
   void Process(Database& db) override;
   std::string busName;
   std::vector<std::string> stopsNames;
@@ -78,7 +81,7 @@ struct EntertainBusRequest : ModifyRequest {
 struct ReadBusRequest : ReadRequest<std::string> {
   ReadBusRequest() : ReadRequest(Type::ReadBus) {}
 
-  void ParseFrom(std::string_view input) override;
+  void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
   std::string Process(Database& db) override;
   std::string busName;
 };
@@ -86,7 +89,7 @@ struct ReadBusRequest : ReadRequest<std::string> {
 struct ReadStopRequest : ReadRequest<std::string> {
   ReadStopRequest() : ReadRequest(Type::ReadStop) {}
 
-  void ParseFrom(std::string_view input) override;
+  void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
   std::string Process(Database& db) override;
   std::string stopName;
 };
