@@ -90,13 +90,40 @@ namespace Json {
     return output << "Document{Root:" << data.GetRoot() << "}";
   }
 
+  void PrintArray(std::ostream& output, const vector<Node> &nodes) {
+    output << "[";
+    bool firstPrinted = false;
+    for(const auto &node : nodes) {
+      if (!firstPrinted) {
+        output << ", ";
+        firstPrinted = true;
+      }
+      output << node;
+    }
+    output << "]";
+  }
+
+  void PrintMap(std::ostream& output, const map<string, Node> &nodes) {
+    output << "{";
+    bool firstPrinted = false;
+    for(const auto &[key, node] : nodes) {
+      if (!firstPrinted) {
+        output << ", ";
+        firstPrinted = true;
+      }
+      output << "\"" << key << "\":" << node;
+    }
+    output << "}";
+  }
+
+
   std::ostream& operator<<(std::ostream& output, const Node &data) {
     output << "Node{";
 
     if (holds_alternative<vector<Node>>(data)) {
-      output << data.AsArray();
+      PrintArray(output, data.AsArray());
     } else if (holds_alternative<map<string, Node>>(data)) {
-      output << data.AsMap();
+      PrintMap(output, data.AsMap());
     } else if (holds_alternative<double>(data)) {
       output << data.AsNumber();
     } else if (holds_alternative<bool>(data)) {
