@@ -95,7 +95,6 @@ void TestIntegrationPartD() {
   auto input = ifstream("../test_data/test_integration_part_d.json");
   auto expectedOutput = ifstream("../test_data/test_integration_part_d_expected_output.json");
   TestIntegrationGenerator(input, expectedOutput);
-
 }
 
 void TestIntegrationPartDRaw() {

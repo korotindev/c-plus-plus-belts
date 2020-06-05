@@ -34,8 +34,8 @@ namespace Json {
 
   Node LoadBool(istream& input) {
     string line;
-    input >> line;
-    return Node(line == "true");
+    getline(input, line, 'e');
+    return Node(line + 'e' == "true");
   }
 
   Node LoadString(istream& input) {
