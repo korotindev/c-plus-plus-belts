@@ -5,10 +5,13 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include "Json.h"
 
 struct ReadResponse {
+  size_t requestId;
   virtual ~ReadResponse() = default;
   virtual void Print(std::ostream& output) = 0;
+  virtual Json::Document ToJson() = 0;
 };
 
 struct ReadStopResponse : ReadResponse {
@@ -20,11 +23,13 @@ struct ReadStopResponse : ReadResponse {
 struct ReadNoStopResponse : ReadStopResponse {
   using ReadStopResponse::ReadStopResponse;
   void Print(std::ostream& output) override;
+  Json::Document ToJson() override;
 };
 
 struct ReadStopMetricsResponse : ReadStopResponse {
   using ReadStopResponse::ReadStopResponse;
   void Print(std::ostream& output) override;
+  Json::Document ToJson() override;
 };
 
 struct ReadBusResponse : ReadResponse {
@@ -35,11 +40,13 @@ struct ReadBusResponse : ReadResponse {
 struct ReadNoBusResponse : ReadBusResponse {
   using ReadBusResponse::ReadBusResponse;
   void Print(std::ostream& output) override;
+  Json::Document ToJson() override;
 };
 
 struct ReadBusMetricsResponse : ReadBusResponse {
   using ReadBusResponse::ReadBusResponse;
   void Print(std::ostream& output) override;
+  Json::Document ToJson() override;
   size_t stopsCount;
   size_t uniqueStopsCount;
   double routeDistance;

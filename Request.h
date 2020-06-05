@@ -78,19 +78,19 @@ struct EntertainBusRequest : ModifyRequest {
   std::vector<std::string> stopsNames;
 };
 
-struct ReadBusRequest : ReadRequest<std::string> {
+struct ReadBusRequest : ReadRequest<Json::Document> {
   ReadBusRequest() : ReadRequest(Type::ReadBus) {}
 
   void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
-  std::string Process(Database& db) override;
+  Json::Document Process(Database& db) override;
   std::string busName;
 };
 
-struct ReadStopRequest : ReadRequest<std::string> {
+struct ReadStopRequest : ReadRequest<Json::Document> {
   ReadStopRequest() : ReadRequest(Type::ReadStop) {}
 
   void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
-  std::string Process(Database& db) override;
+  Json::Document Process(Database& db) override;
   std::string stopName;
 };
 

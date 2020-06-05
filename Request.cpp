@@ -47,12 +47,10 @@ void ReadBusRequest::ParseFrom(map<string, Json::Node>& requestData) {
   id = static_cast<size_t>(requestData["id"].AsNumber());
 };
 
-string ReadBusRequest::Process(Database& db) {
-  stringstream output;
-  output.precision(DEFAULT_PRECISION);
+Json::Document ReadBusRequest::Process(Database& db) {
   auto responseHolder = db.ReadBus(busName);
-  responseHolder->Print(output);
-  return output.str();
+  auto document = responseHolder->ToJson();
+  return document;
 };
 
 RequestHolder Request::Create(Request::Type type) {
@@ -97,10 +95,8 @@ void ReadStopRequest::ParseFrom(map<string, Json::Node>& requestData) {
   id = static_cast<size_t>(requestData["id"].AsNumber());
 }
 
-std::string ReadStopRequest::Process(Database& db) {
-  stringstream output;
-  output.precision(DEFAULT_PRECISION);
+Json::Document ReadStopRequest::Process(Database& db) {
   auto responseHolder = db.ReadStop(stopName);
-  responseHolder->Print(output);
-  return output.str();
+  auto document = responseHolder->ToJson();
+  return document;
 }

@@ -14,7 +14,7 @@ ParseSpecificRequests(TypeConverter converter, Json::Document& document, std::st
 
 void ProcessModifyRequests(Database& db, std::vector<RequestHolder>& requests);
 
-std::vector<std::string> ProcessReadRequests(Database& db, std::vector<RequestHolder>& requests);
+Json::Document ProcessReadRequests(Database& db, std::vector<RequestHolder>& requests);
 
 void PrintResponses(const std::vector<std::string>& responses, std::ostream& stream = std::cout);
 

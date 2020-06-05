@@ -13,8 +13,9 @@ int main() {
   auto readRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "stat_requests");
   Database db;
   ProcessModifyRequests(db, modifyRequests);
-  auto responses = ProcessReadRequests(db, readRequests);
-  PrintResponses(responses);
+  auto jsonDoc = ProcessReadRequests(db, readRequests);
+  cout.precision(26);
+  cout << jsonDoc;
 
   return 0;
 }

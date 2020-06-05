@@ -20,13 +20,15 @@ void ProcessModifyRequests(Database& db, vector<RequestHolder>& requests) {
   }
 }
 
-vector<string> ProcessReadRequests(Database& db, vector<RequestHolder>& requests) {
-  vector<string> responses;
+Json::Document ProcessReadRequests(Database& db, vector<RequestHolder>& requests) {
+  vector<Json::Node> responses;
+  responses.reserve(requests.size());
   for (const auto& request_holder : requests) {
-    auto& request = dynamic_cast<ReadRequest<string>&>(*request_holder);
-    responses.push_back(request.Process(db));
+    auto& request = dynamic_cast<ReadRequest<Json::Document>&>(*request_holder);
+    responses.push_back(request.Process(db).GetRoot());
   }
-  return responses;
+  auto document = Json::Document(responses);
+  return document;
 }
 
 void TestParsing() {
@@ -80,10 +82,10 @@ void TestIntegrationGenerator(istream& input, ifstream& expectedOutput) {
   auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
   Database db;
   ProcessModifyRequests(db, modifyRequests);
-  auto responses = ProcessReadRequests(db, readRequests);
+  auto jsonDoc = ProcessReadRequests(db, readRequests);
   stringstream output;
   output.precision(26);
-  PrintResponses(responses, output);
+  output << jsonDoc;
   Json::Document resultDocument = Json::Load(output);
   Json::Document expectedDocument = Json::Load(expectedOutput);
   ASSERT_EQUAL(resultDocument, expectedDocument);
