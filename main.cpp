@@ -1,26 +1,20 @@
-#include "Solution.h"
+#include "test_runner.h"
+#include "profile.h"
+#include <iostream>
 
-using namespace std;
-
+void TestFunc() {
+  std::cout << "Hello, world!" << std::endl;
+}
 
 int main() {
-  std::istream::sync_with_stdio(false);
-  cin.tie(nullptr);
-  cout.precision(DEFAULT_PRECISION);
+    TestRunner tr;
 
-  TestRunner tr;
-//  commit tests before sending to grader
-  RUN_TEST(tr, TestParsing);
-  RUN_TEST(tr, TestIntegrationPartD);
-  RUN_TEST(tr, TestIntegrationPartDRaw);
+    {
+        LOG_DURATION("test message")
+        int slowComputation = 5 + 3;
+        std::cout << "slowComputation = " << slowComputation << std::endl;
+    }
 
-  Json::Document document = Json::Load(cin);
-  auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
-  auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
-  Database db;
-  ProcessModifyRequests(db, modifyRequests);
-  auto jsonDoc = ProcessReadRequests(db, readRequests);
-  cout << jsonDoc;
-
-  return 0;
+    RUN_TEST(tr, TestFunc);
+    return 0;
 }
