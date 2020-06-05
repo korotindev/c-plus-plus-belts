@@ -94,5 +94,12 @@ void TestIntegrationGenerator(istream& input, ifstream& expectedOutput) {
 void TestIntegrationPartD() {
   auto input = ifstream("../test_data/test_integration_part_d.json");
   auto expectedOutput = ifstream("../test_data/test_integration_part_d_expected_output.json");
-  TestIntegrationGenerator(input,expectedOutput);
+  TestIntegrationGenerator(input, expectedOutput);
+
+}
+
+void TestIntegrationPartDRaw() {
+  auto input = ifstream("../test_data/test_integration_part_d_raw.json");
+  auto expectedOutput = ifstream("../test_data/test_integration_part_d_expected_output.json");
+  TestIntegrationGenerator(input, expectedOutput);
 }

@@ -21,5 +21,6 @@ void PrintResponses(const std::vector<std::string>& responses, std::ostream& str
 void TestParsing();
 void TestIntegrationGenerator(std::string input, std::string expected);
 void TestIntegrationPartD();
+void TestIntegrationPartDRaw();
 
 #endif //C_PLUS_PLUS_BELTS_SOLUTION_H
