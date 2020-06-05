@@ -1,0 +1,46 @@
+{
+  "base_requests": [
+    {
+      "type": "Stop",
+      "road_distances": {
+        "Marushkino": 3900
+      },
+      "longitude": 37.20829,
+      "name": "Tolstopaltsevo",
+      "latitude": 55.611087
+    },
+    {
+      "type": "Bus",
+      "name": "256",
+      "stops": [
+        "Biryulyovo Zapadnoye",
+        "Biryusinka",
+        "Universam",
+        "Biryulyovo Zapadnoye"
+      ],
+      "is_roundtrip": true
+    },
+    {
+      "type": "Bus",
+      "name": "750",
+      "stops": [
+        "Tolstopaltsevo",
+        "Marushkino",
+        "Rasskazovka"
+      ],
+      "is_roundtrip": false
+    }
+  ],
+  "stat_requests": [
+    {
+      "type": "Bus",
+      "name": "256",
+      "id": 1965312327
+    },
+    {
+      "type": "Stop",
+      "name": "Samara",
+      "id": 746888088
+    }
+  ]
+}
