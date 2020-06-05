@@ -127,7 +127,7 @@ namespace Json {
     } else if (holds_alternative<bool>(data)) {
       output << data.AsBool();
     } else {
-      output << data.AsString();
+      output << '"' << data.AsString() << '"';
     }
     return output;
   }
