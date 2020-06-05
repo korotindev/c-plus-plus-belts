@@ -82,13 +82,13 @@ void Database::EntertainBus(Bus bus) {
   busStorage.Add(move(bus));
 }
 
-unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
+unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName, const size_t requestId) {
   if (!busStorage.Exist(busName)) {
-    return make_unique<ReadNoBusResponse>(busName);
+    return make_unique<ReadNoBusResponse>(busName, requestId);
   }
 
   const auto& stops = busStorage.GetStops(busName);
-  auto response = make_unique<ReadBusMetricsResponse>(busName);
+  auto response = make_unique<ReadBusMetricsResponse>(busName, requestId);
 
   response->stopsCount = stops.size();
   response->uniqueStopsCount = busStorage.GetUniqueStopsCount(busName);
@@ -111,12 +111,12 @@ Stop::Stop(std::string name, Coordinate coordinate, std::vector<StopDistance> kn
     knownDistances(move(knownDistances)) {}
 
 
-std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName) {
+std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName, const size_t requestId) {
   if (!stopsStorage.Exist(stopName)) {
-    return make_unique<ReadNoStopResponse>(stopName);
+    return make_unique<ReadNoStopResponse>(stopName, requestId);
   }
 
-  auto response = make_unique<ReadStopMetricsResponse>(stopName);
+  auto response = make_unique<ReadStopMetricsResponse>(stopName, requestId);
   const auto& sortedBuses = stopsStorage.GetBuses(stopName);
   response->buses = vector<string>(sortedBuses.begin(), sortedBuses.end());
   return response;

@@ -48,7 +48,7 @@ void ReadBusRequest::ParseFrom(map<string, Json::Node>& requestData) {
 };
 
 Json::Document ReadBusRequest::Process(Database& db) {
-  auto responseHolder = db.ReadBus(busName);
+  auto responseHolder = db.ReadBus(busName, id);
   auto document = responseHolder->ToJson();
   return document;
 };
@@ -96,7 +96,7 @@ void ReadStopRequest::ParseFrom(map<string, Json::Node>& requestData) {
 }
 
 Json::Document ReadStopRequest::Process(Database& db) {
-  auto responseHolder = db.ReadStop(stopName);
+  auto responseHolder = db.ReadStop(stopName, id);
   auto document = responseHolder->ToJson();
   return document;
 }

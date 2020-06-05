@@ -83,7 +83,11 @@ namespace Json {
   }
 
   bool operator==(const Document &lhs, const Document &rhs) {
-    return lhs.GetRoot() == rhs.GetRoot();
+    stringstream outputLhs;
+    outputLhs << lhs;
+    stringstream outputRhs;
+    outputRhs << rhs;
+    return outputLhs.str() == outputRhs.str();
   }
 
   std::ostream& operator<<(std::ostream& output, const Document &data) {
@@ -122,6 +126,8 @@ namespace Json {
       PrintArray(output, data.AsArray());
     } else if (holds_alternative<map<string, Node>>(data)) {
       PrintMap(output, data.AsMap());
+    } else if (holds_alternative<size_t>(data)) {
+      output << data.AsInteger();
     } else if (holds_alternative<double>(data)) {
       output << data.AsNumber();
     } else if (holds_alternative<bool>(data)) {

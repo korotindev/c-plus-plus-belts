@@ -6,6 +6,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <sstream>
 
 namespace Json {
 
@@ -13,6 +14,7 @@ namespace Json {
     std::vector<Node>,
     std::map<std::string, Node>,
     double,
+    size_t,
     bool,
     std::string> {
   public:
@@ -28,6 +30,10 @@ namespace Json {
 
     double AsNumber() const {
       return std::get<double>(*this);
+    }
+
+    size_t AsInteger() const {
+      return std::get<size_t>(*this);
     }
 
     bool AsBool() const {

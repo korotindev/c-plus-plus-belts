@@ -1,8 +1,11 @@
 #include "ReadResponse.h"
 
+
 using namespace std;
 
-ReadBusResponse::ReadBusResponse(string busName_) : busName(busName_) {}
+ReadBusResponse::ReadBusResponse(string busName, size_t requestId)
+  : ReadResponse(requestId),
+    busName(move(busName)) {}
 
 void ReadNoBusResponse::Print(std::ostream& output) {
   output << "Bus " << busName << ": not found";
@@ -12,7 +15,7 @@ Json::Document ReadNoBusResponse::ToJson() {
   return Json::Document(
     map<string, Json::Node>(
       {
-        {"request_id",    static_cast<double>(this->requestId)},
+        {"request_id",    requestId},
         {"error_message", string("not found")},
       }
     )
@@ -31,17 +34,19 @@ Json::Document ReadBusMetricsResponse::ToJson() {
   return Json::Document(
     map<string, Json::Node>(
       {
-        {"request_id", Json::Node(static_cast<double>(this->requestId))},
-        {"stop_count", Json::Node(static_cast<double>(this->stopsCount))},
-        {"unique_stop_count", Json::Node(static_cast<double>(this->uniqueStopsCount))},
-        {"route_length", Json::Node(routeDistanceV2)},
-        {"curvature", Json::Node(routeDistanceV2 / routeDistance)},
+        {"request_id",        requestId},
+        {"stop_count",        stopsCount},
+        {"unique_stop_count", uniqueStopsCount},
+        {"route_length",      routeDistanceV2},
+        {"curvature",         routeDistanceV2 / routeDistance},
       }
     )
   );
 }
 
-ReadStopResponse::ReadStopResponse(string stopName) : stopName(std::move(stopName)) {}
+ReadStopResponse::ReadStopResponse(string stopName, size_t requestId)
+  : ReadResponse(requestId),
+    stopName(std::move(stopName)) {}
 
 void ReadNoStopResponse::Print(ostream& output) {
   output << "Stop " << stopName << ": not found";
@@ -51,7 +56,7 @@ Json::Document ReadNoStopResponse::ToJson() {
   return Json::Document(
     map<string, Json::Node>(
       {
-        {"request_id",    static_cast<double>(this->requestId)},
+        {"request_id",    requestId},
         {"error_message", string("not found")},
       }
     )
@@ -76,7 +81,7 @@ Json::Document ReadStopMetricsResponse::ToJson() {
     map<string, Json::Node>(
       {
         {"buses",      vector<Json::Node>(buses.begin(), buses.end())},
-        {"request_id", Json::Node(static_cast<double>(this->requestId))}
+        {"request_id", requestId}
       }
     )
   );

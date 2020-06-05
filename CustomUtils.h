@@ -40,4 +40,6 @@ Number ReadNumberOnLine(std::istream& stream) {
   return number;
 }
 
+static const size_t DEFAULT_PRECISION = 7;
+
 #endif //C_PLUS_PLUS_BELTS_CUSTOMUTILS_H

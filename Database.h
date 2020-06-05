@@ -79,9 +79,8 @@ class Database {
 public:
   void EntertainStop(Stop stop);
   void EntertainBus(Bus bus);
-  std::unique_ptr<ReadBusResponse> ReadBus(const std::string& busName);
-  std::unique_ptr<ReadStopResponse> ReadStop(const std::string& stopName);
+  std::unique_ptr<ReadBusResponse> ReadBus(const std::string& busName, const size_t requestId);
+  std::unique_ptr<ReadStopResponse> ReadStop(const std::string& stopName, const size_t requestId);
 };
-
 
 #endif //C_PLUS_PLUS_BELTS_DATABASE_H
