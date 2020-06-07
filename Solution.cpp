@@ -43,7 +43,6 @@ void TestParsing() {
   InitializeSettings(document, "routing_settings");
   const auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
   const auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
-
   {
     ASSERT_EQUAL(Settings::GetBusVelocity(), 40ul);
     ASSERT_EQUAL(Settings::GetBusWaitTime(), 6ul);
