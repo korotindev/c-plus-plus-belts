@@ -101,6 +101,7 @@ void TestIntegrationGenerator(const string& testDataFolderName) {
   auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
   Database db;
   ProcessModifyRequests(db, modifyRequests);
+  db.BuildRouter();
   auto jsonDoc = ProcessReadRequests(db, readRequests);
   stringstream output;
   output.precision(DEFAULT_PRECISION);
