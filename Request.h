@@ -20,6 +20,7 @@ struct Request {
     EntertainBus,
     ReadBus,
     ReadStop,
+    ReadRoute,
   };
 
   Request(Type type) : type(type) {}
@@ -39,6 +40,7 @@ const TypeConverter MODIFY_TYPES_CONVERTER = {
 const TypeConverter READ_TYPES_CONVERTER = {
   {"Bus",  Request::Type::ReadBus},
   {"Stop", Request::Type::ReadStop},
+  {"Route", Request::Type::ReadRoute},
 };
 
 std::optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& converter, std::string_view type_str);
@@ -93,5 +95,13 @@ struct ReadStopRequest : ReadRequest<Json::Document> {
   std::string stopName;
 };
 
+struct ReadRouteRequest : ReadRequest<Json::Document> {
+  ReadRouteRequest() : ReadRequest(Type::ReadRoute) {}
+
+  void ParseFrom(std::map<std::string, Json::Node>& requestData) override;
+  Json::Document Process(Database& db) override;
+  std::string from;
+  std::string to;
+};
 
 #endif //C_PLUS_PLUS_BELTS_REQUEST_H

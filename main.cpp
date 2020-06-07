@@ -17,6 +17,7 @@ int main() {
   RUN_TEST(tr, TestIntegrationTest4);
 
   Json::Document document = Json::Load(cin);
+  InitializeSettings(document, "routing_settings");
   auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
   auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
   Database db;

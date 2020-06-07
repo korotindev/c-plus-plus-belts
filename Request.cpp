@@ -7,8 +7,8 @@ void EntertainStopRequest::ParseFrom(map<string, Json::Node>& requestData) {
   stopName = requestData["name"].AsString();
   latitude = requestData["latitude"].AsNumber();
   longitude = requestData["longitude"].AsNumber();
-  auto &roadDistances = requestData["road_distances"].AsMap();
-  for(auto& [name, distanceNode] : roadDistances) {
+  auto& roadDistances = requestData["road_distances"].AsMap();
+  for (auto&[name, distanceNode] : roadDistances) {
     distanceToOtherStops.push_back(StopDistance{
       name,
       static_cast<double>(distanceNode.AsNumber())
@@ -23,9 +23,9 @@ void EntertainStopRequest::Process(Database& db) {
 void EntertainBusRequest::ParseFrom(map<string, Json::Node>& requestData) {
   busName = requestData["name"].AsString();
   bool isRoundTrip = requestData["is_roundtrip"].AsBool();
-  auto &stopsNodes = requestData["stops"].AsArray();
+  auto& stopsNodes = requestData["stops"].AsArray();
 
-  for(auto& stopNode : stopsNodes) {
+  for (auto& stopNode : stopsNodes) {
     stopsNames.emplace_back(stopNode.AsString());
   }
 
@@ -63,6 +63,8 @@ RequestHolder Request::Create(Request::Type type) {
       return make_unique<ReadBusRequest>();
     case Request::Type::ReadStop:
       return make_unique<ReadStopRequest>();
+    case Request::Type::ReadRoute:
+      return make_unique<ReadRouteRequest>();
     default:
       return nullptr;
   }
@@ -99,4 +101,15 @@ Json::Document ReadStopRequest::Process(Database& db) {
   auto responseHolder = db.ReadStop(stopName, id);
   auto document = responseHolder->ToJson();
   return document;
+}
+
+void ReadRouteRequest::ParseFrom(std::map<std::string, Json::Node>& requestData) {
+  from = requestData["from"].AsString();
+  to = requestData["to"].AsString();
+  id = static_cast<size_t>(requestData["id"].AsNumber());
+}
+
+Json::Document ReadRouteRequest::Process(Database&) {
+  // TODO
+  return Json::Document(Json::Node());
 }

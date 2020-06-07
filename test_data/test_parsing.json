@@ -1,4 +1,8 @@
 {
+  "routing_settings": {
+    "bus_wait_time": 6,
+    "bus_velocity": 40
+  },
   "base_requests": [
     {
       "type": "Stop",
@@ -41,6 +45,12 @@
       "type": "Stop",
       "name": "Samara",
       "id": 746888088
+    },
+    {
+      "type": "Route",
+      "from": "Biryulyovo Zapadnoye",
+      "to": "Universam",
+      "id": 746888089
     }
   ]
 }

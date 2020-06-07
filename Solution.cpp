@@ -2,6 +2,12 @@
 
 using namespace std;
 
+void InitializeSettings(const Json::Document& document, const string& key) {
+  auto documentRootData = document.GetRoot().AsMap();
+  auto settingsNode = documentRootData.at(key);
+  Settings::InitializeFrom(settingsNode);
+}
+
 vector<unique_ptr<Request>> ParseSpecificRequests(TypeConverter converter, Json::Document& document, string key) {
   auto documentRootData = document.GetRoot().AsMap();
   auto& requests = documentRootData[key].AsArray();
@@ -34,8 +40,14 @@ Json::Document ProcessReadRequests(Database& db, vector<RequestHolder>& requests
 void TestParsing() {
   ifstream input("../test_data/test_parsing.json");
   Json::Document document = Json::Load(input);
+  InitializeSettings(document, "routing_settings");
   const auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
   const auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
+
+  {
+    ASSERT_EQUAL(Settings::GetBusVelocity(), 40ul);
+    ASSERT_EQUAL(Settings::GetBusWaitTime(), 6ul);
+  }
   ASSERT_EQUAL(modifyRequests.size(), 3ul);
   {
     auto request = dynamic_cast<const EntertainStopRequest&>(*modifyRequests[0].get());
@@ -57,7 +69,7 @@ void TestParsing() {
     const vector<string> stopsNames = {"Tolstopaltsevo", "Marushkino", "Rasskazovka", "Marushkino", "Tolstopaltsevo"};
     ASSERT_EQUAL(request.stopsNames, stopsNames)
   }
-  ASSERT_EQUAL(readRequests.size(), 2ul);
+  ASSERT_EQUAL(readRequests.size(), 3ul);
   {
     auto request = dynamic_cast<const ReadBusRequest&>(*readRequests[0].get());
     ASSERT_EQUAL(request.busName, "256");
@@ -67,6 +79,12 @@ void TestParsing() {
     auto request = dynamic_cast<const ReadStopRequest&>(*readRequests[1].get());
     ASSERT_EQUAL(request.stopName, "Samara");
     ASSERT_EQUAL(request.id, 746888088ul);
+  }
+  {
+    auto request = dynamic_cast<const ReadRouteRequest&>(*readRequests[2].get());
+    ASSERT_EQUAL(request.from, "Biryulyovo Zapadnoye");
+    ASSERT_EQUAL(request.to, "Universam");
+    ASSERT_EQUAL(request.id, 746888089ul);
   }
 }
 

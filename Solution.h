@@ -8,6 +8,9 @@
 #include "Request.h"
 #include "CustomUtils.h"
 #include "Json.h"
+#include "Settings.h"
+
+void InitializeSettings(const Json::Document& document, const std::string& key);
 
 std::vector<std::unique_ptr<Request>>
 ParseSpecificRequests(TypeConverter converter, Json::Document& document, std::string key);
