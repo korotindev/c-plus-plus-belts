@@ -17,10 +17,16 @@ std::ostream& operator<<(std::ostream& output, const StopDistance& data) {
 }
 
 void StopsStorage::Add(Stop stop) {
+  static size_t current_id = 0;
+
   for(auto &[targetStopName, distance] : stop.knownDistances) {
     distanceStorage[make_pair(stop.name, targetStopName)] = distance;
   }
-  storage[move(stop.name)].coordinate = stop.coordinate;
+
+  auto& stopData = storage[stop.name];
+  stopData.coordinate = stop.coordinate;
+  idToStop[current_id] = move(stop.name);
+  current_id++;
 }
 
 double StopsStorage::GetDistanceV2(const string& lhsStopName, const string& rhsStopName) const {

@@ -13,7 +13,7 @@
 void InitializeSettings(const Json::Document& document, const std::string& key);
 
 std::vector<std::unique_ptr<Request>>
-ParseSpecificRequests(TypeConverter converter, Json::Document& document, std::string key);
+ParseSpecificRequests(const TypeConverter& converter, Json::Document& document, std::string key);
 
 void ProcessModifyRequests(Database& db, std::vector<RequestHolder>& requests);
 

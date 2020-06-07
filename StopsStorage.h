@@ -42,6 +42,7 @@ class StopsStorage {
     }
   };
 
+  std::unordered_map<size_t, std::string> idToStop;
   std::unordered_map<std::string, StopData> storage;
   std::unordered_map<std::pair<std::string, std::string>, double, PairHasher> distanceStorage;
 public:

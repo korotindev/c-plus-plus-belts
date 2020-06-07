@@ -8,7 +8,7 @@ void InitializeSettings(const Json::Document& document, const string& key) {
   Settings::InitializeFrom(settingsNode);
 }
 
-vector<unique_ptr<Request>> ParseSpecificRequests(TypeConverter converter, Json::Document& document, string key) {
+vector<unique_ptr<Request>> ParseSpecificRequests(const TypeConverter& converter, Json::Document& document, string key) {
   auto documentRootData = document.GetRoot().AsMap();
   auto& requests = documentRootData[key].AsArray();
   vector<unique_ptr<Request>> result;
