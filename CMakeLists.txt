@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic-errors -
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -g -fno-sanitize-recover=null")
 
-add_executable(c-plus-plus-belts main.cpp Coordinate.h Coordinate.cpp Database.h Database.cpp CustomUtils.h CustomUtils.cpp Request.h Request.cpp ReadResponse.cpp ReadResponse.h Solution.cpp Solution.h Json.cpp Json.h Settings.h Settings.cpp Graph.h Router.h)
+add_executable(c-plus-plus-belts main.cpp Coordinate.h Coordinate.cpp Database.h Database.cpp CustomUtils.h CustomUtils.cpp Request.h Request.cpp ReadResponse.cpp ReadResponse.h Solution.cpp Solution.h Json.cpp Json.h Settings.h Settings.cpp Graph.h Router.h StopsStorage.cpp StopsStorage.h BusStorage.cpp BusStorage.h)
 
 target_link_libraries(c-plus-plus-belts INTERFACE utils)
 
