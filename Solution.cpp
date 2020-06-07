@@ -76,7 +76,9 @@ void PrintResponses(const vector<string>& responses, ostream& stream) {
   }
 }
 
-void TestIntegrationGenerator(istream& input, ifstream& expectedOutput) {
+void TestIntegrationGenerator(const string& testDataFolderName) {
+  auto input = ifstream("../test_data/" + testDataFolderName + "/input.json");
+  auto expectedOutput = ifstream("../test_data/" + testDataFolderName + "/expected_output.json");
   Json::Document document = Json::Load(input);
   auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
   auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
@@ -91,14 +93,18 @@ void TestIntegrationGenerator(istream& input, ifstream& expectedOutput) {
   ASSERT_EQUAL(resultDocument, expectedDocument);
 }
 
-void TestIntegrationPartD() {
-  auto input = ifstream("../test_data/test_integration_part_d.json");
-  auto expectedOutput = ifstream("../test_data/test_integration_part_d_expected_output.json");
-  TestIntegrationGenerator(input, expectedOutput);
+void TestIntegrationTest1() {
+  TestIntegrationGenerator("test1");
 }
 
-void TestIntegrationPartDRaw() {
-  auto input = ifstream("../test_data/test_integration_part_d_raw.json");
-  auto expectedOutput = ifstream("../test_data/test_integration_part_d_expected_output.json");
-  TestIntegrationGenerator(input, expectedOutput);
+void TestIntegrationTest2() {
+  TestIntegrationGenerator("test2");
+}
+
+void TestIntegrationTest3() {
+  TestIntegrationGenerator("test3");
+}
+
+void TestIntegrationTest4() {
+  TestIntegrationGenerator("test4");
 }

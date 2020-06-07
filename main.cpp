@@ -11,8 +11,10 @@ int main() {
   TestRunner tr;
 //  commit tests before sending to grader
   RUN_TEST(tr, TestParsing);
-  RUN_TEST(tr, TestIntegrationPartD);
-  RUN_TEST(tr, TestIntegrationPartDRaw);
+  RUN_TEST(tr, TestIntegrationTest1);
+  RUN_TEST(tr, TestIntegrationTest2);
+  RUN_TEST(tr, TestIntegrationTest3);
+  RUN_TEST(tr, TestIntegrationTest4);
 
   Json::Document document = Json::Load(cin);
   auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");

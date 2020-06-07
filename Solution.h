@@ -19,8 +19,10 @@ Json::Document ProcessReadRequests(Database& db, std::vector<RequestHolder>& req
 void PrintResponses(const std::vector<std::string>& responses, std::ostream& stream = std::cout);
 
 void TestParsing();
-void TestIntegrationGenerator(std::string input, std::string expected);
-void TestIntegrationPartD();
-void TestIntegrationPartDRaw();
+void TestIntegrationGenerator(const std::string& testDataFolderName);
+void TestIntegrationTest1();
+void TestIntegrationTest2();
+void TestIntegrationTest3();
+void TestIntegrationTest4();
 
 #endif //C_PLUS_PLUS_BELTS_SOLUTION_H
