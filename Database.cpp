@@ -43,20 +43,44 @@ std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName, con
   return response;
 }
 
-void Database::ReadRoute(const size_t, const std::string& fromStopName, const std::string& toStopName) {
+unique_ptr<ReadRouteResponse>
+Database::ReadRoute(const size_t requestId, const std::string& fromStopName, const std::string& toStopName) {
   auto waitStopFrom = stopNameToWaitVertex.at(fromStopName);
   auto waitStopTo = stopNameToWaitVertex.at(toStopName);
   auto path = router->BuildRoute(waitStopFrom->id, waitStopTo->id);
   if (path == nullopt) {
-    // FIXME no path handler
-    return;
+    return make_unique<ReadNoRouteResponse>(requestId);
   }
 
-  cout << "Route weight: " << path->weight << endl;
+  auto response = make_unique<ReadRouteMetricsResponse>(requestId);
+
+  response->totalTime = path->weight;
+
+  unique_ptr<ReadRouteResponseBusItem> currentBusItem;
   for (size_t i = 0; i < path->edge_count; i++) {
     auto edge_id = router->GetRouteEdge(path->id, i);
-    cout << edges[edge_id]->ToString() << endl;
+    const auto& edge = edges[edge_id];
+    if (edge->type == CustomGraphEdgeType::Boarding) {
+      response->items.push_back(make_unique<ReadRouteResponseWaitItem>(edge->from->stopName, edge->weight));
+      if (currentBusItem != nullptr) {
+        response->items.push_back(move(currentBusItem));
+        currentBusItem = nullptr;
+      }
+    } else {
+      if (currentBusItem == nullptr) {
+        currentBusItem = make_unique<ReadRouteResponseBusItem>(edge->busName, edge->weight, 1);
+      } else {
+        currentBusItem->spanCount++;
+        currentBusItem->time += edge->weight;
+      }
+    }
   }
+
+  if (currentBusItem != nullptr) {
+    response->items.push_back(move(currentBusItem));
+  }
+
+  return response;
 }
 
 Graph::Edge<double> Database::CustomGraphEdge::ToGeneric() const {

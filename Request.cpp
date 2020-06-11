@@ -110,6 +110,7 @@ void ReadRouteRequest::ParseFrom(std::map<std::string, Json::Node>& requestData)
 }
 
 Json::Document ReadRouteRequest::Process(Database& db) {
-  db.ReadRoute(id, from, to);
-  return Json::Document(Json::Node());
+  auto responseHolder = db.ReadRoute(id, from, to);
+  auto document = responseHolder->ToJson();
+  return document;
 }

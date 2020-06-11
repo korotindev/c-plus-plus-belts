@@ -58,7 +58,7 @@ public:
   void EntertainBus(Bus bus);
   std::unique_ptr<ReadBusResponse> ReadBus(const std::string& busName, const size_t requestId);
   std::unique_ptr<ReadStopResponse> ReadStop(const std::string& stopName, const size_t requestId);
-  void ReadRoute(const size_t requestId, const std::string& from, const std::string& to);
+  std::unique_ptr<ReadRouteResponse> ReadRoute(const size_t requestId, const std::string& from, const std::string& to);
 };
 
 #endif //C_PLUS_PLUS_BELTS_DATABASE_H

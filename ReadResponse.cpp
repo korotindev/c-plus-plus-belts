@@ -7,10 +7,6 @@ ReadBusResponse::ReadBusResponse(string busName, size_t requestId)
   : ReadResponse(requestId),
     busName(move(busName)) {}
 
-void ReadNoBusResponse::Print(std::ostream& output) {
-  output << "Bus " << busName << ": not found";
-}
-
 Json::Document ReadNoBusResponse::ToJson() {
   return Json::Document(
     map<string, Json::Node>(
@@ -20,14 +16,6 @@ Json::Document ReadNoBusResponse::ToJson() {
       }
     )
   );
-}
-
-void ReadBusMetricsResponse::Print(std::ostream& output) {
-  output << "Bus " << busName << ": "
-         << stopsCount << " stops on route" << ", "
-         << uniqueStopsCount << " unique stops" << ", "
-         << routeDistanceV2 << " route length" << ", "
-         << routeDistanceV2 / routeDistance << " curvature";
 }
 
 Json::Document ReadBusMetricsResponse::ToJson() {
@@ -48,10 +36,6 @@ ReadStopResponse::ReadStopResponse(string stopName, size_t requestId)
   : ReadResponse(requestId),
     stopName(std::move(stopName)) {}
 
-void ReadNoStopResponse::Print(ostream& output) {
-  output << "Stop " << stopName << ": not found";
-}
-
 Json::Document ReadNoStopResponse::ToJson() {
   return Json::Document(
     map<string, Json::Node>(
@@ -63,25 +47,77 @@ Json::Document ReadNoStopResponse::ToJson() {
   );
 }
 
-void ReadStopMetricsResponse::Print(ostream& output) {
-  output << "Stop " << stopName << ":";
-
-  if (buses.empty()) {
-    output << " no buses";
-  } else {
-    output << " buses";
-    for (const auto& bus : buses) {
-      output << " " << bus;
-    }
-  }
-}
-
 Json::Document ReadStopMetricsResponse::ToJson() {
   return Json::Document(
     map<string, Json::Node>(
       {
         {"buses",      vector<Json::Node>(buses.begin(), buses.end())},
         {"request_id", requestId}
+      }
+    )
+  );
+}
+
+ReadRouteResponseItem::ReadRouteResponseItem(ReadRouteResponseItemType type_, double time_)
+  : type(type_),
+    time(time_) {}
+
+ReadRouteResponseWaitItem::ReadRouteResponseWaitItem(std::string_view stopName_, double time_)
+  : ReadRouteResponseItem(ReadRouteResponseItemType::WaitType, time_),
+    stopName(stopName_) {}
+
+Json::Node ReadRouteResponseWaitItem::ToJson() const {
+  return Json::Node(
+    map<string, Json::Node>(
+      {
+        {"type",      string("Wait")},
+        {"stop_name", string(stopName)},
+        {"time",      time}
+      })
+  );
+}
+
+Json::Node ReadRouteResponseBusItem::ToJson() const {
+  return Json::Node(
+    map<string, Json::Node>(
+      {
+        {"type",       string("Bus")},
+        {"bus",        string(busName)},
+        {"span_count", spanCount},
+        {"time",       time}
+      })
+  );
+}
+
+ReadRouteResponseBusItem::ReadRouteResponseBusItem(std::string_view busName_, double time_, size_t spanCount_)
+  : ReadRouteResponseItem(ReadRouteResponseItemType::BusType, time_),
+    busName(busName_),
+    spanCount(spanCount_) {}
+
+Json::Document ReadNoRouteResponse::ToJson() {
+  return Json::Document(
+    map<string, Json::Node>(
+      {
+        {"request_id",    requestId},
+        {"error_message", string("not found")},
+      }
+    )
+  );
+}
+
+Json::Document ReadRouteMetricsResponse::ToJson() {
+  vector<Json::Node> resultItems;
+
+  for (const auto& item : items) {
+    resultItems.push_back(item->ToJson());
+  }
+
+  return Json::Document(
+    map<string, Json::Node>(
+      {
+        {"request_id", requestId},
+        {"total_time", totalTime},
+        {"items",      resultItems},
       }
     )
   );
