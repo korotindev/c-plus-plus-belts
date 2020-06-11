@@ -100,24 +100,49 @@ Database::CustomGraphVertex::CustomGraphVertex(
     type(type_),
     stopName(stopName_) {}
 
+Database::CustomGraphBusVertex::CustomGraphBusVertex(
+  size_t id_,
+  Database::CustomGraphVertexType type_,
+  std::string_view stopName_,
+  std::string_view busName_
+) : CustomGraphVertex(id_, type_, stopName_), busName(busName_) {}
 
-shared_ptr<Database::CustomGraphVertex>
-Database::FindOrCreateRideStop(std::string_view stopName) {
-  if (auto it = stopNameToRideVertex.find(stopName); it != stopNameToRideVertex.end()) {
+string Database::CustomGraphBusVertex::ToString() const {
+  stringstream output;
+  output << stopName << "(";
+  if (type == CustomGraphVertexType::Wait) {
+    output << "wait";
+  } else {
+    output << "ride on (" << busName << ")";
+  }
+  output << ")";
+  return output.str();
+}
+
+
+shared_ptr<Database::CustomGraphBusVertex>
+Database::FindOrCreateRideStop(std::string_view stopName, std::string_view busName) {
+  auto& localStopsStorage = stopNameAndBusToRideVertex[stopName];
+
+  if (auto it = localStopsStorage.find(busName); it != localStopsStorage.end()) {
     return it->second;
   }
 
-  auto rideStop = make_shared<CustomGraphVertex>(vertices.size(), CustomGraphVertexType::Ride, stopName);
+  auto rideStop = make_shared<CustomGraphBusVertex>(
+    vertices.size(),
+    CustomGraphVertexType::Ride,
+    stopName,
+    busName
+  );
   vertices.push_back(rideStop);
-  stopNameToRideVertex.emplace(rideStop->stopName, rideStop);
+  stopNameAndBusToRideVertex[rideStop->stopName].emplace(busName, rideStop);
   return rideStop;
 }
 
 void Database::BuildRouter() {
-  auto vertex_count = 2ul * stopsStorage.storage.size();
-  vertices.reserve(vertex_count);
+  auto vertex_count = busStorage.storage.size() * stopsStorage.storage.size() + stopsStorage.storage.size();
+  cout << "vertex count" << vertex_count << endl;
   graph = make_unique<Graph::DirectedWeightedGraph<double>>(vertex_count);
-
   for (const auto &[stopName, _] : stopsStorage.storage) {
     auto fromVertex = make_shared<CustomGraphVertex>(
       vertices.size(),
@@ -135,10 +160,10 @@ void Database::BuildRouter() {
     for (size_t i = 0; i < stopsNames.size() - 1; i++) {
       auto& fromStopName = stopsNames[i];
       auto waitStopFrom = stopNameToWaitVertex.at(fromStopName);
-      auto rideStopFrom = FindOrCreateRideStop(fromStopName);
+      auto rideStopFrom = FindOrCreateRideStop(fromStopName, busName);
       auto& toStopName = stopsNames[i + 1];
       auto waitStopTo = stopNameToWaitVertex.at(toStopName);
-      auto rideStopTo = FindOrCreateRideStop(toStopName);
+      auto rideStopTo = FindOrCreateRideStop(toStopName, busName);
 
       auto boardingEdge = make_shared<CustomGraphEdge>(
         CustomGraphEdge{
@@ -151,7 +176,7 @@ void Database::BuildRouter() {
         }
       );
       edges.push_back(boardingEdge);
-      graph->AddEdge(boardingEdge->ToGeneric());
+      cout << graph->AddEdge(boardingEdge->ToGeneric()) << "==" << boardingEdge->id << endl;
 
       auto distance = stopsStorage.GetDistanceV2(fromStopName, toStopName);
       auto rideToWaitVertexEdge = make_shared<CustomGraphEdge>(
@@ -165,7 +190,7 @@ void Database::BuildRouter() {
         }
       );
       edges.push_back(rideToWaitVertexEdge);
-      graph->AddEdge(rideToWaitVertexEdge->ToGeneric());
+      cout << graph->AddEdge(rideToWaitVertexEdge->ToGeneric()) << "==" << rideToWaitVertexEdge->id << endl;
 
       if (i + 1 != stopsNames.size() - 1) {
         auto rideToRideVertexEdge = make_shared<CustomGraphEdge>(
@@ -180,7 +205,8 @@ void Database::BuildRouter() {
         );
 
         edges.push_back(rideToRideVertexEdge);
-        graph->AddEdge(rideToRideVertexEdge->ToGeneric());
+
+        cout << graph->AddEdge(rideToRideVertexEdge->ToGeneric()) << "==" << rideToRideVertexEdge->id << endl;
       }
     }
   }

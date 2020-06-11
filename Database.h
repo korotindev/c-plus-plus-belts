@@ -23,7 +23,13 @@ class Database {
     size_t id;
     CustomGraphVertexType type;
     std::string_view stopName;
-    std::string ToString() const;
+    virtual std::string ToString() const;
+  };
+
+  struct CustomGraphBusVertex : public CustomGraphVertex {
+    CustomGraphBusVertex(size_t id, CustomGraphVertexType type, std::string_view stopName, std::string_view busName);
+    std::string_view busName;
+    std::string ToString() const override;
   };
 
   struct CustomGraphEdge {
@@ -40,12 +46,12 @@ class Database {
   std::unique_ptr<Graph::DirectedWeightedGraph<double>> graph;
   std::unique_ptr<Graph::Router<double>> router;
   std::unordered_map<std::string_view, std::shared_ptr<CustomGraphVertex>> stopNameToWaitVertex;
-  std::unordered_map<std::string_view, std::shared_ptr<CustomGraphVertex>> stopNameToRideVertex;
+  std::unordered_map<std::string_view, std::unordered_map<std::string_view, std::shared_ptr<CustomGraphBusVertex>>> stopNameAndBusToRideVertex;
   std::vector<std::shared_ptr<CustomGraphVertex>> vertices;
   std::vector<std::shared_ptr<CustomGraphEdge>> edges;
   StopsStorage stopsStorage;
   BusStorage busStorage;
-  std::shared_ptr<CustomGraphVertex> FindOrCreateRideStop(std::string_view stopName);
+  std::shared_ptr<CustomGraphBusVertex> FindOrCreateRideStop(std::string_view stopName, std::string_view busName);
 public:
   void BuildRouter();
   void EntertainStop(Stop stop);
