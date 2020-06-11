@@ -51,7 +51,7 @@ class Database {
   std::vector<std::shared_ptr<CustomGraphEdge>> edges;
   StopsStorage stopsStorage;
   BusStorage busStorage;
-  std::shared_ptr<CustomGraphBusVertex> FindOrCreateRideStop(std::string_view stopName, std::string_view busName);
+  std::shared_ptr<CustomGraphBusVertex> createRideStop(std::string_view stopName, std::string_view busName);
 public:
   void BuildRouter();
   void EntertainStop(Stop stop);

@@ -13,7 +13,7 @@ int main() {
   RUN_TEST(tr, TestParsing);
   RUN_TEST(tr, TestIntegrationTest1);
   RUN_TEST(tr, TestIntegrationTest2);
-//  RUN_TEST(tr, TestIntegrationTest3);
+  RUN_TEST(tr, TestIntegrationTest3);
 //  RUN_TEST(tr, TestIntegrationTest4);
 
   Json::Document document = Json::Load(cin);
