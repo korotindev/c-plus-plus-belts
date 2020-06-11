@@ -46,21 +46,21 @@
         "stop_name": "Biryulyovo Zapadnoye"
       },
       {
-        "span_count": 1,
+        "span_count": 2,
         "bus": "297",
         "type": "Bus",
-        "time": 3.9
+        "time": 5.235
       },
       {
         "time": 6,
         "type": "Wait",
-        "stop_name": "Biryulyovo Tovarnaya"
+        "stop_name": "Universam"
       },
       {
-        "span_count": 2,
+        "span_count": 1,
         "bus": "635",
         "type": "Bus",
-        "time": 8.31
+        "time": 6.975
       }
     ],
     "request_id": 5
