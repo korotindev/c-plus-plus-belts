@@ -61,11 +61,11 @@ Database::ReadRoute(const size_t requestId, const std::string& fromStopName, con
     auto edge_id = router->GetRouteEdge(path->id, i);
     const auto& edge = edges[edge_id];
     if (edge->type == CustomGraphEdgeType::Boarding) {
-      response->items.push_back(make_unique<ReadRouteResponseWaitItem>(edge->from->stopName, edge->weight));
       if (currentBusItem != nullptr) {
         response->items.push_back(move(currentBusItem));
         currentBusItem = nullptr;
       }
+      response->items.push_back(make_unique<ReadRouteResponseWaitItem>(edge->from->stopName, edge->weight));
     } else {
       if (currentBusItem == nullptr) {
         currentBusItem = make_unique<ReadRouteResponseBusItem>(edge->busName, edge->weight, 1);
