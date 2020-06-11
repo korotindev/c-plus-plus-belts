@@ -141,7 +141,6 @@ Database::FindOrCreateRideStop(std::string_view stopName, std::string_view busNa
 
 void Database::BuildRouter() {
   auto vertex_count = busStorage.storage.size() * stopsStorage.storage.size() + stopsStorage.storage.size();
-  cout << "vertex count" << vertex_count << endl;
   graph = make_unique<Graph::DirectedWeightedGraph<double>>(vertex_count);
   for (const auto &[stopName, _] : stopsStorage.storage) {
     auto fromVertex = make_shared<CustomGraphVertex>(
@@ -169,35 +168,37 @@ void Database::BuildRouter() {
         CustomGraphEdge{
           edges.size(),
           CustomGraphEdgeType::Boarding,
-          static_cast<double>(Settings::GetBusWaitTime() * Settings::GetBusVelocity()),
+          static_cast<double>(Settings::GetBusWaitTime()),
           waitStopFrom,
           rideStopFrom,
           busName,
         }
       );
       edges.push_back(boardingEdge);
-      cout << graph->AddEdge(boardingEdge->ToGeneric()) << "==" << boardingEdge->id << endl;
+      graph->AddEdge(boardingEdge->ToGeneric());
 
-      auto distance = stopsStorage.GetDistanceV2(fromStopName, toStopName);
+      double weight = stopsStorage.GetDistanceV2(fromStopName, toStopName)
+                      / (static_cast<double>(Settings::GetBusVelocity()) * 1000.0 / 60.0);
+
       auto rideToWaitVertexEdge = make_shared<CustomGraphEdge>(
         CustomGraphEdge{
           edges.size(),
           CustomGraphEdgeType::Riding,
-          distance,
+          weight,
           rideStopFrom,
           waitStopTo,
           busName,
         }
       );
       edges.push_back(rideToWaitVertexEdge);
-      cout << graph->AddEdge(rideToWaitVertexEdge->ToGeneric()) << "==" << rideToWaitVertexEdge->id << endl;
+      graph->AddEdge(rideToWaitVertexEdge->ToGeneric());
 
       if (i + 1 != stopsNames.size() - 1) {
         auto rideToRideVertexEdge = make_shared<CustomGraphEdge>(
           CustomGraphEdge{
             edges.size(),
             CustomGraphEdgeType::Riding,
-            distance,
+            weight,
             rideStopFrom,
             rideStopTo,
             busName,
@@ -205,8 +206,7 @@ void Database::BuildRouter() {
         );
 
         edges.push_back(rideToRideVertexEdge);
-
-        cout << graph->AddEdge(rideToRideVertexEdge->ToGeneric()) << "==" << rideToRideVertexEdge->id << endl;
+        graph->AddEdge(rideToRideVertexEdge->ToGeneric());
       }
     }
   }
