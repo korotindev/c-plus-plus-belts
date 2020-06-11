@@ -20,6 +20,7 @@ void ProcessModifyRequests(Database& db, std::vector<RequestHolder>& requests);
 Json::Document ProcessReadRequests(Database& db, std::vector<RequestHolder>& requests);
 
 void PrintResponses(const std::vector<std::string>& responses, std::ostream& stream = std::cout);
+Json::Document GeneralProcess(std::istream& input);
 
 void TestParsing();
 void TestIntegrationGenerator(const std::string& testDataFolderName);

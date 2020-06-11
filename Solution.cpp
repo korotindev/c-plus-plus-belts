@@ -93,9 +93,7 @@ void PrintResponses(const vector<string>& responses, ostream& stream) {
   }
 }
 
-void TestIntegrationGenerator(const string& testDataFolderName) {
-  auto input = ifstream("../test_data/" + testDataFolderName + "/input.json");
-  auto expectedOutput = ifstream("../test_data/" + testDataFolderName + "/expected_output.json");
+Json::Document GeneralProcess(istream& input) {
   Json::Document document = Json::Load(input);
   InitializeSettings(document, "routing_settings");
   auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
@@ -104,6 +102,13 @@ void TestIntegrationGenerator(const string& testDataFolderName) {
   ProcessModifyRequests(db, modifyRequests);
   db.BuildRouter();
   auto jsonDoc = ProcessReadRequests(db, readRequests);
+  return jsonDoc;
+}
+
+void TestIntegrationGenerator(const string& testDataFolderName) {
+  auto input = ifstream("../test_data/" + testDataFolderName + "/input.json");
+  auto expectedOutput = ifstream("../test_data/" + testDataFolderName + "/expected_output.json");
+  auto jsonDoc = GeneralProcess(input);
   stringstream output;
   output.precision(DEFAULT_PRECISION);
   output << jsonDoc;
