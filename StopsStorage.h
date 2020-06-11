@@ -11,6 +11,9 @@
 #include "ReadResponse.h"
 #include "Coordinate.h"
 #include "Router.h"
+#include "CustomUtils.h"
+
+class Database;
 
 struct StopDistance {
   std::string name;
@@ -50,6 +53,7 @@ struct RoadHasher {
 };
 
 class StopsStorage {
+  friend class Database;
   std::unordered_map<std::string, StopData> storage;
   std::unordered_map<Road, RoadData, RoadHasher> distanceStorage;
 public:

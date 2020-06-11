@@ -43,9 +43,147 @@ std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName, con
   return response;
 }
 
-void Database::ReadRoute(const size_t, const std::string&, const std::string&) {
+void Database::ReadRoute(const size_t, const std::string& fromStopName, const std::string& toStopName) {
+  auto waitStopFrom = stopNameToWaitVertex.at(fromStopName);
+  auto waitStopTo = stopNameToWaitVertex.at(toStopName);
+  auto path = router->BuildRoute(waitStopFrom->id, waitStopTo->id);
+  if (path == nullopt) {
+    // FIXME no path handler
+    return;
+  }
 
+  cout << "Route weight: " << path->weight << endl;
+  for (size_t i = 0; i < path->edge_count; i++) {
+    auto edge_id = router->GetRouteEdge(path->id, i);
+    cout << edges[edge_id]->ToString() << endl;
+  }
+}
+
+Graph::Edge<double> Database::CustomGraphEdge::ToGeneric() const {
+  return {
+    from->id,
+    to->id,
+    weight,
+  };
+}
+
+string Database::CustomGraphEdge::ToString() const {
+  stringstream output;
+
+  if (type == CustomGraphEdgeType::Riding) {
+    output << "Riding on: " << busName;
+  } else {
+    output << "Boarding to: " << busName;
+  }
+  output << " from " << from->ToString() << " to " << to->ToString();
+  output << " take " << weight;
+  return output.str();
+}
+
+string Database::CustomGraphVertex::ToString() const {
+  stringstream output;
+  output << stopName << "(";
+  if (type == CustomGraphVertexType::Wait) {
+    output << "wait";
+  } else {
+    output << "ride";
+  }
+  output << ")";
+  return output.str();
+}
+
+Database::CustomGraphVertex::CustomGraphVertex(
+  size_t id_,
+  Database::CustomGraphVertexType type_,
+  std::string_view stopName_
+) : id(id_),
+    type(type_),
+    stopName(stopName_) {}
+
+
+shared_ptr<Database::CustomGraphVertex>
+Database::FindOrCreateRideStop(std::string_view stopName) {
+  if (auto it = stopNameToRideVertex.find(stopName); it != stopNameToRideVertex.end()) {
+    return it->second;
+  }
+
+  auto rideStop = make_shared<CustomGraphVertex>(vertices.size(), CustomGraphVertexType::Ride, stopName);
+  vertices.push_back(rideStop);
+  stopNameToRideVertex.emplace(rideStop->stopName, rideStop);
+  return rideStop;
 }
 
 void Database::BuildRouter() {
+  auto vertex_count = 2ul * stopsStorage.storage.size();
+  vertices.reserve(vertex_count);
+  graph = make_unique<Graph::DirectedWeightedGraph<double>>(vertex_count);
+
+  for (const auto &[stopName, _] : stopsStorage.storage) {
+    auto fromVertex = make_shared<CustomGraphVertex>(
+      vertices.size(),
+      CustomGraphVertexType::Wait,
+      stopName
+    );
+    vertices.push_back(fromVertex);
+    stopNameToWaitVertex.emplace(fromVertex->stopName, fromVertex);
+  }
+
+  for (const auto &[busName, stopsNames] : busStorage.storage) {
+    if (stopsNames.size() < 3) {
+      continue;
+    }
+    for (size_t i = 0; i < stopsNames.size() - 1; i++) {
+      auto& fromStopName = stopsNames[i];
+      auto waitStopFrom = stopNameToWaitVertex.at(fromStopName);
+      auto rideStopFrom = FindOrCreateRideStop(fromStopName);
+      auto& toStopName = stopsNames[i + 1];
+      auto waitStopTo = stopNameToWaitVertex.at(toStopName);
+      auto rideStopTo = FindOrCreateRideStop(toStopName);
+
+      auto boardingEdge = make_shared<CustomGraphEdge>(
+        CustomGraphEdge{
+          edges.size(),
+          CustomGraphEdgeType::Boarding,
+          static_cast<double>(Settings::GetBusWaitTime() * Settings::GetBusVelocity()),
+          waitStopFrom,
+          rideStopFrom,
+          busName,
+        }
+      );
+      edges.push_back(boardingEdge);
+      graph->AddEdge(boardingEdge->ToGeneric());
+
+      auto distance = stopsStorage.GetDistanceV2(fromStopName, toStopName);
+      auto rideToWaitVertexEdge = make_shared<CustomGraphEdge>(
+        CustomGraphEdge{
+          edges.size(),
+          CustomGraphEdgeType::Riding,
+          distance,
+          rideStopFrom,
+          waitStopTo,
+          busName,
+        }
+      );
+      edges.push_back(rideToWaitVertexEdge);
+      graph->AddEdge(rideToWaitVertexEdge->ToGeneric());
+
+      if (i + 1 != stopsNames.size() - 1) {
+        auto rideToRideVertexEdge = make_shared<CustomGraphEdge>(
+          CustomGraphEdge{
+            edges.size(),
+            CustomGraphEdgeType::Riding,
+            distance,
+            rideStopFrom,
+            rideStopTo,
+            busName,
+          }
+        );
+
+        edges.push_back(rideToRideVertexEdge);
+        graph->AddEdge(rideToRideVertexEdge->ToGeneric());
+      }
+    }
+  }
+
+  router = make_unique<Graph::Router<double>>(*graph.get());
 }

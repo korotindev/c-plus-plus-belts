@@ -11,6 +11,8 @@
 #include "Router.h"
 #include "StopsStorage.h"
 
+class Database;
+
 struct Bus {
   std::string name;
   std::vector<std::string> stopsNames;
@@ -18,6 +20,7 @@ struct Bus {
 };
 
 class BusStorage {
+  friend class Database;
   std::unordered_map<std::string, std::vector<std::string>> storage;
   std::unordered_map<std::string, std::unordered_set<std::string>> uniqueStorage;
 public:
