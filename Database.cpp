@@ -49,6 +49,7 @@ Database::ReadRoute(const size_t requestId, const std::string& fromStopName, con
   auto waitStopTo = stopNameToWaitVertex.at(toStopName);
   auto path = router->BuildRoute(waitStopFrom->id, waitStopTo->id);
   if (path == nullopt) {
+    router->ReleaseRoute(path->id);
     return make_unique<ReadNoRouteResponse>(requestId);
   }
 
@@ -80,6 +81,7 @@ Database::ReadRoute(const size_t requestId, const std::string& fromStopName, con
     response->items.push_back(move(currentBusItem));
   }
 
+  router->ReleaseRoute(path->id);
   return response;
 }
 

@@ -97,6 +97,7 @@ void TestIntegrationGenerator(const string& testDataFolderName) {
   auto input = ifstream("../test_data/" + testDataFolderName + "/input.json");
   auto expectedOutput = ifstream("../test_data/" + testDataFolderName + "/expected_output.json");
   Json::Document document = Json::Load(input);
+  InitializeSettings(document, "routing_settings");
   auto modifyRequests = ParseSpecificRequests(MODIFY_TYPES_CONVERTER, document, "base_requests");
   auto readRequests = ParseSpecificRequests(READ_TYPES_CONVERTER, document, "stat_requests");
   Database db;
