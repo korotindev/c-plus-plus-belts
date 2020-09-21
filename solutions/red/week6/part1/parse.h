@@ -2,16 +2,16 @@
 
 #include "iterator_range.h"
 
-#include <string_view>
 #include <sstream>
+#include <string_view>
 #include <vector>
 using namespace std;
 
 template <typename Container>
-string Join(char c, const Container& cont) {
+string Join(char c, const Container &cont) {
   ostringstream os;
   size_t size = cont.size() - 1;
-  for (const auto& item : Head(cont, size)) {
+  for (const auto &item : Head(cont, size)) {
     os << item << c;
   }
   os << *rbegin(cont);

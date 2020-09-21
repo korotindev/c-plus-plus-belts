@@ -9,11 +9,11 @@ public:
   virtual ~IBook() = default;
 
   // Возвращает название книги
-  virtual const std::string& GetName() const = 0;
+  virtual const std::string &GetName() const = 0;
 
   // Возвращает текст книги как строку.
   // Размером книги считается размер её текста в байтах.
-  virtual const std::string& GetContent() const = 0;
+  virtual const std::string &GetContent() const = 0;
 };
 
 // Интерфейс, позволяющий распаковывать книги
@@ -22,7 +22,7 @@ public:
   virtual ~IBooksUnpacker() = default;
 
   // Распаковывает книгу с указанным названием из хранилища
-  virtual std::unique_ptr<IBook> UnpackBook(const std::string& book_name) = 0;
+  virtual std::unique_ptr<IBook> UnpackBook(const std::string &book_name) = 0;
 };
 
 // Интерфейс, представляющий кэш
@@ -46,11 +46,8 @@ public:
   // max_memory. При необходимости удаляет из кэша книги, к которым дольше всего
   // не обращались. Если размер самой книги уже больше max_memory, то оставляет
   // кэш пустым.
-  virtual BookPtr GetBook(const std::string& book_name) = 0;
+  virtual BookPtr GetBook(const std::string &book_name) = 0;
 };
 
 // Создаёт объект кэша для заданного распаковщика и заданных настроек
-std::unique_ptr<ICache> MakeCache(
-  std::shared_ptr<IBooksUnpacker> books_unpacker,
-  const ICache::Settings& settings
-);
+std::unique_ptr<ICache> MakeCache(std::shared_ptr<IBooksUnpacker> books_unpacker, const ICache::Settings &settings);

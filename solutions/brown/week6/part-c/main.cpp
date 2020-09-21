@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestParseRequests_withModifyConverter);

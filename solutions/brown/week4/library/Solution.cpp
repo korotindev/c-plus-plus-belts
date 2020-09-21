@@ -1,18 +1,16 @@
 #include "Common.h"
-#include <unordered_map>
 #include <list>
 #include <mutex>
+#include <unordered_map>
 
 using namespace std;
 
 class LruCache : public ICache {
 public:
-  LruCache(shared_ptr<IBooksUnpacker> books_unpacker_, const Settings& settings_)
-    : books_unpacker(move(books_unpacker_)),
-      max_memory(settings_.max_memory),
-      allocated_space(0) {}
+  LruCache(shared_ptr<IBooksUnpacker> books_unpacker_, const Settings &settings_)
+      : books_unpacker(move(books_unpacker_)), max_memory(settings_.max_memory), allocated_space(0) {}
 
-  BookPtr GetBook(const string& book_name) override {
+  BookPtr GetBook(const string &book_name) override {
     lock_guard guard(m);
     auto cacheIter = cache.find(book_name);
     BookPtr result;
@@ -24,7 +22,7 @@ public:
       auto unpacked_book = books_unpacker->UnpackBook(book_name);
       auto needed_space = unpacked_book->GetContent().size();
 
-      while(allocated_space + needed_space > max_memory && !books.empty()) {
+      while (allocated_space + needed_space > max_memory && !books.empty()) {
         auto book_to_remove = books.back();
         allocated_space -= book_to_remove->GetContent().size();
         cache.erase(book_to_remove->GetName());
@@ -58,7 +56,6 @@ private:
   mutex m;
 };
 
-
-unique_ptr<ICache> MakeCache(shared_ptr<IBooksUnpacker> books_unpacker, const ICache::Settings& settings) {
+unique_ptr<ICache> MakeCache(shared_ptr<IBooksUnpacker> books_unpacker, const ICache::Settings &settings) {
   return make_unique<LruCache>(move(books_unpacker), settings);
 }

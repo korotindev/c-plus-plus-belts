@@ -16,7 +16,7 @@ public:
 
   void SetTexture(std::shared_ptr<ITexture> t) final { this->texture = t; }
 
-  ITexture* GetTexture() const final { return this->texture.get(); }
+  ITexture *GetTexture() const final { return this->texture.get(); }
 
   bool IsPointInTexture(Point p) const {
     if (!texture) {
@@ -35,11 +35,9 @@ protected:
 
 class RectangleShape : public OrdinaryShape {
 public:
-  std::unique_ptr<IShape> Clone() const final {
-    return make_unique<RectangleShape>(*this);
-  }
+  std::unique_ptr<IShape> Clone() const final { return make_unique<RectangleShape>(*this); }
 
-  void Draw(Image& image) const final {
+  void Draw(Image &image) const final {
     int maxHeight = min(this->point.y + this->size.height, static_cast<int>(image.size()));
     int maxWidth = min(this->point.x + this->size.width, static_cast<int>((image.empty() ? 0 : image[0].size())));
     for (int y = this->point.y; y < maxHeight; ++y) {
@@ -57,11 +55,9 @@ public:
 
 class EllipseShape : public OrdinaryShape {
 public:
-  std::unique_ptr<IShape> Clone() const final {
-    return make_unique<EllipseShape>(*this);
-  }
+  std::unique_ptr<IShape> Clone() const final { return make_unique<EllipseShape>(*this); }
 
-  void Draw(Image& image) const final {
+  void Draw(Image &image) const final {
     int maxHeight = min(this->point.y + this->size.height, static_cast<int>(image.size()));
     int maxWidth = min(this->point.x + this->size.width, static_cast<int>((image.empty() ? 0 : image[0].size())));
     for (int y = this->point.y; y < maxHeight; ++y) {
@@ -82,10 +78,10 @@ public:
 // Напишите реализацию функции
 unique_ptr<IShape> MakeShape(ShapeType shape_type) {
   switch (shape_type) {
-    case ShapeType::Rectangle:
-      return make_unique<RectangleShape>();
+  case ShapeType::Rectangle:
+    return make_unique<RectangleShape>();
 
-    case ShapeType::Ellipse:
-      return make_unique<EllipseShape>();
+  case ShapeType::Ellipse:
+    return make_unique<EllipseShape>();
   }
 }

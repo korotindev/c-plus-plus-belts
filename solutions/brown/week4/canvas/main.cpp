@@ -11,12 +11,9 @@ class Canvas {
 public:
   using ShapeId = size_t;
 
-  void SetSize(Size size) {
-    size_ = size;
-  }
+  void SetSize(Size size) { size_ = size; }
 
-  ShapeId AddShape(ShapeType shape_type, Point position, Size size,
-                   unique_ptr<ITexture> texture) {
+  ShapeId AddShape(ShapeType shape_type, Point position, Size size, unique_ptr<ITexture> texture) {
     auto shape = MakeShape(shape_type);
     shape->SetPosition(position);
     shape->SetSize(size);
@@ -30,31 +27,23 @@ public:
     return InsertShape(move(shape));
   }
 
-  void RemoveShape(ShapeId id) {
-    shapes_.erase(GetShapeNodeById(id));
-  }
+  void RemoveShape(ShapeId id) { shapes_.erase(GetShapeNodeById(id)); }
 
-  void MoveShape(ShapeId id, Point position) {
-    GetShapeNodeById(id)->second->SetPosition(position);
-  }
+  void MoveShape(ShapeId id, Point position) { GetShapeNodeById(id)->second->SetPosition(position); }
 
-  void ResizeShape(ShapeId id, Size size) {
-    GetShapeNodeById(id)->second->SetSize(size);
-  }
+  void ResizeShape(ShapeId id, Size size) { GetShapeNodeById(id)->second->SetSize(size); }
 
-  int GetShapesCount() const {
-    return static_cast<int>(shapes_.size());
-  }
+  int GetShapesCount() const { return static_cast<int>(shapes_.size()); }
 
-  void Print(ostream& output) const {
+  void Print(ostream &output) const {
     Image image(size_.height, string(size_.width, ' '));
 
-    for (const auto& [id, shape] : shapes_) {
+    for (const auto &[id, shape] : shapes_) {
       shape->Draw(image);
     }
 
     output << '#' << string(size_.width, '#') << "#\n";
-    for (const auto& line : image) {
+    for (const auto &line : image) {
       output << '#' << line << "#\n";
     }
     output << '#' << string(size_.width, '#') << "#\n";
@@ -89,12 +78,11 @@ void TestSimple() {
   stringstream output;
   canvas.Print(output);
 
-  const auto answer =
-    "#######\n"
-    "# ... #\n"
-    "# ... #\n"
-    "# ... #\n"
-    "#######\n";
+  const auto answer = "#######\n"
+                      "# ... #\n"
+                      "# ... #\n"
+                      "# ... #\n"
+                      "#######\n";
 
   ASSERT_EQUAL(answer, output.str());
 }
@@ -103,19 +91,17 @@ void TestSmallTexture() {
   Canvas canvas;
   canvas.SetSize({6, 4});
 
-  canvas.AddShape(ShapeType::Rectangle, {1, 1}, {4, 2},
-                  MakeTextureSolid({3, 1}, '*'));
+  canvas.AddShape(ShapeType::Rectangle, {1, 1}, {4, 2}, MakeTextureSolid({3, 1}, '*'));
 
   stringstream output;
   canvas.Print(output);
 
-  const auto answer =
-    "########\n"
-    "#      #\n"
-    "# ***. #\n"
-    "# .... #\n"
-    "#      #\n"
-    "########\n";
+  const auto answer = "########\n"
+                      "#      #\n"
+                      "# ***. #\n"
+                      "# .... #\n"
+                      "#      #\n"
+                      "########\n";
 
   ASSERT_EQUAL(answer, output.str());
 }
@@ -130,14 +116,20 @@ void TestCow() {
   canvas.Print(output);
 
   // Здесь уместно использовать сырые литералы, т.к. в текстуре есть символы '\'
-  const auto answer =
-    R"(####################)""\n"
-    R"(# ^__^             #)""\n"
-    R"(# (oo)\_______     #)""\n"
-    R"(# (__)\       )\/\ #)""\n"
-    R"(#     ||----w |    #)""\n"
-    R"(#     ||     ||    #)""\n"
-    R"(####################)""\n";
+  const auto answer = R"(####################)"
+                      "\n"
+                      R"(# ^__^             #)"
+                      "\n"
+                      R"(# (oo)\_______     #)"
+                      "\n"
+                      R"(# (__)\       )\/\ #)"
+                      "\n"
+                      R"(#     ||----w |    #)"
+                      "\n"
+                      R"(#     ||     ||    #)"
+                      "\n"
+                      R"(####################)"
+                      "\n";
 
   ASSERT_EQUAL(answer, output.str());
 }
@@ -147,14 +139,11 @@ void TestCpp() {
   canvas.SetSize({77, 17});
 
   // Буква "C" как разность двух эллипсов, один из которых нарисован цветом фона
-  canvas.AddShape(ShapeType::Ellipse, {2, 1}, {30, 15},
-                  MakeTextureCheckers({100, 100}, 'c', 'C'));
-  canvas.AddShape(ShapeType::Ellipse, {8, 4}, {30, 9},
-                  MakeTextureSolid({100, 100}, ' '));
+  canvas.AddShape(ShapeType::Ellipse, {2, 1}, {30, 15}, MakeTextureCheckers({100, 100}, 'c', 'C'));
+  canvas.AddShape(ShapeType::Ellipse, {8, 4}, {30, 9}, MakeTextureSolid({100, 100}, ' '));
 
   // Горизонтальные чёрточки плюсов
-  auto h1 = canvas.AddShape(ShapeType::Rectangle, {54, 7}, {22, 3},
-                            MakeTextureSolid({100, 100}, '+'));
+  auto h1 = canvas.AddShape(ShapeType::Rectangle, {54, 7}, {22, 3}, MakeTextureSolid({100, 100}, '+'));
   auto h2 = canvas.DuplicateShape(h1, {30, 7});
 
   // Вертикальные чёрточки плюсов
@@ -165,26 +154,25 @@ void TestCpp() {
   stringstream output;
   canvas.Print(output);
 
-  const auto answer =
-    "###############################################################################\n"
-    "#                                                                             #\n"
-    "#            cCcCcCcCcC                                                       #\n"
-    "#        CcCcCcCcCcCcCcCcCc                                                   #\n"
-    "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++         #\n"
-    "#    CcCcCcCcCcCc                      ++++++                  ++++++         #\n"
-    "#   CcCcCcCcC                          ++++++                  ++++++         #\n"
-    "#   cCcCcCc                            ++++++                  ++++++         #\n"
-    "#  cCcCcC                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
-    "#  CcCcCc                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
-    "#  cCcCcC                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
-    "#   cCcCcCc                            ++++++                  ++++++         #\n"
-    "#   CcCcCcCcC                          ++++++                  ++++++         #\n"
-    "#    CcCcCcCcCcCc                      ++++++                  ++++++         #\n"
-    "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++         #\n"
-    "#        CcCcCcCcCcCcCcCcCc                                                   #\n"
-    "#            cCcCcCcCcC                                                       #\n"
-    "#                                                                             #\n"
-    "###############################################################################\n";
+  const auto answer = "###############################################################################\n"
+                      "#                                                                             #\n"
+                      "#            cCcCcCcCcC                                                       #\n"
+                      "#        CcCcCcCcCcCcCcCcCc                                                   #\n"
+                      "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++         #\n"
+                      "#    CcCcCcCcCcCc                      ++++++                  ++++++         #\n"
+                      "#   CcCcCcCcC                          ++++++                  ++++++         #\n"
+                      "#   cCcCcCc                            ++++++                  ++++++         #\n"
+                      "#  cCcCcC                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
+                      "#  CcCcCc                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
+                      "#  cCcCcC                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
+                      "#   cCcCcCc                            ++++++                  ++++++         #\n"
+                      "#   CcCcCcCcC                          ++++++                  ++++++         #\n"
+                      "#    CcCcCcCcCcCc                      ++++++                  ++++++         #\n"
+                      "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++         #\n"
+                      "#        CcCcCcCcCcCcCcCcCc                                                   #\n"
+                      "#            cCcCcCcCcC                                                       #\n"
+                      "#                                                                             #\n"
+                      "###############################################################################\n";
 
   ASSERT_EQUAL(answer, output.str());
 }

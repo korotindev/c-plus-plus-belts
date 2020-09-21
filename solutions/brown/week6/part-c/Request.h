@@ -1,13 +1,13 @@
 #ifndef C_PLUS_PLUS_BELTS_REQUEST_H
 #define C_PLUS_PLUS_BELTS_REQUEST_H
 
+#include "Coordinate.h"
+#include "Database.h"
 #include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include "Coordinate.h"
-#include "Database.h"
 
 struct Request;
 using RequestHolder = std::unique_ptr<Request>;
@@ -28,38 +28,37 @@ struct Request {
   const Type type;
 };
 
-
 using TypeConverter = std::unordered_map<std::string_view, Request::Type>;
 const TypeConverter MODIFY_TYPES_CONVERTER = {
-  {"Bus",  Request::Type::EntertainBus},
-  {"Stop", Request::Type::EntertainStop},
+    {"Bus", Request::Type::EntertainBus},
+    {"Stop", Request::Type::EntertainStop},
 };
 const TypeConverter READ_TYPES_CONVERTER = {
-  {"Bus",  Request::Type::ReadBus},
-  {"Stop", Request::Type::ReadStop},
+    {"Bus", Request::Type::ReadBus},
+    {"Stop", Request::Type::ReadStop},
 };
 
-std::optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& converter, std::string_view type_str);
+std::optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter &converter, std::string_view type_str);
 
-RequestHolder ParseRequest(const TypeConverter& converter, std::string_view request_str);
+RequestHolder ParseRequest(const TypeConverter &converter, std::string_view request_str);
 
-template<typename ResultType>
+template <typename ResultType>
 struct ReadRequest : Request {
   using Request::Request;
   static const size_t DEFAULT_PRECISION = 7;
-  virtual ResultType Process(Database& db) = 0;
+  virtual ResultType Process(Database &db) = 0;
 };
 
 struct ModifyRequest : Request {
   using Request::Request;
-  virtual void Process(Database& db) = 0;
+  virtual void Process(Database &db) = 0;
 };
 
 struct EntertainStopRequest : ModifyRequest {
   EntertainStopRequest() : ModifyRequest(Type::EntertainStop) {}
 
   void ParseFrom(std::string_view input) override;
-  void Process(Database& db) override;
+  void Process(Database &db) override;
   std::string stopName;
   double latitude;
   double longitude;
@@ -70,7 +69,7 @@ struct EntertainBusRequest : ModifyRequest {
   EntertainBusRequest() : ModifyRequest(Type::EntertainBus) {}
 
   void ParseFrom(std::string_view input) override;
-  void Process(Database& db) override;
+  void Process(Database &db) override;
   std::string busName;
   std::vector<std::string> stopsNames;
 };
@@ -79,7 +78,7 @@ struct ReadBusRequest : ReadRequest<std::string> {
   ReadBusRequest() : ReadRequest(Type::ReadBus) {}
 
   void ParseFrom(std::string_view input) override;
-  std::string Process(Database& db) override;
+  std::string Process(Database &db) override;
   std::string busName;
 };
 
@@ -87,9 +86,8 @@ struct ReadStopRequest : ReadRequest<std::string> {
   ReadStopRequest() : ReadRequest(Type::ReadStop) {}
 
   void ParseFrom(std::string_view input) override;
-  std::string Process(Database& db) override;
+  std::string Process(Database &db) override;
   std::string stopName;
 };
 
-
-#endif //C_PLUS_PLUS_BELTS_REQUEST_H
+#endif // C_PLUS_PLUS_BELTS_REQUEST_H

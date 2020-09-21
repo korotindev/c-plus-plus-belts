@@ -25,7 +25,7 @@ pair<string_view, string_view> SplitTwo(string_view s, string_view delimiter = "
   return {lhs, rhs_opt.value_or("")};
 }
 
-string_view ReadToken(string_view& s, string_view delimiter = " ") {
+string_view ReadToken(string_view &s, string_view delimiter = " ") {
   const auto [lhs, rhs] = SplitTwo(s, delimiter);
   s = rhs;
   return lhs;
@@ -66,11 +66,11 @@ public:
   // Weird legacy, can't wait for std::chrono::year_month_day
   time_t AsTimestamp() const {
     std::tm t;
-    t.tm_sec  = 0;
-    t.tm_min  = 0;
+    t.tm_sec = 0;
+    t.tm_min = 0;
     t.tm_hour = 0;
     t.tm_mday = day_;
-    t.tm_mon  = month_ - 1;
+    t.tm_mon = month_ - 1;
     t.tm_year = year_ - 1900;
     t.tm_isdst = 0;
     return mktime(&t);
@@ -81,12 +81,10 @@ private:
   int month_;
   int day_;
 
-  Date(int year, int month, int day)
-    : year_(year), month_(month), day_(day)
-  {}
+  Date(int year, int month, int day) : year_(year), month_(month), day_(day) {}
 };
 
-int ComputeDaysDiff(const Date& date_to, const Date& date_from) {
+int ComputeDaysDiff(const Date &date_to, const Date &date_from) {
   const time_t timestamp_to = date_to.AsTimestamp();
   const time_t timestamp_from = date_from.AsTimestamp();
   static constexpr int SECONDS_IN_DAY = 60 * 60 * 24;
@@ -99,9 +97,7 @@ static const size_t DAY_COUNT = ComputeDaysDiff(END_DATE, START_DATE);
 static const size_t DAY_COUNT_P2 = 1 << 16;
 static const size_t VERTEX_COUNT = DAY_COUNT_P2 * 2;
 
-size_t ComputeDayIndex(const Date& date) {
-  return ComputeDaysDiff(date, START_DATE);
-}
+size_t ComputeDayIndex(const Date &date) { return ComputeDaysDiff(date, START_DATE); }
 
 array<double, VERTEX_COUNT> tree_earned, tree_earned_add, tree_spend, tree_spend_add, tree_factor;
 
@@ -118,7 +114,8 @@ void Push(size_t vertex_id, size_t node_left, size_t node_right) {
     if (vertex_child_id < VERTEX_COUNT) {
       tree_factor[vertex_child_id] *= tree_factor[vertex_id];
       (tree_earned_add[vertex_child_id] *= tree_factor[vertex_id]) += tree_earned_add[vertex_id];
-      (tree_earned[vertex_child_id] *= tree_factor[vertex_id]) += tree_earned_add[vertex_id] * (node_right - node_left) / 2;
+      (tree_earned[vertex_child_id] *= tree_factor[vertex_id]) +=
+          tree_earned_add[vertex_id] * (node_right - node_left) / 2;
 
       tree_spend_add[vertex_child_id] += tree_spend_add[vertex_id];
       (tree_spend[vertex_child_id]) += tree_spend_add[vertex_id] * (node_right - node_left) / 2;
@@ -137,11 +134,12 @@ double ComputeSum(size_t vertex_id, size_t node_left, size_t node_right, size_t 
   if (query_left <= node_left && node_right <= query_right) {
     return tree_earned[vertex_id] - tree_spend[vertex_id];
   }
-  return ComputeSum(vertex_id * 2, node_left, (node_left + node_right) / 2, query_left, query_right)
-         + ComputeSum(vertex_id * 2 + 1, (node_left + node_right) / 2, node_right, query_left, query_right);
+  return ComputeSum(vertex_id * 2, node_left, (node_left + node_right) / 2, query_left, query_right) +
+         ComputeSum(vertex_id * 2 + 1, (node_left + node_right) / 2, node_right, query_left, query_right);
 }
 
-void Add(size_t vertex_id, size_t node_left, size_t node_right, size_t query_right, size_t query_left, double earned_per_day, double spend_per_day) {
+void Add(size_t vertex_id, size_t node_left, size_t node_right, size_t query_right, size_t query_left,
+         double earned_per_day, double spend_per_day) {
   if (vertex_id >= VERTEX_COUNT || query_left <= node_left || node_right <= query_right) {
     return;
   }
@@ -155,17 +153,17 @@ void Add(size_t vertex_id, size_t node_left, size_t node_right, size_t query_rig
     return;
   }
   Add(vertex_id * 2, node_left, (node_left + node_right) / 2, query_right, query_left, earned_per_day, spend_per_day);
-  Add(vertex_id * 2 + 1, (node_left + node_right) / 2, node_right, query_right, query_left, earned_per_day, spend_per_day);
-  tree_earned[vertex_id] =
-    (vertex_id * 2 < VERTEX_COUNT ? tree_earned[vertex_id * 2] : 0)
-    + (vertex_id * 2 + 1 < VERTEX_COUNT ? tree_earned[vertex_id * 2 + 1] : 0);
+  Add(vertex_id * 2 + 1, (node_left + node_right) / 2, node_right, query_right, query_left, earned_per_day,
+      spend_per_day);
+  tree_earned[vertex_id] = (vertex_id * 2 < VERTEX_COUNT ? tree_earned[vertex_id * 2] : 0) +
+                           (vertex_id * 2 + 1 < VERTEX_COUNT ? tree_earned[vertex_id * 2 + 1] : 0);
 
-  tree_spend[vertex_id] =
-    (vertex_id * 2 < VERTEX_COUNT ? tree_spend[vertex_id * 2] : 0)
-    + (vertex_id * 2 + 1 < VERTEX_COUNT ? tree_spend[vertex_id * 2 + 1] : 0);
+  tree_spend[vertex_id] = (vertex_id * 2 < VERTEX_COUNT ? tree_spend[vertex_id * 2] : 0) +
+                          (vertex_id * 2 + 1 < VERTEX_COUNT ? tree_spend[vertex_id * 2 + 1] : 0);
 }
 
-void Multiply(size_t vertex_id, size_t node_left, size_t node_right, size_t query_left, size_t query_right, double factor) {
+void Multiply(size_t vertex_id, size_t node_left, size_t node_right, size_t query_left, size_t query_right,
+              double factor) {
   if (vertex_id >= VERTEX_COUNT || query_right <= node_left || node_right <= query_left) {
     return;
   }
@@ -178,11 +176,9 @@ void Multiply(size_t vertex_id, size_t node_left, size_t node_right, size_t quer
   }
   Multiply(vertex_id * 2, node_left, (node_left + node_right) / 2, query_left, query_right, factor);
   Multiply(vertex_id * 2 + 1, (node_left + node_right) / 2, node_right, query_left, query_right, factor);
-  tree_earned[vertex_id] =
-    (vertex_id * 2 < VERTEX_COUNT ? tree_earned[vertex_id * 2] : 0)
-    + (vertex_id * 2 + 1 < VERTEX_COUNT ? tree_earned[vertex_id * 2 + 1] : 0);
+  tree_earned[vertex_id] = (vertex_id * 2 < VERTEX_COUNT ? tree_earned[vertex_id * 2] : 0) +
+                           (vertex_id * 2 + 1 < VERTEX_COUNT ? tree_earned[vertex_id * 2 + 1] : 0);
 }
-
 
 int main() {
   cout.precision(25);

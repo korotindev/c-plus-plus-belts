@@ -15,7 +15,7 @@ public:
     string date;
   };
 
-  BookingId Book(const BookingData& data) {
+  BookingId Book(const BookingData &data) {
     if (counter >= capacity) {
       throw runtime_error("Flight overbooking");
     }
@@ -23,7 +23,7 @@ public:
     return counter;
   }
 
-  void Cancel(const BookingId& id) {
+  void Cancel(const BookingId &id) {
     --counter;
     if (counter < 0) {
       throw logic_error("Too many flights have been canceled");
@@ -35,7 +35,6 @@ public:
   static int counter;
 };
 
-
 class HotelProvider {
 public:
   using BookingId = int;
@@ -46,7 +45,7 @@ public:
     string date_to;
   };
 
-  BookingId Book(const BookingData& data) {
+  BookingId Book(const BookingData &data) {
     if (counter >= capacity) {
       throw runtime_error("Hotel overbooking");
     }
@@ -54,7 +53,7 @@ public:
     return counter;
   }
 
-  void Cancel(const BookingId& id) {
+  void Cancel(const BookingId &id) {
     --counter;
     if (counter < 0) {
       throw logic_error("Too many hotels have been canceled");

@@ -1,21 +1,21 @@
 #pragma once
 
-#include <sstream>
-#include <stdexcept>
+#include "profile.h"
 #include <iostream>
 #include <map>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <set>
-#include <string>
 #include <vector>
-#include "profile.h"
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& s) {
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::vector<T> &s) {
   os << "{";
   bool first = true;
-  for (const auto& x : s) {
+  for (const auto &x : s) {
     if (!first) {
       os << ", ";
     }
@@ -25,11 +25,11 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& s) {
   return os << "}";
 }
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::set<T>& s) {
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::set<T> &s) {
   os << "{";
   bool first = true;
-  for (const auto& x : s) {
+  for (const auto &x : s) {
     if (!first) {
       os << ", ";
     }
@@ -39,11 +39,11 @@ std::ostream& operator<<(std::ostream& os, const std::set<T>& s) {
   return os << "}";
 }
 
-template<class T>
-std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& s) {
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &s) {
   os << "{";
   bool first = true;
-  for (const auto& x : s) {
+  for (const auto &x : s) {
     if (!first) {
       os << ", ";
     }
@@ -53,11 +53,11 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_set<T>& s) {
   return os << "}";
 }
 
-template<class K, class V>
-std::ostream& operator<<(std::ostream& os, const std::map<K, V>& m) {
+template <class K, class V>
+std::ostream &operator<<(std::ostream &os, const std::map<K, V> &m) {
   os << "{";
   bool first = true;
-  for (const auto& kv : m) {
+  for (const auto &kv : m) {
     if (!first) {
       os << ", ";
     }
@@ -67,11 +67,11 @@ std::ostream& operator<<(std::ostream& os, const std::map<K, V>& m) {
   return os << "}";
 }
 
-template<class K, class V>
-std::ostream& operator<<(std::ostream& os, const std::unordered_map<K, V>& m) {
+template <class K, class V>
+std::ostream &operator<<(std::ostream &os, const std::unordered_map<K, V> &m) {
   os << "{";
   bool first = true;
-  for (const auto& kv : m) {
+  for (const auto &kv : m) {
     if (!first) {
       os << ", ";
     }
@@ -81,8 +81,8 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_map<K, V>& m) {
   return os << "}";
 }
 
-template<class T, class U>
-void AssertEqual(const T& t, const U& u, const std::string& hint = {}) {
+template <class T, class U>
+void AssertEqual(const T &t, const U &u, const std::string &hint = {}) {
   if (!(t == u)) {
     std::ostringstream os;
     os << "\n  Assertion failed: \n    " << t << "\n    != \n    " << u << "\n";
@@ -93,20 +93,18 @@ void AssertEqual(const T& t, const U& u, const std::string& hint = {}) {
   }
 }
 
-inline void Assert(bool b, const std::string& hint) {
-  AssertEqual(b, true, hint);
-}
+inline void Assert(bool b, const std::string &hint) { AssertEqual(b, true, hint); }
 
 class TestRunner {
 public:
-  template<class TestFunc>
-  void RunTest(TestFunc func, const std::string& test_name) {
+  template <class TestFunc>
+  void RunTest(TestFunc func, const std::string &test_name) {
     {
       LOG_DURATION(test_name + " duration");
       try {
         func();
         std::cerr << test_name << " OK" << std::endl;
-      } catch (std::exception& e) {
+      } catch (std::exception &e) {
         ++fail_count;
         std::cerr << test_name << " fail: " << e.what() << std::endl;
       } catch (...) {
@@ -127,20 +125,18 @@ private:
   int fail_count = 0;
 };
 
-#define ASSERT_EQUAL(x, y) {            \
-  std::ostringstream os;                     \
-  os << #x << " != " << #y << ", "      \
-    << __FILE__ << ":" << __LINE__;     \
-  AssertEqual(x, y, os.str());          \
-}
+#define ASSERT_EQUAL(x, y)                                                                                             \
+  {                                                                                                                    \
+    std::ostringstream os;                                                                                             \
+    os << #x << " != " << #y << ", " << __FILE__ << ":" << __LINE__;                                                   \
+    AssertEqual(x, y, os.str());                                                                                       \
+  }
 
-#define ASSERT(x) {                     \
-  std::ostringstream os;                     \
-  os << #x << " is false, "             \
-    << __FILE__ << ":" << __LINE__;     \
-  Assert(x, os.str());                  \
-}
+#define ASSERT(x)                                                                                                      \
+  {                                                                                                                    \
+    std::ostringstream os;                                                                                             \
+    os << #x << " is false, " << __FILE__ << ":" << __LINE__;                                                          \
+    Assert(x, os.str());                                                                                               \
+  }
 
-#define RUN_TEST(tr, func) \
-  tr.RunTest(func, #func)
-
+#define RUN_TEST(tr, func) tr.RunTest(func, #func)

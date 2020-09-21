@@ -2,14 +2,13 @@
 
 using namespace std;
 
-
 int main() {
   std::istream::sync_with_stdio(false);
   cin.tie(nullptr);
   cout.precision(DEFAULT_PRECISION);
 
   TestRunner tr;
-//  commit tests before sending to grader
+  //  commit tests before sending to grader
   RUN_TEST(tr, TestParsing);
   RUN_TEST(tr, TestIntegrationPartD);
   RUN_TEST(tr, TestIntegrationPartDRaw);

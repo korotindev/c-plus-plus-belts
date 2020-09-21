@@ -1,14 +1,14 @@
 #ifndef C_PLUS_PLUS_BELTS_READRESPONSE_H
 #define C_PLUS_PLUS_BELTS_READRESPONSE_H
 
+#include <cmath>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <cmath>
 
 struct ReadResponse {
   virtual ~ReadResponse() = default;
-  virtual void Print(std::ostream& output) = 0;
+  virtual void Print(std::ostream &output) = 0;
 };
 
 struct ReadStopResponse : ReadResponse {
@@ -19,12 +19,12 @@ struct ReadStopResponse : ReadResponse {
 
 struct ReadNoStopResponse : ReadStopResponse {
   using ReadStopResponse::ReadStopResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
 };
 
 struct ReadStopMetricsResponse : ReadStopResponse {
   using ReadStopResponse::ReadStopResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
 };
 
 struct ReadBusResponse : ReadResponse {
@@ -34,17 +34,16 @@ struct ReadBusResponse : ReadResponse {
 
 struct ReadNoBusResponse : ReadBusResponse {
   using ReadBusResponse::ReadBusResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
 };
 
 struct ReadBusMetricsResponse : ReadBusResponse {
   using ReadBusResponse::ReadBusResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
   size_t stopsCount;
   size_t uniqueStopsCount;
   double routeDistance;
   double routeDistanceV2;
 };
 
-
-#endif //C_PLUS_PLUS_BELTS_READRESPONSE_H
+#endif // C_PLUS_PLUS_BELTS_READRESPONSE_H

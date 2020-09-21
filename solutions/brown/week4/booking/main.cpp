@@ -7,7 +7,6 @@
 
 using namespace std;
 
-
 // Эти определения статических переменных правильнее было бы поместить в соответствующий cpp-файл,
 // но мы для простоты разместим их здесь
 
@@ -16,7 +15,6 @@ int FlightProvider::counter = 0;
 
 int HotelProvider::capacity = 0;
 int HotelProvider::counter = 0;
-
 
 void TestNoOverbooking() {
   FlightProvider::capacity = 100;
@@ -39,7 +37,7 @@ void TestFlightOverbooking() {
   try {
     TripManager tm;
     auto trip = tm.Book({});
-  } catch (const runtime_error&) {
+  } catch (const runtime_error &) {
     ASSERT_EQUAL(FlightProvider::counter, 0);
     ASSERT_EQUAL(HotelProvider::counter, 0);
     return;
@@ -55,7 +53,7 @@ void TestHotelOverbooking() {
   try {
     TripManager tm;
     auto trip = tm.Book({});
-  } catch (const runtime_error& ex) {
+  } catch (const runtime_error &ex) {
     ASSERT_EQUAL(FlightProvider::counter, 0);
     ASSERT_EQUAL(HotelProvider::counter, 0);
     return;

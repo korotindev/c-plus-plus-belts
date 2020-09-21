@@ -2,11 +2,9 @@
 
 using namespace std;
 
-void StopsStorage::Add(Stop stop) {
-  storage[move(stop.name)].coordinate = stop.coordinate;
-}
+void StopsStorage::Add(Stop stop) { storage[move(stop.name)].coordinate = stop.coordinate; }
 
-double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsStopName) const {
+double StopsStorage::GetDistance(const string &lhsStopName, const string &rhsStopName) const {
   pair<string, string> routePair = make_pair(max(lhsStopName, rhsStopName), min(lhsStopName, rhsStopName));
   if (auto it = distanceStorage.find(routePair); it != distanceStorage.end()) {
     return it->second;
@@ -24,18 +22,16 @@ void BusStorage::Add(Bus bus) {
                                        make_move_iterator(bus.stopsNames.end()));
 }
 
-size_t BusStorage::GetUniqueStopsCount(const std::string& busName) const {
+size_t BusStorage::GetUniqueStopsCount(const std::string &busName) const {
   if (auto it = uniqueStorage.find(busName); it != uniqueStorage.end()) {
     return it->second.size();
   }
   return 0;
 }
 
-bool BusStorage::Exist(const std::string& busName) const {
-  return storage.find(busName) != storage.end();
-}
+bool BusStorage::Exist(const std::string &busName) const { return storage.find(busName) != storage.end(); }
 
-const vector<string>& BusStorage::GetStops(const std::string& busName) const {
+const vector<string> &BusStorage::GetStops(const std::string &busName) const {
   static const vector<string> defaultStops;
   if (auto it = storage.find(busName); it != storage.end()) {
     return it->second;
@@ -43,7 +39,7 @@ const vector<string>& BusStorage::GetStops(const std::string& busName) const {
   return defaultStops;
 }
 
-const set<string>& StopsStorage::GetBuses(const string& stopName) const {
+const set<string> &StopsStorage::GetBuses(const string &stopName) const {
   static const set<string> defaultBuses;
   if (auto it = storage.find(stopName); it != storage.end()) {
     return it->second.buses;
@@ -51,31 +47,27 @@ const set<string>& StopsStorage::GetBuses(const string& stopName) const {
   return defaultBuses;
 }
 
-bool StopsStorage::Exist(const std::string& stopName) const {
-  return storage.find(stopName) != storage.end();
-}
+bool StopsStorage::Exist(const std::string &stopName) const { return storage.find(stopName) != storage.end(); }
 
-void StopsStorage::AddBusToStop(const std::string& stopName, const std::string& busName) {
+void StopsStorage::AddBusToStop(const std::string &stopName, const std::string &busName) {
   storage[stopName].buses.insert(busName);
 }
 
-void Database::EntertainStop(Stop stop) {
-  stopsStorage.Add(move(stop));
-}
+void Database::EntertainStop(Stop stop) { stopsStorage.Add(move(stop)); }
 
 void Database::EntertainBus(Bus bus) {
-  for (auto& stopName : bus.stopsNames) {
+  for (auto &stopName : bus.stopsNames) {
     stopsStorage.AddBusToStop(stopName, bus.name);
   }
   busStorage.Add(move(bus));
 }
 
-unique_ptr<ReadBusResponse> Database::ReadBus(const std::string& busName) {
+unique_ptr<ReadBusResponse> Database::ReadBus(const std::string &busName) {
   if (!busStorage.Exist(busName)) {
     return make_unique<ReadNoBusResponse>(busName);
   }
 
-  const auto& stops = busStorage.GetStops(busName);
+  const auto &stops = busStorage.GetStops(busName);
   auto response = make_unique<ReadBusMetricsResponse>(busName);
 
   response->stopsCount = stops.size();
@@ -91,14 +83,13 @@ Bus::Bus(std::string name_, std::vector<std::string> stopsNames_) : name(move(na
 
 Stop::Stop(std::string name, Coordinate coordinate) : name(move(name)), coordinate(coordinate) {}
 
-
-std::unique_ptr<ReadStopResponse> Database::ReadStop(const string& stopName) {
+std::unique_ptr<ReadStopResponse> Database::ReadStop(const string &stopName) {
   if (!stopsStorage.Exist(stopName)) {
     return make_unique<ReadNoStopResponse>(stopName);
   }
 
   auto response = make_unique<ReadStopMetricsResponse>(stopName);
-  const auto& sortedBuses = stopsStorage.GetBuses(stopName);
+  const auto &sortedBuses = stopsStorage.GetBuses(stopName);
   response->buses = vector<string>(sortedBuses.begin(), sortedBuses.end());
   return response;
 }

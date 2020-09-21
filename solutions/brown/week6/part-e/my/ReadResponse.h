@@ -1,17 +1,17 @@
 #ifndef C_PLUS_PLUS_BELTS_READRESPONSE_H
 #define C_PLUS_PLUS_BELTS_READRESPONSE_H
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <utility>
 #include "Json.h"
+#include <cmath>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 struct ReadResponse {
   size_t requestId;
-  ReadResponse(size_t requestId) : requestId(requestId) {};
+  ReadResponse(size_t requestId) : requestId(requestId){};
   virtual ~ReadResponse() = default;
   virtual Json::Document ToJson() = 0;
 };
@@ -89,5 +89,4 @@ struct ReadNoRouteResponse : ReadRouteResponse {
   Json::Document ToJson() override;
 };
 
-
-#endif //C_PLUS_PLUS_BELTS_READRESPONSE_H
+#endif // C_PLUS_PLUS_BELTS_READRESPONSE_H

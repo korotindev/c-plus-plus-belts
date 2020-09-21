@@ -9,7 +9,7 @@ void EntertainStopRequest::ParseFrom(string_view input) {
   Longitude = ConvertToDouble(input);
 };
 
-void EntertainStopRequest::Process(Database& db) {
+void EntertainStopRequest::Process(Database &db) {
   db.EntertainStop(Stop(move(StopName), Coordinate{Latitude, Longitude}));
 };
 
@@ -29,16 +29,14 @@ void EntertainBusRequest::ParseFrom(string_view input) {
   }
 };
 
-void EntertainBusRequest::Process(Database& db) {
+void EntertainBusRequest::Process(Database &db) {
   Bus bus(move(BusName), move(StopsNames));
   db.EntertainBus(move(bus));
 };
 
-void ReadBusRequest::ParseFrom(string_view input) {
-  BusName = ReadToken(input, "\n");
-};
+void ReadBusRequest::ParseFrom(string_view input) { BusName = ReadToken(input, "\n"); };
 
-string ReadBusRequest::Process(Database& db) {
+string ReadBusRequest::Process(Database &db) {
   stringstream output;
   output.precision(6);
   auto responseHolder = db.ReadBus(BusName);
@@ -48,29 +46,28 @@ string ReadBusRequest::Process(Database& db) {
 
 RequestHolder Request::Create(Request::Type type) {
   switch (type) {
-    case Request::Type::EntertainBus:
-      return make_unique<EntertainBusRequest>();
-    case Request::Type::EntertainStop:
-      return make_unique<EntertainStopRequest>();
-    case Request::Type::ReadBus:
-      return make_unique<ReadBusRequest>();
-    case Request::Type::ReadStop:
-      return make_unique<ReadStopRequest>();
-    default:
-      return nullptr;
+  case Request::Type::EntertainBus:
+    return make_unique<EntertainBusRequest>();
+  case Request::Type::EntertainStop:
+    return make_unique<EntertainStopRequest>();
+  case Request::Type::ReadBus:
+    return make_unique<ReadBusRequest>();
+  case Request::Type::ReadStop:
+    return make_unique<ReadStopRequest>();
+  default:
+    return nullptr;
   }
 }
 
-optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& converter, string_view type_str) {
-  if (const auto it = converter.find(type_str);
-    it != converter.end()) {
+optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter &converter, string_view type_str) {
+  if (const auto it = converter.find(type_str); it != converter.end()) {
     return it->second;
   } else {
     return nullopt;
   }
 }
 
-RequestHolder ParseRequest(const TypeConverter& converter, string_view request_str) {
+RequestHolder ParseRequest(const TypeConverter &converter, string_view request_str) {
   const auto request_type = ConvertRequestTypeFromString(converter, ReadToken(request_str));
   if (!request_type) {
     return nullptr;
@@ -82,11 +79,9 @@ RequestHolder ParseRequest(const TypeConverter& converter, string_view request_s
   return request;
 }
 
-void ReadStopRequest::ParseFrom(std::string_view input) {
-  StopName = ReadToken(input, "\n");
-}
+void ReadStopRequest::ParseFrom(std::string_view input) { StopName = ReadToken(input, "\n"); }
 
-std::string ReadStopRequest::Process(Database& db) {
+std::string ReadStopRequest::Process(Database &db) {
   stringstream output;
   output.precision(6);
   auto responseHolder = db.ReadStop(StopName);

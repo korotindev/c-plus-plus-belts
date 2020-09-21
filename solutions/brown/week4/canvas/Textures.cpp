@@ -7,7 +7,7 @@ using namespace std;
 class Texture : public ITexture {
 public:
   Texture(Image image) : image_(move(image)) {
-    for (const auto& line : image_) {
+    for (const auto &line : image_) {
       assert(line.size() == image_[0].size());
     }
   }
@@ -18,9 +18,7 @@ public:
     return {width, height};
   }
 
-  const Image& GetImage() const override {
-    return image_;
-  }
+  const Image &GetImage() const override { return image_; }
 
 private:
   Image image_;
@@ -31,8 +29,7 @@ std::unique_ptr<ITexture> MakeTextureSolid(Size size, char pixel) {
   return make_unique<Texture>(move(image));
 }
 
-std::unique_ptr<ITexture> MakeTextureCheckers(Size size, char pixel1,
-                                              char pixel2) {
+std::unique_ptr<ITexture> MakeTextureCheckers(Size size, char pixel1, char pixel2) {
   Image image(size.height, string(size.width, pixel1));
 
   for (int i = 0; i < size.height; ++i) {
@@ -47,10 +44,7 @@ std::unique_ptr<ITexture> MakeTextureCheckers(Size size, char pixel1,
 }
 
 std::unique_ptr<ITexture> MakeTextureCow() {
-  Image image = {R"(^__^            )",
-                 R"((oo)\_______    )",
-                 R"((__)\       )\/\)",
-                 R"(    ||----w |   )",
+  Image image = {R"(^__^            )", R"((oo)\_______    )", R"((__)\       )\/\)", R"(    ||----w |   )",
                  R"(    ||     ||   )"};
   return make_unique<Texture>(move(image));
 }

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-template<typename It>
+template <typename It>
 class Range {
 public:
   Range(It begin, It end) : begin_(begin), end_(end) {}
@@ -41,7 +41,7 @@ pair<string_view, string_view> SplitTwo(string_view s, string_view delimiter = "
   return {lhs, rhs_opt.value_or("")};
 }
 
-string_view ReadToken(string_view& s, string_view delimiter = " ") {
+string_view ReadToken(string_view &s, string_view delimiter = " ") {
   const auto [lhs, rhs] = SplitTwo(s, delimiter);
   s = rhs;
   return lhs;
@@ -72,16 +72,10 @@ struct IndexSegment {
   size_t left;
   size_t right;
 
-  size_t length() const {
-    return right - left;
-  }
-  bool empty() const {
-    return length() == 0;
-  }
+  size_t length() const { return right - left; }
+  bool empty() const { return length() == 0; }
 
-  bool Contains(IndexSegment other) const {
-    return left <= other.left && other.right <= right;
-  }
+  bool Contains(IndexSegment other) const { return left <= other.left && other.right <= right; }
 };
 
 IndexSegment IntersectSegments(IndexSegment lhs, IndexSegment rhs) {
@@ -98,10 +92,10 @@ struct SegmentTreeData {
   double earned;
   double spent;
 
-  friend SegmentTreeData operator+(const SegmentTreeData& lhs, const SegmentTreeData& rhs) {
+  friend SegmentTreeData operator+(const SegmentTreeData &lhs, const SegmentTreeData &rhs) {
     return {
-      lhs.earned + rhs.earned,
-      lhs.spent + rhs.spent,
+        lhs.earned + rhs.earned,
+        lhs.spent + rhs.spent,
     };
   }
 };
@@ -111,20 +105,13 @@ struct BulkMoneyAdder {
   double delta_spent = 0.0;
 };
 
-
 class BulkTaxApplier {
 public:
-  BulkTaxApplier(size_t percentage = 0) {
-    factor = 1.0 - percentage / 100.0;
-  }
+  BulkTaxApplier(size_t percentage = 0) { factor = 1.0 - percentage / 100.0; }
 
-  void Apply(BulkTaxApplier other) {
-    factor *= other.factor;
-  }
+  void Apply(BulkTaxApplier other) { factor *= other.factor; }
 
-  double GetFactor() const {
-    return factor;
-  }
+  double GetFactor() const { return factor; }
 
 private:
   double factor = 1;
@@ -134,15 +121,11 @@ class BulkLinearUpdater {
 public:
   BulkLinearUpdater() = default;
 
-  BulkLinearUpdater(const BulkMoneyAdder& add)
-    : add_(add)
-  {}
+  BulkLinearUpdater(const BulkMoneyAdder &add) : add_(add) {}
 
-  BulkLinearUpdater(const BulkTaxApplier& tax)
-    : tax_(tax)
-  {}
+  BulkLinearUpdater(const BulkTaxApplier &tax) : tax_(tax) {}
 
-  void CombineWith(const BulkLinearUpdater& other) {
+  void CombineWith(const BulkLinearUpdater &other) {
     tax_.Apply(other.tax_);
     add_.delta_earned = add_.delta_earned * other.tax_.GetFactor() + other.add_.delta_earned;
     add_.delta_spent += other.add_.delta_spent;
@@ -150,8 +133,8 @@ public:
 
   SegmentTreeData Collapse(SegmentTreeData origin, IndexSegment segment) const {
     return {
-      origin.earned * tax_.GetFactor() + add_.delta_earned * segment.length(),
-      origin.spent + add_.delta_spent * segment.length(),
+        origin.earned * tax_.GetFactor() + add_.delta_earned * segment.length(),
+        origin.spent + add_.delta_spent * segment.length(),
     };
   }
 
@@ -161,17 +144,14 @@ private:
   BulkMoneyAdder add_;
 };
 
-
 template <typename Data, typename BulkOperation>
 class SummingSegmentTree {
 public:
   SummingSegmentTree(size_t size) : root_(Build({0, size})) {}
 
-  Data ComputeSum(IndexSegment segment) const {
-    return this->TraverseWithQuery(root_, segment, ComputeSumVisitor{});
-  }
+  Data ComputeSum(IndexSegment segment) const { return this->TraverseWithQuery(root_, segment, ComputeSumVisitor{}); }
 
-  void AddBulkOperation(IndexSegment segment, const BulkOperation& operation) {
+  void AddBulkOperation(IndexSegment segment, const BulkOperation &operation) {
     this->TraverseWithQuery(root_, segment, AddBulkOperationVisitor{operation});
   }
 
@@ -194,22 +174,23 @@ private:
       return nullptr;
     } else if (segment.length() == 1) {
       return make_unique<Node>(Node{
-        .left = nullptr,
-        .right = nullptr,
-        .segment = segment,
+          .left = nullptr,
+          .right = nullptr,
+          .segment = segment,
       });
     } else {
       const size_t middle = segment.left + segment.length() / 2;
       return make_unique<Node>(Node{
-        .left = Build({segment.left, middle}),
-        .right = Build({middle, segment.right}),
-        .segment = segment,
+          .left = Build({segment.left, middle}),
+          .right = Build({middle, segment.right}),
+          .segment = segment,
       });
     }
   }
 
   template <typename Visitor>
-  static typename Visitor::ResultType TraverseWithQuery(const NodeHolder& node, IndexSegment query_segment, Visitor visitor) {
+  static typename Visitor::ResultType TraverseWithQuery(const NodeHolder &node, IndexSegment query_segment,
+                                                        Visitor visitor) {
     if (!node || !AreSegmentsIntersected(node->segment, query_segment)) {
       return visitor.ProcessEmpty(node);
     } else {
@@ -222,11 +203,8 @@ private:
           TraverseWithQuery(node->right, query_segment, visitor);
           return visitor.ProcessPartial(node, query_segment);
         } else {
-          return visitor.ProcessPartial(
-            node, query_segment,
-            TraverseWithQuery(node->left, query_segment, visitor),
-            TraverseWithQuery(node->right, query_segment, visitor)
-          );
+          return visitor.ProcessPartial(node, query_segment, TraverseWithQuery(node->left, query_segment, visitor),
+                                        TraverseWithQuery(node->right, query_segment, visitor));
         }
       }
     }
@@ -236,15 +214,11 @@ private:
   public:
     using ResultType = Data;
 
-    Data ProcessEmpty(const NodeHolder&) const {
-      return {};
-    }
+    Data ProcessEmpty(const NodeHolder &) const { return {}; }
 
-    Data ProcessFull(const NodeHolder& node) const {
-      return node->data;
-    }
+    Data ProcessFull(const NodeHolder &node) const { return node->data; }
 
-    Data ProcessPartial(const NodeHolder&, IndexSegment, const Data& left_result, const Data& right_result) const {
+    Data ProcessPartial(const NodeHolder &, IndexSegment, const Data &left_result, const Data &right_result) const {
       return left_result + right_result;
     }
   };
@@ -253,27 +227,25 @@ private:
   public:
     using ResultType = void;
 
-    explicit AddBulkOperationVisitor(const BulkOperation& operation)
-      : operation_(operation)
-    {}
+    explicit AddBulkOperationVisitor(const BulkOperation &operation) : operation_(operation) {}
 
-    void ProcessEmpty(const NodeHolder&) const {}
+    void ProcessEmpty(const NodeHolder &) const {}
 
-    void ProcessFull(const NodeHolder& node) const {
+    void ProcessFull(const NodeHolder &node) const {
       node->postponed_bulk_operation.CombineWith(operation_);
       node->data = operation_.Collapse(node->data, node->segment);
     }
 
-    void ProcessPartial(const NodeHolder& node, IndexSegment) const {
+    void ProcessPartial(const NodeHolder &node, IndexSegment) const {
       node->data = (node->left ? node->left->data : Data()) + (node->right ? node->right->data : Data());
     }
 
   private:
-    const BulkOperation& operation_;
+    const BulkOperation &operation_;
   };
 
-  static void PropagateBulkOperation(const NodeHolder& node) {
-    for (auto* child_ptr : {node->left.get(), node->right.get()}) {
+  static void PropagateBulkOperation(const NodeHolder &node) {
+    for (auto *child_ptr : {node->left.get(), node->right.get()}) {
       if (child_ptr) {
         child_ptr->postponed_bulk_operation.CombineWith(node->postponed_bulk_operation);
         child_ptr->data = node->postponed_bulk_operation.Collapse(child_ptr->data, child_ptr->segment);
@@ -282,7 +254,6 @@ private:
     node->postponed_bulk_operation = BulkOperation();
   }
 };
-
 
 class Date {
 public:
@@ -298,11 +269,11 @@ public:
   // Weird legacy, can't wait for std::chrono::year_month_day
   time_t AsTimestamp() const {
     std::tm t;
-    t.tm_sec  = 0;
-    t.tm_min  = 0;
+    t.tm_sec = 0;
+    t.tm_min = 0;
     t.tm_hour = 0;
     t.tm_mday = day_;
-    t.tm_mon  = month_ - 1;
+    t.tm_mon = month_ - 1;
     t.tm_year = year_ - 1900;
     t.tm_isdst = 0;
     return mktime(&t);
@@ -313,12 +284,10 @@ private:
   int month_;
   int day_;
 
-  Date(int year, int month, int day)
-    : year_(year), month_(month), day_(day)
-  {}
+  Date(int year, int month, int day) : year_(year), month_(month), day_(day) {}
 };
 
-int ComputeDaysDiff(const Date& date_to, const Date& date_from) {
+int ComputeDaysDiff(const Date &date_to, const Date &date_from) {
   const time_t timestamp_to = date_to.AsTimestamp();
   const time_t timestamp_from = date_from.AsTimestamp();
   static constexpr int SECONDS_IN_DAY = 60 * 60 * 24;
@@ -329,20 +298,16 @@ static const Date START_DATE = Date::FromString("2000-01-01");
 static const Date END_DATE = Date::FromString("2100-01-01");
 static const size_t DAY_COUNT = ComputeDaysDiff(END_DATE, START_DATE);
 
-size_t ComputeDayIndex(const Date& date) {
-  return ComputeDaysDiff(date, START_DATE);
-}
+size_t ComputeDayIndex(const Date &date) { return ComputeDaysDiff(date, START_DATE); }
 
-IndexSegment MakeDateSegment(const Date& date_from, const Date& date_to) {
+IndexSegment MakeDateSegment(const Date &date_from, const Date &date_to) {
   return {ComputeDayIndex(date_from), ComputeDayIndex(date_to) + 1};
 }
-
 
 class BudgetManager : public SummingSegmentTree<SegmentTreeData, BulkLinearUpdater> {
 public:
   BudgetManager() : SummingSegmentTree(DAY_COUNT) {}
 };
-
 
 struct Request;
 using RequestHolder = unique_ptr<Request>;
@@ -364,21 +329,21 @@ struct Request {
 };
 
 const unordered_map<string_view, Request::Type> STR_TO_REQUEST_TYPE = {
-  {"ComputeIncome", Request::Type::COMPUTE_INCOME},
-  {"Earn", Request::Type::EARN},
-  {"PayTax", Request::Type::PAY_TAX},
-  { "Spend", Request::Type::SPEND},
+    {"ComputeIncome", Request::Type::COMPUTE_INCOME},
+    {"Earn", Request::Type::EARN},
+    {"PayTax", Request::Type::PAY_TAX},
+    {"Spend", Request::Type::SPEND},
 };
 
 template <typename ResultType>
 struct ReadRequest : Request {
   using Request::Request;
-  virtual ResultType Process(const BudgetManager& manager) const = 0;
+  virtual ResultType Process(const BudgetManager &manager) const = 0;
 };
 
 struct ModifyRequest : Request {
   using Request::Request;
-  virtual void Process(BudgetManager& manager) const = 0;
+  virtual void Process(BudgetManager &manager) const = 0;
 };
 
 struct ComputeIncomeRequest : ReadRequest<double> {
@@ -388,7 +353,7 @@ struct ComputeIncomeRequest : ReadRequest<double> {
     date_to = Date::FromString(input);
   }
 
-  double Process(const BudgetManager& manager) const override {
+  double Process(const BudgetManager &manager) const override {
     auto data = manager.ComputeSum(MakeDateSegment(date_from, date_to));
     return data.earned - data.spent;
   }
@@ -405,7 +370,7 @@ struct EarnRequest : ModifyRequest {
     income = ConvertToInt(input);
   }
 
-  void Process(BudgetManager& manager) const override {
+  void Process(BudgetManager &manager) const override {
     const auto date_segment = MakeDateSegment(date_from, date_to);
     const double daily_income = income * 1.0 / date_segment.length();
     manager.AddBulkOperation(date_segment, BulkMoneyAdder{daily_income, 0.0});
@@ -424,7 +389,7 @@ struct PayTaxRequest : ModifyRequest {
     percentage = ConvertToInt(input);
   }
 
-  void Process(BudgetManager& manager) const override {
+  void Process(BudgetManager &manager) const override {
     manager.AddBulkOperation(MakeDateSegment(date_from, date_to), BulkTaxApplier(percentage));
   }
 
@@ -441,7 +406,7 @@ struct SpendRequest : ModifyRequest {
     spend = ConvertToInt(input);
   }
 
-  void Process(BudgetManager& manager) const override {
+  void Process(BudgetManager &manager) const override {
     const auto date_segment = MakeDateSegment(date_from, date_to);
     const double daily_spend = spend * 1.0 / date_segment.length();
     manager.AddBulkOperation(date_segment, BulkMoneyAdder{0.0, daily_spend});
@@ -454,21 +419,21 @@ struct SpendRequest : ModifyRequest {
 
 RequestHolder Request::Create(Request::Type type) {
   switch (type) {
-    case Request::Type::COMPUTE_INCOME:
-      return make_unique<ComputeIncomeRequest>();
-    case Request::Type::EARN:
-      return make_unique<EarnRequest>();
-    case Request::Type::PAY_TAX:
-      return make_unique<PayTaxRequest>();
-    case Request::Type::SPEND:
-      return make_unique<SpendRequest>();
-    default:
-      return nullptr;
+  case Request::Type::COMPUTE_INCOME:
+    return make_unique<ComputeIncomeRequest>();
+  case Request::Type::EARN:
+    return make_unique<EarnRequest>();
+  case Request::Type::PAY_TAX:
+    return make_unique<PayTaxRequest>();
+  case Request::Type::SPEND:
+    return make_unique<SpendRequest>();
+  default:
+    return nullptr;
   }
 }
 
 template <typename Number>
-Number ReadNumberOnLine(istream& stream) {
+Number ReadNumberOnLine(istream &stream) {
   Number number;
   stream >> number;
   string dummy;
@@ -477,8 +442,7 @@ Number ReadNumberOnLine(istream& stream) {
 }
 
 optional<Request::Type> ConvertRequestTypeFromString(string_view type_str) {
-  if (const auto it = STR_TO_REQUEST_TYPE.find(type_str);
-    it != STR_TO_REQUEST_TYPE.end()) {
+  if (const auto it = STR_TO_REQUEST_TYPE.find(type_str); it != STR_TO_REQUEST_TYPE.end()) {
     return it->second;
   } else {
     return nullopt;
@@ -497,7 +461,7 @@ RequestHolder ParseRequest(string_view request_str) {
   return request;
 }
 
-vector<RequestHolder> ReadRequests(istream& in_stream = cin) {
+vector<RequestHolder> ReadRequests(istream &in_stream = cin) {
   const size_t request_count = ReadNumberOnLine<size_t>(in_stream);
 
   vector<RequestHolder> requests;
@@ -513,27 +477,26 @@ vector<RequestHolder> ReadRequests(istream& in_stream = cin) {
   return requests;
 }
 
-vector<double> ProcessRequests(const vector<RequestHolder>& requests) {
+vector<double> ProcessRequests(const vector<RequestHolder> &requests) {
   vector<double> responses;
   BudgetManager manager;
-  for (const auto& request_holder : requests) {
+  for (const auto &request_holder : requests) {
     if (request_holder->type == Request::Type::COMPUTE_INCOME) {
-      const auto& request = static_cast<const ComputeIncomeRequest&>(*request_holder);
+      const auto &request = static_cast<const ComputeIncomeRequest &>(*request_holder);
       responses.push_back(request.Process(manager));
     } else {
-      const auto& request = static_cast<const ModifyRequest&>(*request_holder);
+      const auto &request = static_cast<const ModifyRequest &>(*request_holder);
       request.Process(manager);
     }
   }
   return responses;
 }
 
-void PrintResponses(const vector<double>& responses, ostream& stream = cout) {
+void PrintResponses(const vector<double> &responses, ostream &stream = cout) {
   for (const double response : responses) {
     stream << response << endl;
   }
 }
-
 
 int main() {
   cout.precision(25);

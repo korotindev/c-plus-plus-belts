@@ -6,42 +6,34 @@ using namespace std;
 
 class Trip {
 private:
-  HotelProvider& hotel_provider;
-  FlightProvider& flight_provider;
+  HotelProvider &hotel_provider;
+  FlightProvider &flight_provider;
 
 public:
   vector<HotelProvider::BookingId> hotels;
   vector<FlightProvider::BookingId> flights;
 
-  Trip(HotelProvider& hp, FlightProvider& fp)
-    : hotel_provider(hp),
-      flight_provider(fp)
-  {
-  }
+  Trip(HotelProvider &hp, FlightProvider &fp) : hotel_provider(hp), flight_provider(fp) {}
 
-  Trip(const Trip&) = delete;
-  Trip(Trip&&) = default;
+  Trip(const Trip &) = delete;
+  Trip(Trip &&) = default;
 
-  Trip& operator=(const Trip&) = delete;
-  Trip& operator=(Trip&&) = default;
+  Trip &operator=(const Trip &) = delete;
+  Trip &operator=(Trip &&) = default;
 
   void Cancel() {
-    for (auto& id : hotels) {
+    for (auto &id : hotels) {
       hotel_provider.Cancel(id);
     }
     hotels.clear();
-    for (auto& id : flights) {
+    for (auto &id : flights) {
       flight_provider.Cancel(id);
     }
     flights.clear();
   }
 
-  ~Trip() {
-    Cancel();
-  }
-
+  ~Trip() { Cancel(); }
 };
-
 
 class TripManager {
 public:
@@ -52,7 +44,7 @@ public:
     string date_to;
   };
 
-  Trip Book(const BookingData& data) {
+  Trip Book(const BookingData &data) {
     Trip trip(hotel_provider, flight_provider);
     {
       FlightProvider::BookingData data;
@@ -69,9 +61,7 @@ public:
     return trip;
   }
 
-  void Cancel(Trip& trip) {
-    trip.Cancel();
-  }
+  void Cancel(Trip &trip) { trip.Cancel(); }
 
 private:
   HotelProvider hotel_provider;

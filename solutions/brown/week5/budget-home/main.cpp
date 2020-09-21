@@ -1,14 +1,14 @@
-#include "test_runner.h"
 #include "profile.h"
+#include "test_runner.h"
+#include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <tuple>
 #include <vector>
-#include <algorithm>
-#include <numeric>
 
 using namespace std;
 
-template<typename It>
+template <typename It>
 class Range {
 public:
   Range(It begin, It end) : begin_(begin), end_(end) {}
@@ -29,24 +29,25 @@ class DateIterator;
 class Date {
   friend DateHasher;
   friend DateIterator;
+
 public:
   Date() = default;
 
   Date(size_t year_, size_t month_, size_t day_) : year(year_), month(month_), day(day_) {}
 
-  friend bool operator<(const Date& lhs, const Date& rhs) {
+  friend bool operator<(const Date &lhs, const Date &rhs) {
     return make_tuple(lhs.year, lhs.month, lhs.day) < make_tuple(rhs.year, rhs.month, rhs.day);
   }
 
-  friend bool operator<=(const Date& lhs, const Date& rhs) {
+  friend bool operator<=(const Date &lhs, const Date &rhs) {
     return make_tuple(lhs.year, lhs.month, lhs.day) <= make_tuple(rhs.year, rhs.month, rhs.day);
   }
 
-  friend bool operator==(const Date& lhs, const Date& rhs) {
+  friend bool operator==(const Date &lhs, const Date &rhs) {
     return make_tuple(lhs.year, lhs.month, lhs.day) == make_tuple(rhs.year, rhs.month, rhs.day);
   }
 
-  friend void operator>>(istream& input, Date& rhs) {
+  friend void operator>>(istream &input, Date &rhs) {
     input >> rhs.year;
     input.ignore(1);
     input >> rhs.month;
@@ -54,7 +55,7 @@ public:
     input >> rhs.day;
   }
 
-  friend ostream& operator<<(ostream& output, const Date& rhs) {
+  friend ostream &operator<<(ostream &output, const Date &rhs) {
     output << rhs.year << '-' << rhs.month << '-' << rhs.day;
     return output;
   }
@@ -94,9 +95,7 @@ public:
     return *this;
   }
 
-  Date& operator*() {
-    return begin_date;
-  }
+  Date &operator*() { return begin_date; }
 
 private:
   bool IsLeapYear() {
@@ -108,7 +107,7 @@ private:
 };
 
 struct DateHasher {
-  size_t operator()(const Date& dt) const {
+  size_t operator()(const Date &dt) const {
     size_t r1 = int_hasher(dt.year);
     size_t r2 = int_hasher(dt.month);
     size_t r3 = int_hasher(dt.day);
@@ -124,6 +123,7 @@ struct DateHasher {
 class DB {
   static const size_t min_year = 2000;
   static const size_t max_year = 2099;
+
 public:
   DB() {
     Date minDate(min_year, 1, 1);
@@ -142,43 +142,37 @@ public:
     auto datesRange = TransformDatesToRange(fromDate, toDate, earned_per_day);
     const size_t days_count = distance(datesRange.begin(), datesRange.end());
     double diff_per_day = value / static_cast<double>(days_count);
-    transform(datesRange.begin(), datesRange.end(), datesRange.begin(), [diff_per_day](double d) {
-      return d += diff_per_day;
-    });
+    transform(datesRange.begin(), datesRange.end(), datesRange.begin(),
+              [diff_per_day](double d) { return d += diff_per_day; });
   }
 
   double ComputeIncome(Date fromDate, Date toDate) {
     auto earnDatesRange = TransformDatesToRange(fromDate, toDate, earned_per_day);
     auto spendDatesRange = TransformDatesToRange(fromDate, toDate, spend_per_day);
-    return accumulate(earnDatesRange.begin(), earnDatesRange.end(), double(0))
-           -
+    return accumulate(earnDatesRange.begin(), earnDatesRange.end(), double(0)) -
            accumulate(spendDatesRange.begin(), spendDatesRange.end(), double(0));
   }
 
   void PayTax(Date fromDate, Date toDate, int percentage) {
     auto datesRange = TransformDatesToRange(fromDate, toDate, earned_per_day);
     double coefficient = 1 - percentage / 100.0;
-    transform(datesRange.begin(), datesRange.end(), datesRange.begin(), [coefficient](double d) {
-      return d * coefficient;
-    });
+    transform(datesRange.begin(), datesRange.end(), datesRange.begin(),
+              [coefficient](double d) { return d * coefficient; });
   }
 
   void Spend(Date fromDate, Date toDate, double value) {
     auto datesRange = TransformDatesToRange(fromDate, toDate, spend_per_day);
     const size_t days_count = distance(datesRange.begin(), datesRange.end());
     double diff_per_day = value / static_cast<double>(days_count);
-    transform(datesRange.begin(), datesRange.end(), datesRange.begin(), [diff_per_day](double d) {
-      return d += diff_per_day;
-    });
+    transform(datesRange.begin(), datesRange.end(), datesRange.begin(),
+              [diff_per_day](double d) { return d += diff_per_day; });
   }
 
 private:
-  size_t DateToUnixEpoch(Date d) {
-    return date_to_size_t[d];
-  }
+  size_t DateToUnixEpoch(Date d) { return date_to_size_t[d]; }
 
-  template<class Container>
-  Range<typename Container::iterator> TransformDatesToRange(Date fromDate, Date toDate, Container& v) {
+  template <class Container>
+  Range<typename Container::iterator> TransformDatesToRange(Date fromDate, Date toDate, Container &v) {
     const size_t from = DateToUnixEpoch(fromDate);
     const size_t to = DateToUnixEpoch(toDate);
     auto beginIter = v.begin();

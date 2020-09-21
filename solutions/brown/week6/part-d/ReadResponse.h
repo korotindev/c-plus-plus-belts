@@ -1,18 +1,18 @@
 #ifndef C_PLUS_PLUS_BELTS_READRESPONSE_H
 #define C_PLUS_PLUS_BELTS_READRESPONSE_H
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <cmath>
-#include <utility>
 #include "Json.h"
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
 
 struct ReadResponse {
   size_t requestId;
-  ReadResponse(size_t requestId) : requestId(requestId) {};
+  ReadResponse(size_t requestId) : requestId(requestId){};
   virtual ~ReadResponse() = default;
-  virtual void Print(std::ostream& output) = 0;
+  virtual void Print(std::ostream &output) = 0;
   virtual Json::Document ToJson() = 0;
 };
 
@@ -24,13 +24,13 @@ struct ReadStopResponse : ReadResponse {
 
 struct ReadNoStopResponse : ReadStopResponse {
   using ReadStopResponse::ReadStopResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
   Json::Document ToJson() override;
 };
 
 struct ReadStopMetricsResponse : ReadStopResponse {
   using ReadStopResponse::ReadStopResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
   Json::Document ToJson() override;
 };
 
@@ -41,13 +41,13 @@ struct ReadBusResponse : ReadResponse {
 
 struct ReadNoBusResponse : ReadBusResponse {
   using ReadBusResponse::ReadBusResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
   Json::Document ToJson() override;
 };
 
 struct ReadBusMetricsResponse : ReadBusResponse {
   using ReadBusResponse::ReadBusResponse;
-  void Print(std::ostream& output) override;
+  void Print(std::ostream &output) override;
   Json::Document ToJson() override;
   size_t stopsCount;
   size_t uniqueStopsCount;
@@ -55,5 +55,4 @@ struct ReadBusMetricsResponse : ReadBusResponse {
   double routeDistanceV2;
 };
 
-
-#endif //C_PLUS_PLUS_BELTS_READRESPONSE_H
+#endif // C_PLUS_PLUS_BELTS_READRESPONSE_H

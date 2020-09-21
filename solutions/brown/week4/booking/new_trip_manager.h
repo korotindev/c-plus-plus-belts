@@ -10,18 +10,17 @@ public:
   vector<FlightProvider::Booking> flights;
 
   Trip() = default;
-  Trip(const Trip&) = delete;
-  Trip(Trip&&) = default;
+  Trip(const Trip &) = delete;
+  Trip(Trip &&) = default;
 
-  Trip& operator=(const Trip&) = delete;
-  Trip& operator=(Trip&&) = default;
+  Trip &operator=(const Trip &) = delete;
+  Trip &operator=(Trip &&) = default;
 
   void Cancel() {
     hotels.clear();
     flights.clear();
   }
 };
-
 
 class TripManager {
 public:
@@ -32,7 +31,7 @@ public:
     string date_to;
   };
 
-  Trip Book(const BookingData& data) {
+  Trip Book(const BookingData &data) {
     Trip trip;
     {
       FlightProvider::BookingData data;
@@ -51,9 +50,7 @@ public:
     return trip;
   }
 
-  void Cancel(Trip& trip) {
-    trip.Cancel();
-  }
+  void Cancel(Trip &trip) { trip.Cancel(); }
 
 private:
   HotelProvider hotel_provider;

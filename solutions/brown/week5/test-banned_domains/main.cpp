@@ -9,7 +9,7 @@
 
 using namespace std;
 
-template<typename It>
+template <typename It>
 class Range {
 public:
   Range(It begin, It end) : begin_(begin), end_(end) {}
@@ -38,7 +38,7 @@ vector<string_view> Split(string_view s, string_view delimiter = " ") {
     return parts;
   }
   while (true) {
-    const auto[lhs, rhs_opt] = SplitTwoStrict(s, delimiter);
+    const auto [lhs, rhs_opt] = SplitTwoStrict(s, delimiter);
     parts.push_back(lhs);
     if (!rhs_opt) {
       break;
@@ -48,7 +48,6 @@ vector<string_view> Split(string_view s, string_view delimiter = " ") {
   return parts;
 }
 
-
 class Domain {
 public:
   explicit Domain(string_view text) {
@@ -56,27 +55,19 @@ public:
     parts_reversed_.assign(rbegin(parts), rend(parts));
   }
 
-  size_t GetPartCount() const {
-    return parts_reversed_.size();
-  }
+  size_t GetPartCount() const { return parts_reversed_.size(); }
 
-  auto GetParts() const {
-    return Range(rbegin(parts_reversed_), rend(parts_reversed_));
-  }
+  auto GetParts() const { return Range(rbegin(parts_reversed_), rend(parts_reversed_)); }
 
-  auto GetReversedParts() const {
-    return Range(begin(parts_reversed_), end(parts_reversed_));
-  }
+  auto GetReversedParts() const { return Range(begin(parts_reversed_), end(parts_reversed_)); }
 
-  bool operator==(const Domain& other) const {
-    return parts_reversed_ == other.parts_reversed_;
-  }
+  bool operator==(const Domain &other) const { return parts_reversed_ == other.parts_reversed_; }
 
 private:
   vector<string> parts_reversed_;
 };
 
-ostream& operator<<(ostream& stream, const Domain& domain) {
+ostream &operator<<(ostream &stream, const Domain &domain) {
   bool first = true;
   for (const string_view part : domain.GetParts()) {
     if (!first) {
@@ -90,28 +81,23 @@ ostream& operator<<(ostream& stream, const Domain& domain) {
 }
 
 // domain is subdomain of itself
-bool IsSubdomain(const Domain& subdomain, const Domain& domain) {
+bool IsSubdomain(const Domain &subdomain, const Domain &domain) {
   const auto subdomain_reversed_parts = subdomain.GetReversedParts();
   const auto domain_reversed_parts = domain.GetReversedParts();
-  return
-    subdomain.GetPartCount() >= domain.GetPartCount()
-    && equal(begin(domain_reversed_parts), end(domain_reversed_parts),
-             begin(subdomain_reversed_parts));
+  return subdomain.GetPartCount() >= domain.GetPartCount() &&
+         equal(begin(domain_reversed_parts), end(domain_reversed_parts), begin(subdomain_reversed_parts));
 }
 
-bool IsSubOrSuperDomain(const Domain& lhs, const Domain& rhs) {
-  return lhs.GetPartCount() >= rhs.GetPartCount()
-         ? IsSubdomain(lhs, rhs)
-         : IsSubdomain(rhs, lhs);
+bool IsSubOrSuperDomain(const Domain &lhs, const Domain &rhs) {
+  return lhs.GetPartCount() >= rhs.GetPartCount() ? IsSubdomain(lhs, rhs) : IsSubdomain(rhs, lhs);
 }
-
 
 class DomainChecker {
 public:
-  template<typename InputIt>
+  template <typename InputIt>
   DomainChecker(InputIt domains_begin, InputIt domains_end) {
     sorted_domains_.reserve(distance(domains_begin, domains_end));
-    for (const Domain& domain : Range(domains_begin, domains_end)) {
+    for (const Domain &domain : Range(domains_begin, domains_end)) {
       sorted_domains_.push_back(&domain);
     }
     sort(begin(sorted_domains_), end(sorted_domains_), IsDomainLess);
@@ -119,10 +105,8 @@ public:
   }
 
   // Check if candidate is subdomain of some domain
-  bool IsSubdomain(const Domain& candidate) const {
-    const auto it = upper_bound(
-      begin(sorted_domains_), end(sorted_domains_),
-      &candidate, IsDomainLess);
+  bool IsSubdomain(const Domain &candidate) const {
+    const auto it = upper_bound(begin(sorted_domains_), end(sorted_domains_), &candidate, IsDomainLess);
     if (it == begin(sorted_domains_)) {
       return false;
     }
@@ -130,31 +114,24 @@ public:
   }
 
 private:
-  vector<const Domain*> sorted_domains_;
+  vector<const Domain *> sorted_domains_;
 
-  static bool IsDomainLess(const Domain* lhs, const Domain* rhs) {
+  static bool IsDomainLess(const Domain *lhs, const Domain *rhs) {
     const auto lhs_reversed_parts = lhs->GetReversedParts();
     const auto rhs_reversed_parts = rhs->GetReversedParts();
-    return lexicographical_compare(
-      begin(lhs_reversed_parts), end(lhs_reversed_parts),
-      begin(rhs_reversed_parts), end(rhs_reversed_parts)
-    );
+    return lexicographical_compare(begin(lhs_reversed_parts), end(lhs_reversed_parts), begin(rhs_reversed_parts),
+                                   end(rhs_reversed_parts));
   }
 
-  static vector<const Domain*> AbsorbSubdomains(vector<const Domain*> domains) {
-    domains.erase(
-      unique(begin(domains), end(domains),
-             [](const Domain* lhs, const Domain* rhs) {
-               return IsSubOrSuperDomain(*lhs, *rhs);
-             }),
-      end(domains)
-    );
+  static vector<const Domain *> AbsorbSubdomains(vector<const Domain *> domains) {
+    domains.erase(unique(begin(domains), end(domains),
+                         [](const Domain *lhs, const Domain *rhs) { return IsSubOrSuperDomain(*lhs, *rhs); }),
+                  end(domains));
     return domains;
   }
 };
 
-
-vector<Domain> ReadDomains(istream& in_stream = cin) {
+vector<Domain> ReadDomains(istream &in_stream = cin) {
   vector<Domain> domains;
 
   size_t count;
@@ -169,19 +146,19 @@ vector<Domain> ReadDomains(istream& in_stream = cin) {
   return domains;
 }
 
-vector<bool> CheckDomains(const vector<Domain>& banned_domains, const vector<Domain>& domains_to_check) {
+vector<bool> CheckDomains(const vector<Domain> &banned_domains, const vector<Domain> &domains_to_check) {
   const DomainChecker checker(begin(banned_domains), end(banned_domains));
 
   vector<bool> check_results;
   check_results.reserve(domains_to_check.size());
-  for (const Domain& domain_to_check : domains_to_check) {
+  for (const Domain &domain_to_check : domains_to_check) {
     check_results.push_back(!checker.IsSubdomain(domain_to_check));
   }
 
   return check_results;
 }
 
-void PrintCheckResults(const vector<bool>& check_results, ostream& out_stream = cout) {
+void PrintCheckResults(const vector<bool> &check_results, ostream &out_stream = cout) {
   for (const bool check_result : check_results) {
     out_stream << (check_result ? "Good" : "Bad") << "\n";
   }
@@ -212,10 +189,7 @@ void TestIsSubdomain() {
 
 void TestAbsorbDomains() {
   {
-    const vector<Domain> banned_domains{
-      Domain("google.com"),
-      Domain("maps.google.com")
-    };
+    const vector<Domain> banned_domains{Domain("google.com"), Domain("maps.google.com")};
     const DomainChecker checker(begin(banned_domains), end(banned_domains));
     ASSERT(checker.IsSubdomain(Domain("mail.google.com")));
     ASSERT(checker.IsSubdomain(Domain("maps.google.com")));
@@ -223,10 +197,7 @@ void TestAbsorbDomains() {
   }
 
   {
-    vector<Domain> banned_domains{
-      Domain("google.com"),
-      Domain("maps.google.com")
-    };
+    vector<Domain> banned_domains{Domain("google.com"), Domain("maps.google.com")};
     DomainChecker checker(begin(banned_domains), end(banned_domains));
     banned_domains[0] = Domain("ya.ru");
     ASSERT(!checker.IsSubdomain(Domain("mail.google.com")));
@@ -237,9 +208,7 @@ void TestAbsorbDomains() {
 }
 
 void TestChecker() {
-  const vector<Domain> banned_domains{
-    Domain("a.b.google.com")
-  };
+  const vector<Domain> banned_domains{Domain("a.b.google.com")};
   const DomainChecker checker(begin(banned_domains), end(banned_domains));
   ASSERT(!checker.IsSubdomain(Domain("a.google.com")));
   ASSERT(!checker.IsSubdomain(Domain("google.com")));
@@ -268,9 +237,18 @@ void Test9_full() {
   stringstream ss_in, ss_out;
 
   ss_in << "4\n";
-  ss_in << "ya.ru\n" << "maps.me\n" << "m.ya.ru\n" << "com\n";
+  ss_in << "ya.ru\n"
+        << "maps.me\n"
+        << "m.ya.ru\n"
+        << "com\n";
   ss_in << "7\n";
-  ss_in << "ya.ru\n" << "ya.com\n" << "m.maps.me\n" << "moscow.m.ya.ru\n" << "maps.com\n" << "maps.ru\n" << "ya.ya\n";
+  ss_in << "ya.ru\n"
+        << "ya.com\n"
+        << "m.maps.me\n"
+        << "moscow.m.ya.ru\n"
+        << "maps.com\n"
+        << "maps.ru\n"
+        << "ya.ya\n";
 
   const vector<Domain> banned_domains = ReadDomains(ss_in);
   const vector<Domain> domains_to_check = ReadDomains(ss_in);
@@ -280,9 +258,17 @@ void Test9_full() {
   stringstream ss_in2, ss_out2;
 
   ss_in2 << "3\n";
-  ss_in2 << "ya.ya\n" << "ya.ru\n" << "ya.com\n";
+  ss_in2 << "ya.ya\n"
+         << "ya.ru\n"
+         << "ya.com\n";
   ss_in2 << "7\n";
-  ss_in2 << "ha.ya.ya\n" << "te.ya.ru\n" << "su.ya.com\n" << "haya.ya\n" << "teya.ru\n" << "suya.com\n" << "ya.ya.net\n";
+  ss_in2 << "ha.ya.ya\n"
+         << "te.ya.ru\n"
+         << "su.ya.com\n"
+         << "haya.ya\n"
+         << "teya.ru\n"
+         << "suya.com\n"
+         << "ya.ya.net\n";
 
   const vector<Domain> banned_domains2 = ReadDomains(ss_in2);
   const vector<Domain> domains_to_check2 = ReadDomains(ss_in2);

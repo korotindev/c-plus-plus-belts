@@ -1,17 +1,17 @@
 #ifndef C_PLUS_PLUS_BELTS_STOPSSTORAGE_H
 #define C_PLUS_PLUS_BELTS_STOPSSTORAGE_H
 
-#include <string>
-#include <vector>
+#include "Coordinate.h"
+#include "CustomUtils.h"
+#include "ReadResponse.h"
+#include "Router.h"
 #include <iostream>
+#include <memory>
+#include <set>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <set>
-#include <memory>
-#include "ReadResponse.h"
-#include "Coordinate.h"
-#include "Router.h"
-#include "CustomUtils.h"
+#include <vector>
 
 class Database;
 
@@ -45,7 +45,7 @@ struct RoadData {
 };
 
 struct RoadHasher {
-  std::size_t operator()(const Road& road) const noexcept {
+  std::size_t operator()(const Road &road) const noexcept {
     std::size_t h1 = std::hash<std::string>{}(road.from);
     std::size_t h2 = std::hash<std::string>{}(road.to);
     return h1 ^ (h2 << 1);
@@ -56,17 +56,18 @@ class StopsStorage {
   friend class Database;
   std::unordered_map<std::string, StopData> storage;
   std::unordered_map<Road, RoadData, RoadHasher> distanceStorage;
+
 public:
   void Add(Stop stop);
-  bool Exist(const std::string& busName) const;
-  void AddBusToStop(const std::string& stopName, const std::string& busName);
-  const std::set<std::string>& GetBuses(const std::string& stopName) const;
-  double GetDistance(const std::string& lhsStopName, const std::string& rhsStopName) const;
-  double GetDistanceV2(const std::string& lhsStopName, const std::string& rhsStopName) const;
+  bool Exist(const std::string &busName) const;
+  void AddBusToStop(const std::string &stopName, const std::string &busName);
+  const std::set<std::string> &GetBuses(const std::string &stopName) const;
+  double GetDistance(const std::string &lhsStopName, const std::string &rhsStopName) const;
+  double GetDistanceV2(const std::string &lhsStopName, const std::string &rhsStopName) const;
 };
 
-bool operator==(const Road& lhs, const Road& rhs);
-bool operator==(const StopDistance& lhs, const StopDistance& rhs);
-std::ostream& operator<<(std::ostream& output, const StopDistance& data);
+bool operator==(const Road &lhs, const Road &rhs);
+bool operator==(const StopDistance &lhs, const StopDistance &rhs);
+std::ostream &operator<<(std::ostream &output, const StopDistance &data);
 
-#endif //C_PLUS_PLUS_BELTS_STOPSSTORAGE_H
+#endif // C_PLUS_PLUS_BELTS_STOPSSTORAGE_H

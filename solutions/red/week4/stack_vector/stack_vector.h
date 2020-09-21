@@ -1,59 +1,51 @@
 #pragma once
 
-#include <stdexcept>
 #include <array>
+#include <stdexcept>
 
 using namespace std;
 
-template<typename T, size_t N>
+template <typename T, size_t N>
 class StackVector {
 public:
-    explicit StackVector(size_t a_size = 0) {
-        if (a_size > N) {
-            throw invalid_argument("");
-        }
-
-        size = a_size;
+  explicit StackVector(size_t a_size = 0) {
+    if (a_size > N) {
+      throw invalid_argument("");
     }
 
-    T &operator[](size_t index) { return data[index]; }
+    size = a_size;
+  }
 
-    const T &operator[](size_t index) const { return data[index]; }
+  T &operator[](size_t index) { return data[index]; }
 
-    typename array<T, N>::iterator begin() {
-        return data.begin();
-    }
-    typename array<T, N>::iterator end() {
-        return data.begin() + size;
-    }
-    typename array<T, N>::const_iterator begin() const {
-        return data.begin();
-    }
-    typename array<T, N>::const_iterator end() const {
-        return data.begin() + size;
-    }
+  const T &operator[](size_t index) const { return data[index]; }
 
-    size_t Size() const { return size; }
+  typename array<T, N>::iterator begin() { return data.begin(); }
+  typename array<T, N>::iterator end() { return data.begin() + size; }
+  typename array<T, N>::const_iterator begin() const { return data.begin(); }
+  typename array<T, N>::const_iterator end() const { return data.begin() + size; }
 
-    size_t Capacity() const { return N; }
+  size_t Size() const { return size; }
 
-    void PushBack(const T &value) {
-        if (size >= N) {
-            throw overflow_error("");
-        }
+  size_t Capacity() const { return N; }
 
-        data[size++] = value;
+  void PushBack(const T &value) {
+    if (size >= N) {
+      throw overflow_error("");
     }
 
-    T PopBack() {
-        if (size <= 0) {
-            throw underflow_error("");
-        }
+    data[size++] = value;
+  }
 
-        return data[--size];
+  T PopBack() {
+    if (size <= 0) {
+      throw underflow_error("");
     }
+
+    return data[--size];
+  }
 
 private:
-    array<T, N> data;
-    size_t size;
+  array<T, N> data;
+  size_t size;
 };

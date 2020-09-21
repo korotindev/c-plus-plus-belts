@@ -22,15 +22,9 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Install additional compiler
-ARG CMAKE_SCRIPT_SOURCE="https://github.com/Kitware/CMake/releases/download/v3.17.3/cmake-3.17.3-Linux-x86_64.sh"
-
 RUN export DEBIAN_FRONTEND=noninteractive \
-    && wget -q -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
     && apt-get update \
-    && apt-get -y install --no-install-recommends build-essential cmake valgrind cppcheck gdb \
-      clang-10 clang-tools-10 clang-10-doc libclang-common-10-dev libclang-10-dev libclang1-10 clang-format-10 clangd-10 libc++-10-dev libc++abi-10-dev \
-      llvm-10 libboost-all-dev \
+    && apt-get -y install --no-install-recommends build-essential cmake valgrind cppcheck gdb clang-format \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
@@ -40,7 +34,6 @@ ARG CXX=g++
 
 ENV CC ${CC}
 ENV CXX ${CXX}
-ENV ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-10/bin/llvm-symbolizer
 
 RUN mkdir -p /home/${USERNAME}/app
 WORKDIR /home/${USERNAME}/app

@@ -12,7 +12,7 @@ class FlightProvider {
 public:
   using BookingId = int;
   using Booking = RAII::Booking<FlightProvider>;
-  friend Booking;  // Явно разрешаем функциям класса Booking вызывать private-функции нашего класса FlightProvider
+  friend Booking; // Явно разрешаем функциям класса Booking вызывать private-функции нашего класса FlightProvider
 
   struct BookingData {
     string city_from;
@@ -20,7 +20,7 @@ public:
     string date;
   };
 
-  Booking Book(const BookingData& data) {
+  Booking Book(const BookingData &data) {
     if (counter >= capacity) {
       throw runtime_error("Flight overbooking");
     }
@@ -30,15 +30,12 @@ public:
 
 private:
   // Скрываем эту функцию в private, чтобы её мог позвать только соответствующий friend-класс Booking
-  void CancelOrComplete(const Booking& booking) {
-    --counter;
-  }
+  void CancelOrComplete(const Booking &booking) { --counter; }
 
 public:
   static int capacity;
   static int counter;
 };
-
 
 class HotelProvider {
 public:
@@ -52,7 +49,7 @@ public:
     string date_to;
   };
 
-  Booking Book(const BookingData& data) {
+  Booking Book(const BookingData &data) {
     if (counter >= capacity) {
       throw runtime_error("Hotel overbooking");
     }
@@ -61,9 +58,7 @@ public:
   }
 
 private:
-  void CancelOrComplete(const Booking& booking) {
-    --counter;
-  }
+  void CancelOrComplete(const Booking &booking) { --counter; }
 
 public:
   static int capacity;

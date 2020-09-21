@@ -5,16 +5,13 @@
 using namespace std;
 
 Stop::Stop(std::string name, Coordinate coordinate, std::vector<StopDistance> knownDistances)
-  : name(move(name)),
-    coordinate(coordinate),
-    knownDistances(move(knownDistances)) {}
+    : name(move(name)), coordinate(coordinate), knownDistances(move(knownDistances)) {}
 
-
-bool operator==(const StopDistance& lhs, const StopDistance& rhs) {
+bool operator==(const StopDistance &lhs, const StopDistance &rhs) {
   return make_pair(lhs.name, lhs.distance) == make_pair(rhs.name, rhs.distance);
 }
 
-std::ostream& operator<<(std::ostream& output, const StopDistance& data) {
+std::ostream &operator<<(std::ostream &output, const StopDistance &data) {
   return output << "StopDistance{" << data.name << ", " << data.distance << "}";
 }
 
@@ -26,7 +23,7 @@ void StopsStorage::Add(Stop stop) {
   storage[stop.name].coordinate = stop.coordinate;
 }
 
-double StopsStorage::GetDistanceV2(const string& lhsStopName, const string& rhsStopName) const {
+double StopsStorage::GetDistanceV2(const string &lhsStopName, const string &rhsStopName) const {
   if (auto it = distanceStorage.find(Road(lhsStopName, rhsStopName)); it != distanceStorage.end()) {
     return it->second.distance;
   }
@@ -38,14 +35,14 @@ double StopsStorage::GetDistanceV2(const string& lhsStopName, const string& rhsS
   return 0.0;
 }
 
-double StopsStorage::GetDistance(const string& lhsStopName, const string& rhsStopName) const {
+double StopsStorage::GetDistance(const string &lhsStopName, const string &rhsStopName) const {
   auto lhsCoord = storage.find(lhsStopName)->second.coordinate;
   auto rhsCoord = storage.find(rhsStopName)->second.coordinate;
   auto distance = lhsCoord.GetDistance(rhsCoord);
   return distance;
 }
 
-const set<string>& StopsStorage::GetBuses(const string& stopName) const {
+const set<string> &StopsStorage::GetBuses(const string &stopName) const {
   static const set<string> defaultBuses;
   if (auto it = storage.find(stopName); it != storage.end()) {
     return it->second.buses;
@@ -53,23 +50,17 @@ const set<string>& StopsStorage::GetBuses(const string& stopName) const {
   return defaultBuses;
 }
 
-bool StopsStorage::Exist(const std::string& stopName) const {
-  return storage.find(stopName) != storage.end();
-}
+bool StopsStorage::Exist(const std::string &stopName) const { return storage.find(stopName) != storage.end(); }
 
-void StopsStorage::AddBusToStop(const std::string& stopName, const std::string& busName) {
+void StopsStorage::AddBusToStop(const std::string &stopName, const std::string &busName) {
   storage[stopName].buses.insert(busName);
 }
 
-bool operator==(const Road& lhs, const Road& rhs) {
-  return make_pair(lhs.from, lhs.to) == make_pair(rhs.from, rhs.to);
-}
+bool operator==(const Road &lhs, const Road &rhs) { return make_pair(lhs.from, lhs.to) == make_pair(rhs.from, rhs.to); }
 
 Road::Road(std::string from_, std::string to_) {
   from = std::move(from_);
   to = std::move(to_);
 }
 
-RoadData::RoadData(double distance_) {
-  distance = distance_;
-}
+RoadData::RoadData(double distance_) { distance = distance_; }

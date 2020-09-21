@@ -8,14 +8,14 @@ void EntertainStopRequest::ParseFrom(string_view input) {
   latitude = ConvertToDouble(ReadToken(input, ", "));
   longitude = ConvertToDouble(ReadToken(input, ", "));
   auto token = ReadToken(input, ", ");
-  while(!token.empty()) {
+  while (!token.empty()) {
     auto distanceToTargetStop = ConvertToDouble(ReadToken(token, "m to "));
     distanceToOtherStops.push_back(StopDistance{string(token), distanceToTargetStop});
     token = ReadToken(input, ", ");
   }
 };
 
-void EntertainStopRequest::Process(Database& db) {
+void EntertainStopRequest::Process(Database &db) {
   db.EntertainStop(Stop(move(stopName), Coordinate{latitude, longitude}, move(distanceToOtherStops)));
 };
 
@@ -35,16 +35,14 @@ void EntertainBusRequest::ParseFrom(string_view input) {
   }
 };
 
-void EntertainBusRequest::Process(Database& db) {
+void EntertainBusRequest::Process(Database &db) {
   Bus bus(move(busName), move(stopsNames));
   db.EntertainBus(move(bus));
 };
 
-void ReadBusRequest::ParseFrom(string_view input) {
-  busName = ReadToken(input, "\n");
-};
+void ReadBusRequest::ParseFrom(string_view input) { busName = ReadToken(input, "\n"); };
 
-string ReadBusRequest::Process(Database& db) {
+string ReadBusRequest::Process(Database &db) {
   stringstream output;
   output.precision(DEFAULT_PRECISION);
   auto responseHolder = db.ReadBus(busName);
@@ -54,30 +52,29 @@ string ReadBusRequest::Process(Database& db) {
 
 RequestHolder Request::Create(Request::Type type) {
   switch (type) {
-    case Request::Type::EntertainBus:
-      return make_unique<EntertainBusRequest>();
-    case Request::Type::EntertainStop:
-      return make_unique<EntertainStopRequest>();
-    case Request::Type::ReadBus:
-      return make_unique<ReadBusRequest>();
-    case Request::Type::ReadStop:
-      return make_unique<ReadStopRequest>();
-    default:
-      return nullptr;
+  case Request::Type::EntertainBus:
+    return make_unique<EntertainBusRequest>();
+  case Request::Type::EntertainStop:
+    return make_unique<EntertainStopRequest>();
+  case Request::Type::ReadBus:
+    return make_unique<ReadBusRequest>();
+  case Request::Type::ReadStop:
+    return make_unique<ReadStopRequest>();
+  default:
+    return nullptr;
   }
 }
 
-optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter& converter, string_view type_str) {
-  if (const auto it = converter.find(type_str);
-    it != converter.end()) {
+optional<Request::Type> ConvertRequestTypeFromString(const TypeConverter &converter, string_view type_str) {
+  if (const auto it = converter.find(type_str); it != converter.end()) {
     return it->second;
   } else {
     return nullopt;
   }
 }
 
-RequestHolder ParseRequest(const TypeConverter& converter, string_view request_str) {
-  //cerr << request_str << '\n';
+RequestHolder ParseRequest(const TypeConverter &converter, string_view request_str) {
+  // cerr << request_str << '\n';
   const auto request_type = ConvertRequestTypeFromString(converter, ReadToken(request_str));
   if (!request_type) {
     return nullptr;
@@ -89,11 +86,9 @@ RequestHolder ParseRequest(const TypeConverter& converter, string_view request_s
   return request;
 }
 
-void ReadStopRequest::ParseFrom(std::string_view input) {
-  stopName = ReadToken(input, "\n");
-}
+void ReadStopRequest::ParseFrom(std::string_view input) { stopName = ReadToken(input, "\n"); }
 
-std::string ReadStopRequest::Process(Database& db) {
+std::string ReadStopRequest::Process(Database &db) {
   stringstream output;
   output.precision(DEFAULT_PRECISION);
   auto responseHolder = db.ReadStop(stopName);

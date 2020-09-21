@@ -1,8 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 struct Point {
   int x;
@@ -42,7 +42,7 @@ public:
   // Возвращает размер хранимого изображения
   virtual Size GetSize() const = 0;
   // Возвращает хранимое изображение
-  virtual const Image& GetImage() const = 0;
+  virtual const Image &GetImage() const = 0;
 };
 
 // Интерфейс фигуры
@@ -62,10 +62,10 @@ public:
   virtual Size GetSize() const = 0;
 
   virtual void SetTexture(std::shared_ptr<ITexture>) = 0;
-  virtual ITexture* GetTexture() const = 0;
+  virtual ITexture *GetTexture() const = 0;
 
   // Рисует фигуру на указанном изображении
-  virtual void Draw(Image&) const = 0;
+  virtual void Draw(Image &) const = 0;
 };
 
 // Создаёт фигуру заданного типа. Вам нужно реализовать эту функцию.

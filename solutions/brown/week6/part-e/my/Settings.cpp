@@ -8,15 +8,11 @@ using namespace std;
 
 unique_ptr<Settings> Settings::instance = nullptr;
 
-size_t Settings::GetBusWaitTime() {
-  return instance->busWaitTime;
-}
+size_t Settings::GetBusWaitTime() { return instance->busWaitTime; }
 
-size_t Settings::GetBusVelocity() {
-  return instance->busVelocity;
-}
+size_t Settings::GetBusVelocity() { return instance->busVelocity; }
 
-void Settings::InitializeFrom(const Json::Node& node) {
+void Settings::InitializeFrom(const Json::Node &node) {
   const auto &values = node.AsMap();
   instance = make_unique<Settings>();
 

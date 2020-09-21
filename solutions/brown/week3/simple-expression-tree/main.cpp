@@ -9,9 +9,7 @@ class ValueExpression : public Expression {
 public:
   ValueExpression(int num) : value(num) {}
 
-  int Evaluate() const override {
-    return value;
-  }
+  int Evaluate() const override { return value; }
 
   std::string ToString() const override {
     ostringstream out;
@@ -23,17 +21,13 @@ private:
   int value;
 };
 
-ExpressionPtr Value(int num) {
-  return make_unique<ValueExpression>(num);
-}
+ExpressionPtr Value(int num) { return make_unique<ValueExpression>(num); }
 
 class SumExpression : public Expression {
 public:
   SumExpression(ExpressionPtr l, ExpressionPtr r) : left(move(l)), right(move(r)) {}
 
-  int Evaluate() const override {
-    return left->Evaluate() + right->Evaluate();
-  }
+  int Evaluate() const override { return left->Evaluate() + right->Evaluate(); }
 
   std::string ToString() const override {
     ostringstream out;
@@ -45,17 +39,13 @@ private:
   ExpressionPtr left, right;
 };
 
-ExpressionPtr Sum(ExpressionPtr l, ExpressionPtr r) {
-  return make_unique<SumExpression>(move(l), move(r));
-}
+ExpressionPtr Sum(ExpressionPtr l, ExpressionPtr r) { return make_unique<SumExpression>(move(l), move(r)); }
 
 class ProductExpression : public Expression {
 public:
   ProductExpression(ExpressionPtr l, ExpressionPtr r) : left(move(l)), right(move(r)) {}
 
-  int Evaluate() const override {
-    return left->Evaluate() * right->Evaluate();
-  }
+  int Evaluate() const override { return left->Evaluate() * right->Evaluate(); }
 
   std::string ToString() const override {
     ostringstream out;
@@ -67,11 +57,9 @@ private:
   ExpressionPtr left, right;
 };
 
-ExpressionPtr Product(ExpressionPtr l, ExpressionPtr r) {
-  return make_unique<ProductExpression>(move(l), move(r));
-}
+ExpressionPtr Product(ExpressionPtr l, ExpressionPtr r) { return make_unique<ProductExpression>(move(l), move(r)); }
 
-string Print(const Expression* e) {
+string Print(const Expression *e) {
   if (!e) {
     return "Null expression provided";
   }
