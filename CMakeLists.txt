@@ -1,22 +1,34 @@
-cmake_minimum_required(VERSION 3.16.5)
-project(c-plus-plus-belts)
+cmake_minimum_required(VERSION 3.16.3)
+project(freq VERSION 0.1.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-recover=address")
 
-add_subdirectory(utils)
+#set(BOOST_DEBUG ON)
+#find_package(Boost 1.71.0)
+#include_directories(${Boost_INCLUDE_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic-errors -Wconversion -Wsign-conversion")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-unused-parameter -Wno-conversion -Wno-sign-conversion")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -g -fno-sanitize-recover=null")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -g -fno-sanitize-recover=null")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -g -fno-sanitize-recover=null")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+add_definitions(-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_SANITIZE_VECTOR)
 
-add_executable(c-plus-plus-belts main.cpp)
+include (cmake/cppcheck.cmake)
+include (cmake/clang-format.cmake)
 
-target_link_libraries(c-plus-plus-belts INTERFACE utils)
+add_custom_target(debug_run
+  COMMAND LSAN_OPTIONS=max_leaks=1 ASAN_OPTIONS=debug=1:detect_leaks=1:abort_on_error=1:halt_on_error=1:verbosity=2:color=always bin/freq 
+  DEPENDS bin/freq
+)
 
-target_include_directories(c-plus-plus-belts PUBLIC "${PROJECT_BINARY_DIR}" "utils")
+add_custom_target(run 
+  COMMAND bin/freq
+  DEPENDS bin/freq
+)
+
+add_executable(freq src/main.cpp)
+target_compile_features(freq PUBLIC cxx_std_17)
+target_link_libraries(freq pthread)
