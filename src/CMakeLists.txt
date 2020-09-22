@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.16.3)
 project(executor VERSION 0.1.0)
 
 set(TARGET executor)
-add_executable(${TARGET} main.cpp)
+file(GLOB TARGET_SRC
+    "*.h"
+    "*.cpp"
+)
+
+add_executable(${TARGET} ${TARGET_SRC})
 target_compile_features(${TARGET} PUBLIC cxx_std_20)
 target_compile_options(${TARGET} PUBLIC -Wall -Wextra -Werror -pedantic) 
 target_compile_definitions(${TARGET} PUBLIC -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_SANITIZE_VECTOR)
