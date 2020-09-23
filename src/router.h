@@ -61,25 +61,28 @@ namespace Graph {
   std::optional<typename Router<Weight>::RouteInfo> Router<Weight>::BuildRoute(VertexId from, VertexId to) const {
     const size_t vertex_count = graph_.GetVertexCount();
     routes_internal_data_.assign(vertex_count, std::nullopt);
-    routes_internal_data_[from] = RouteInternalData{.weight = 0};
+    routes_internal_data_[from] = RouteInternalData{
+      .weight = 0,
+      .prev_edge = {}
+    };
     std::set<std::pair<Weight, VertexId>> vertices_by_weight{{0, from}};
     std::unordered_set<VertexId> done_vertices;
 
     while (!vertices_by_weight.empty()) {
-      const auto min_vertex_it = vertices_by_weight.begin();
-      vertices_by_weight.erase(min_vertex_it);
-      done_vertices.insert(min_vertex_it->second);
+      const auto min_vertex = *vertices_by_weight.begin();
+      vertices_by_weight.erase(vertices_by_weight.begin());
+      done_vertices.insert(min_vertex.second);
 
-      for (const EdgeId edge_id : graph_.GetIncidentEdges(min_vertex_it->second)) {
+      for (const EdgeId edge_id : graph_.GetIncidentEdges(min_vertex.second)) {
         const auto& edge = graph_.GetEdge(edge_id);
         if (done_vertices.count(edge.to)) {
           continue;
         }
-        if (!routes_internal_data_[edge.to] || routes_internal_data_[edge.to]->weight > min_vertex_it->first + edge.weight) {
+        if (!routes_internal_data_[edge.to] || routes_internal_data_[edge.to]->weight > min_vertex.first + edge.weight) {
           if (routes_internal_data_[edge.to]) {
             vertices_by_weight.erase({routes_internal_data_[edge.to]->weight, edge.to});
           }
-          routes_internal_data_[edge.to] = RouteInternalData{.weight = min_vertex_it->first + edge.weight,
+          routes_internal_data_[edge.to] = RouteInternalData{.weight = min_vertex.first + edge.weight,
                                                              .prev_edge = edge_id};
           vertices_by_weight.emplace(routes_internal_data_[edge.to]->weight, edge.to);
         }

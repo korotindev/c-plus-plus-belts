@@ -84,7 +84,10 @@ optional<TransportRouter::RouteInfo> TransportRouter::FindRoute(const string& st
     return nullopt;
   }
 
-  RouteInfo route_info = {.total_time = route->weight};
+  RouteInfo route_info = {
+    .total_time = route->weight,
+    .items = {}
+  };
   route_info.items.reserve(route->edge_count);
   for (size_t edge_idx = 0; edge_idx < route->edge_count; ++edge_idx) {
     const Graph::EdgeId edge_id = router_->GetRouteEdge(route->id, edge_idx);

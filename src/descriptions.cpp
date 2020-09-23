@@ -10,7 +10,8 @@ namespace Descriptions {
         .position = {
             .latitude = attrs.at("latitude").AsDouble(),
             .longitude = attrs.at("longitude").AsDouble(),
-        }
+        },
+        .distances = {}
     };
     if (attrs.count("road_distances") > 0) {
       for (const auto& [neighbour_stop, distance_node] : attrs.at("road_distances").AsMap()) {
