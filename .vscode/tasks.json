@@ -13,7 +13,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "cd build && cmake --build .",
+            "command": "cd build && cmake --build . -j $(nproc)",
             "group": {
                 "kind": "build",
                 "isDefault": true
