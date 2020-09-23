@@ -7,8 +7,9 @@ docker-compose run --rm app bash
 mkdir -p ./build
 cd ./build
 cmake ..
-make 
-make run
+cmake --build . -j $(nproc)
+cmake --build . -t test
+
 ```
 
 Take a look at `CMakeLists.txt` for `make run` implementation
