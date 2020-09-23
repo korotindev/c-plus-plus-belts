@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/freq",
+            "program": "${workspaceFolder}/build/bin/executor_runner",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",

@@ -1,4 +1,17 @@
 #include "tests.h"
+#include "json.h"
+#include "descriptions.h"
+#include "json.h"
+#include "requests.h"
+#include "sphere.h"
+#include "transport_catalog.h"
+#include "utils.h"
+#include "utils/test_runner.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
 
 using namespace std;
 
