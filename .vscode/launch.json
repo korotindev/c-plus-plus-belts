@@ -20,15 +20,16 @@
                 }
             ],
             "preLaunchTask": "Build",
+            "envFile": "${workspaceFolder}/debug.env"
         },
         {
             "name": "(gdb) Launch Tests",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/tests_runner",
-            "args": [],
+            "args": ["1"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin",
+            "cwd": "${workspaceFolder}/tests",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -40,6 +41,7 @@
                 }
             ],
             "preLaunchTask": "Build",
+            "envFile": "${workspaceFolder}/debug.env"
         },
     ]
 }

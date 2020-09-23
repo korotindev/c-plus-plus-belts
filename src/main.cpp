@@ -7,8 +7,6 @@
 
 #include <iostream>
 
-#define RUN_TESTS
-
 using namespace std;
 
 int main() {

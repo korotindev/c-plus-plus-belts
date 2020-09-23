@@ -16,7 +16,7 @@
 using namespace std;
 
 void TestIntegrationGenerator(const string &testDataFolderName) {
-  auto input = ifstream("../test_data/" + testDataFolderName + "/input.json");
+  auto input = ifstream("samples/" + testDataFolderName + "/input.json");
   const auto input_doc = Json::Load(input);
 
   const auto& input_map = input_doc.GetRoot().AsMap();

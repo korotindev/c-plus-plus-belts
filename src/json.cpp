@@ -134,25 +134,13 @@ namespace Json {
     output << '}';
   }
 
-  template <>
-  void PrintValue<Document>(const Document& doc, std::ostream& output) {
-    PrintNode(doc.GetRoot(), output);
-  }
-
   void PrintNode(const Json::Node& node, ostream& output) {
     visit([&output](const auto& value) { PrintValue(value, output); },
           node.GetBase());
   }
 
-  std::ostream &operator<<(std::ostream &output, const Document &rhs) {
-    PrintValue(rhs, output);
-    return output;
+  void Print(const Document& document, ostream& output) {
+    PrintNode(document.GetRoot(), output);
   }
 
-  bool operator==(const Document &lhs, const Document &rhs) {
-    stringstream output_lhs, output_rhs;
-    PrintValue(lhs, output_lhs);
-    PrintValue(rhs, output_rhs);
-    return output_lhs.str() == output_rhs.str();
-  }
 }
