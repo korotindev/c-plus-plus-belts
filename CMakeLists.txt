@@ -10,4 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include (cmake/cppcheck.cmake)
 include (cmake/clang-format.cmake)
 
+enable_testing()
+
 add_subdirectory(./src)
+add_subdirectory(./test)
