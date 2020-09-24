@@ -9,7 +9,7 @@ TransportRouter::TransportRouter(const Descriptions::StopsDict& stops_dict,
     : routing_settings_(MakeRoutingSettings(routing_settings_json))
 {
   const size_t vertex_count = stops_dict.size() * 2;
-  vertices_info_.reserve(vertex_count);
+  vertices_info_.resize(vertex_count);
   graph_ = BusGraph(vertex_count);
 
   FillGraphWithStops(stops_dict);
@@ -30,12 +30,13 @@ void TransportRouter::FillGraphWithStops(const Descriptions::StopsDict& stops_di
 
   for (const auto& [stop_name, _] : stops_dict) {
     auto& vertex_ids = stops_vertex_ids_[stop_name];
-    vertex_ids.in = vertex_id++;
     vertex_ids.out = vertex_id++;
-    vertices_info_[vertex_ids.in] = {stop_name};
+    vertex_ids.in = vertex_id++;
     vertices_info_[vertex_ids.out] = {stop_name};
+    vertices_info_[vertex_ids.in] = {stop_name};
 
     edges_info_.push_back(WaitEdgeInfo{});
+    cout << "Transit " << vertex_ids.out << " -> " << vertex_ids.in << " " << stop_name << endl;
     graph_.AddEdge({
         vertex_ids.out,
         vertex_ids.in,
@@ -58,17 +59,21 @@ void TransportRouter::FillGraphWithBuses(const Descriptions::StopsDict& stops_di
       return Descriptions::ComputeStopsDistance(*stops_dict.at(bus.stops[lhs_idx]), *stops_dict.at(bus.stops[lhs_idx + 1]));
     };
     for (size_t start_stop_idx = 0; start_stop_idx + 1 < stop_count; ++start_stop_idx) {
-      const Graph::VertexId start_vertex = stops_vertex_ids_[bus.stops[start_stop_idx]].in;
+      const auto& start_vertex_name = bus.stops[start_stop_idx];
+      const Graph::VertexId start_vertex_id = stops_vertex_ids_[start_vertex_name].in;
       int total_distance = 0;
-      for (size_t finish_stop_idx = start_stop_idx + 1; finish_stop_idx <= stop_count; ++finish_stop_idx) {
+      for (size_t finish_stop_idx = start_stop_idx + 1; finish_stop_idx < stop_count; ++finish_stop_idx) {
+        const auto& finish_vertex_name = bus.stops[finish_stop_idx];
+        const Graph::VertexId finish_vertex_id = stops_vertex_ids_[finish_vertex_name].out;
         total_distance += compute_distance_from(finish_stop_idx - 1);
         edges_info_.push_back(BusEdgeInfo{
             .bus_name = bus.name,
             .span_count = finish_stop_idx - start_stop_idx,
         });
+        cout << "Add " << start_vertex_name << "(" << start_vertex_id << ")"  << " -> " << finish_vertex_name << "(" << finish_vertex_id << ")" << endl;
         graph_.AddEdge({
-            start_vertex,
-            stops_vertex_ids_[bus.stops[finish_stop_idx]].out,
+            start_vertex_id,
+            finish_vertex_id,
             total_distance * 1.0 / (routing_settings_.bus_velocity * 1000.0 / 60)  // m / (km/h * 1000 / 60) = min
         });
       }

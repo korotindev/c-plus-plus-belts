@@ -9,7 +9,6 @@ add_executable(${TARGET} ${TARGET_SRC})
 
 target_compile_features(${TARGET} PUBLIC cxx_std_20)
 target_compile_options(${TARGET} PUBLIC -Wall -Wextra -Werror -pedantic) 
-target_compile_definitions(${TARGET} PUBLIC -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_GLIBCXX_ASSERTIONS -D_GLIBCXX_SANITIZE_VECTOR)
 target_include_directories(${TARGET} PUBLIC ./utils ${executor_SOURCE_DIR})
 target_link_libraries(${TARGET} executor)
 
