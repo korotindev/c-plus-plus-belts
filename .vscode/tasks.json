@@ -11,9 +11,9 @@
             }
         },
         {
-            "label": "Build Main",
+            "label": "Build",
             "type": "shell",
-            "command": "cd build && make",
+            "command": "cd build && cmake --build . -j $(nproc)",
             "group": {
                 "kind": "build",
                 "isDefault": true

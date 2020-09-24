@@ -3,7 +3,7 @@
 using namespace std;
 
 int main() {
-  cout << "App runner" << endl;
+  cout << "Tests runner" << endl;
 
   return 0;
 }
