@@ -27,7 +27,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/tests_runner",
-            "args": ["1"],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/tests",
             "environment": [],

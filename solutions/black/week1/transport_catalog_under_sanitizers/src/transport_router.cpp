@@ -36,7 +36,6 @@ void TransportRouter::FillGraphWithStops(const Descriptions::StopsDict& stops_di
     vertices_info_[vertex_ids.in] = {stop_name};
 
     edges_info_.push_back(WaitEdgeInfo{});
-    cout << "Transit " << vertex_ids.out << " -> " << vertex_ids.in << " " << stop_name << endl;
     graph_.AddEdge({
         vertex_ids.out,
         vertex_ids.in,
@@ -70,7 +69,6 @@ void TransportRouter::FillGraphWithBuses(const Descriptions::StopsDict& stops_di
             .bus_name = bus.name,
             .span_count = finish_stop_idx - start_stop_idx,
         });
-        cout << "Add " << start_vertex_name << "(" << start_vertex_id << ")"  << " -> " << finish_vertex_name << "(" << finish_vertex_id << ")" << endl;
         graph_.AddEdge({
             start_vertex_id,
             finish_vertex_id,

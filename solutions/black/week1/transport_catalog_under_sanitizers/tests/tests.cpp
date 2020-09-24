@@ -17,8 +17,9 @@ using namespace std;
 
 void TestIntegrationGenerator(const string &testDataFolderName) {
   auto input = ifstream("samples/" + testDataFolderName + "/input.json");
-  const auto input_doc = Json::Load(input);
+  auto expectedOutput = ifstream("samples/" + testDataFolderName + "/expected_output.json");
 
+  const auto input_doc = Json::Load(input);
   const auto& input_map = input_doc.GetRoot().AsMap();
   const TransportCatalog db(
     Descriptions::ReadDescriptions(input_map.at("base_requests").AsArray()),
@@ -32,7 +33,6 @@ void TestIntegrationGenerator(const string &testDataFolderName) {
   output << endl;
 
   Json::Document resultDocument = Json::Load(output);
-  auto expectedOutput = ifstream("../test_data/" + testDataFolderName + "/expected_output.json");
   Json::Document expectedDocument = Json::Load(expectedOutput);
   ASSERT_EQUAL(resultDocument, expectedDocument);
 }
