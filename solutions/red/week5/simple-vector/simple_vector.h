@@ -6,7 +6,7 @@ using namespace std;
 
 template <typename T>
 class SimpleVector {
-public:
+ public:
   SimpleVector() = default;
 
   explicit SimpleVector(const SimpleVector &tmp);
@@ -33,7 +33,7 @@ public:
 
   void PushBack(const T &value);
 
-private:
+ private:
   T *data = nullptr;
   size_t size = 0;
   size_t capacity = 0;

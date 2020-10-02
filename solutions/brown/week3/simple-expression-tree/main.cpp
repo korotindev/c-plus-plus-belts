@@ -1,12 +1,12 @@
+#include <sstream>
+
 #include "Common.h"
 #include "test_runner.h"
-
-#include <sstream>
 
 using namespace std;
 
 class ValueExpression : public Expression {
-public:
+ public:
   ValueExpression(int num) : value(num) {}
 
   int Evaluate() const override { return value; }
@@ -17,14 +17,14 @@ public:
     return out.str();
   }
 
-private:
+ private:
   int value;
 };
 
 ExpressionPtr Value(int num) { return make_unique<ValueExpression>(num); }
 
 class SumExpression : public Expression {
-public:
+ public:
   SumExpression(ExpressionPtr l, ExpressionPtr r) : left(move(l)), right(move(r)) {}
 
   int Evaluate() const override { return left->Evaluate() + right->Evaluate(); }
@@ -35,14 +35,14 @@ public:
     return out.str();
   }
 
-private:
+ private:
   ExpressionPtr left, right;
 };
 
 ExpressionPtr Sum(ExpressionPtr l, ExpressionPtr r) { return make_unique<SumExpression>(move(l), move(r)); }
 
 class ProductExpression : public Expression {
-public:
+ public:
   ProductExpression(ExpressionPtr l, ExpressionPtr r) : left(move(l)), right(move(r)) {}
 
   int Evaluate() const override { return left->Evaluate() * right->Evaluate(); }
@@ -53,7 +53,7 @@ public:
     return out.str();
   }
 
-private:
+ private:
   ExpressionPtr left, right;
 };
 

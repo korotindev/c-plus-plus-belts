@@ -78,7 +78,8 @@ void TestBasicSearch() {
   const vector<string> docs = {"we are ready to go",
                                "come on everybody shake you hands",
                                "i love this game",
-                               "just like exception safety is not about writing try catch everywhere in your code move "
+                               "just like exception safety is not about writing try catch everywhere in "
+                               "your code move "
                                "semantics are not about typing double ampersand everywhere in your code",
                                "daddy daddy daddy dad dad dad",
                                "tell me the meaning of being lonely",
@@ -158,7 +159,7 @@ void GenerateLargeTextFiles() {
       "database.txt",
       rd,
       possible_words,
-      50000, // 50000
+      50000,  // 50000
       50,
       max_word_len,
       80,
@@ -169,7 +170,7 @@ void GenerateLargeTextFiles() {
       "queries.txt",
       rd,
       possible_words,
-      50000, // 500000
+      50000,  // 500000
       10,
       max_word_len,
       80,
@@ -187,7 +188,10 @@ void TestSpeedUp() {
     srv.UpdateDocumentBase(docs_input);
   }
   ostringstream queries_output;
-  { LOG_DURATION("AddQueriesStream") srv.AddQueriesStream(queries_input, queries_output); }
+  {
+    LOG_DURATION("AddQueriesStream")
+    srv.AddQueriesStream(queries_input, queries_output);
+  }
 }
 int main() {
   TestRunner tr;

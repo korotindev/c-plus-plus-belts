@@ -1,13 +1,14 @@
 #ifndef C_PLUS_PLUS_BELTS_REQUEST_H
 #define C_PLUS_PLUS_BELTS_REQUEST_H
 
-#include "Coordinate.h"
-#include "Database.h"
 #include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+
+#include "Coordinate.h"
+#include "Database.h"
 
 struct Request;
 using RequestHolder = std::unique_ptr<Request>;
@@ -88,4 +89,4 @@ struct ReadStopRequest : ReadRequest<std::string> {
   std::string StopName;
 };
 
-#endif // C_PLUS_PLUS_BELTS_REQUEST_H
+#endif  // C_PLUS_PLUS_BELTS_REQUEST_H

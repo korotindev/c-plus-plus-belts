@@ -1,7 +1,8 @@
 #include "stats_aggregator.h"
-#include "test_runner.h"
 
 #include <sstream>
+
+#include "test_runner.h"
 using namespace std;
 
 namespace StatsAggregators {
@@ -98,4 +99,4 @@ void TestComposite() {
   expected += "Mode is 16\n";
   ASSERT_EQUAL(PrintedValue(aggr), expected);
 }
-} // namespace StatsAggregators
+}  // namespace StatsAggregators

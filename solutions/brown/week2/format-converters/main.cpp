@@ -1,11 +1,10 @@
-#include "json.h"
-#include "xml.h"
-
-#include "test_runner.h"
-
 #include <map>
 #include <string>
 #include <vector>
+
+#include "json.h"
+#include "test_runner.h"
+#include "xml.h"
 
 Json::Document XmlToJson(const Xml::Document &doc) {
   using std::string;
@@ -37,7 +36,6 @@ Xml::Document JsonToXml(const Json::Document &doc, std::string root_name) {
 }
 
 void TestXmlToJson() {
-
   Xml::Node root("july", {});
   root.AddChild({"spend", {{"category", "travel"}, {"amount", "23400"}}});
   root.AddChild({"spend", {{"category", "food"}, {"amount", "5000"}}});

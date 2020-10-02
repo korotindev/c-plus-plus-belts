@@ -1,9 +1,9 @@
-#include "simple_vector.h"
-#include "test_runner.h"
-
 #include <numeric>
 #include <tuple>
 #include <vector>
+
+#include "simple_vector.h"
+#include "test_runner.h"
 
 using namespace std;
 

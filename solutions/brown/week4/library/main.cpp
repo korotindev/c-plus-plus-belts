@@ -1,11 +1,11 @@
-#include "Common.h"
-#include "test_runner.h"
-
 #include <atomic>
 #include <future>
 #include <numeric>
 #include <random>
 #include <sstream>
+
+#include "Common.h"
+#include "test_runner.h"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ using namespace std;
 // элементы. Собственно, тестирующая система курсеры имеет как раз более
 // продвинутую реализацию.
 class Book : public IBook {
-public:
+ public:
   Book(string name, string content, atomic<size_t> &memory_used_by_books)
       : name_(move(name)), content_(move(content)), memory_used_by_books_(memory_used_by_books) {
     memory_used_by_books_ += content_.size();
@@ -28,7 +28,7 @@ public:
 
   const string &GetContent() const override { return content_; }
 
-private:
+ private:
   string name_;
   string content_;
   atomic<size_t> &memory_used_by_books_;
@@ -40,7 +40,7 @@ private:
 // написать другую реализацию. Собственно, тестирующая система курсеры имеет как
 // раз более продвинутую реализацию.
 class BooksUnpacker : public IBooksUnpacker {
-public:
+ public:
   unique_ptr<IBook> UnpackBook(const string &book_name) override {
     ++unpacked_books_count_;
     return make_unique<Book>(book_name, "Dummy content of the book " + book_name, memory_used_by_books_);
@@ -50,7 +50,7 @@ public:
 
   int GetUnpackedBooksCount() const { return unpacked_books_count_; }
 
-private:
+ private:
   // Шаблонный класс atomic позволяет безопасно использовать скалярный тип из
   // нескольких потоков. В противном случае у нас было бы состояние гонки.
   atomic<size_t> memory_used_by_books_ = 0;
@@ -152,8 +152,8 @@ void TestAsync(const Library &lib) {
 int main() {
   BooksUnpacker unpacker;
   const Library lib(
-      // Названия книг для локального тестирования. В тестирующей системе курсеры
-      // будет другой набор, намного больше.
+      // Названия книг для локального тестирования. В тестирующей системе
+      // курсеры будет другой набор, намного больше.
       {"Sherlock Holmes", "Don Quixote", "Harry Potter", "A Tale of Two Cities", "The Lord of the Rings",
        "Le Petit Prince", "Alice in Wonderland", "Dream of the Red Chamber", "And Then There Were None", "The Hobbit"},
       unpacker);

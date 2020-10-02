@@ -37,11 +37,13 @@ void PrintResponses(const vector<string> &responses, ostream &stream) {
 }
 
 void TestParseRequests_withModifyConverter() {
-  stringstream input("3\n"
-                     "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka");
+  stringstream input(
+      "3\n"
+      "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n"
+      "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka");
   const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 3ul);
   {
@@ -67,13 +69,16 @@ void TestParseRequests_withModifyConverter() {
 }
 
 void TestParseRequests_withModifyConverter2() {
-  stringstream input("4\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus lw5PH5: qwe > eee > qwe\n"
-                     "Bus lw5PH6: qwe - eee\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n");
+  stringstream input(
+      "4\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n"
+      "Bus lw5PH5: qwe > eee > qwe\n"
+      "Bus lw5PH6: qwe - eee\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n");
   const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 4ul);
   {
@@ -107,10 +112,11 @@ void TestParseRequests_withModifyConverter2() {
 }
 
 void TestParseRequests_withReadConverter() {
-  stringstream input("3\n"
-                     "Bus 2 56\n"
-                     "Stop 7 50\n"
-                     "Bus 751");
+  stringstream input(
+      "3\n"
+      "Bus 2 56\n"
+      "Stop 7 50\n"
+      "Bus 751");
   const vector<unique_ptr<Request>> requests = ParseRequests(READ_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 3ul);
   {
@@ -145,7 +151,8 @@ void TestIntegrationPartA() {
                             "Stop Marushkino: 55.595884, 37.209755\n"
                             "Stop qwe: 55.611087, 37.20829\n"
                             "Stop eee: 55.595884, 37.209755\n"
-                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > "
+                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+                            "Tovarnaya > "
                             "Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
                             "Bus lw5PH5 second: qwe > eee > qwe\n"
                             "Bus lw5PH6: qwe - eee\n"
@@ -168,7 +175,8 @@ void TestIntegrationPartA() {
                            ("Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
                             "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
                             "Bus 752: not found\n"
-                            "Bus lw5PH5 second: 3 stops on route, 2 unique stops, 3386 route length\n"
+                            "Bus lw5PH5 second: 3 stops on route, 2 unique stops, 3386 route "
+                            "length\n"
                             "Bus lw5PH6: 3 stops on route, 2 unique stops, 3386 route length\n"
                             "Bus lw5PH7: 0 stops on route, 0 unique stops, 0 route length\n"
                             "Bus 751 1: not found\n"));
@@ -176,10 +184,12 @@ void TestIntegrationPartA() {
 
 void TestIntegrationPartB() {
   TestIntegrationGenerator(("4\n"
-                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > "
+                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > "
+                            "Universam > Biryulyovo Tovarnaya > "
                             "Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
                             "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517\n"
-                            "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye\n"
+                            "Bus 828: Biryulyovo Zapadnoye > Universam > "
+                            "Rossoshanskaya ulitsa > Biryulyovo Zapadnoye\n"
                             "Stop Prazhskaya: 55.611678, 37.603831\n"
                             "3\n"
                             "Stop Samara\n"
@@ -192,7 +202,8 @@ void TestIntegrationPartB() {
   TestIntegrationGenerator(("13\n"
                             "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
                             "Stop Marushkino: 55.595884, 37.209755\n"
-                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > "
+                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+                            "Tovarnaya > "
                             "Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye\n"
                             "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
                             "Stop Rasskazovka: 55.632761, 37.333324\n"
@@ -201,7 +212,8 @@ void TestIntegrationPartB() {
                             "Stop Universam: 55.587655, 37.645687\n"
                             "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656\n"
                             "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164\n"
-                            "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye\n"
+                            "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > "
+                            "Biryulyovo Zapadnoye\n"
                             "Stop Rossoshanskaya ulitsa: 55.595579, 37.605757\n"
                             "Stop Prazhskaya: 55.611678, 37.603831\n"
                             "6\n"

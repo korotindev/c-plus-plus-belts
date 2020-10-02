@@ -5,7 +5,7 @@
 using namespace std;
 
 class Texture : public ITexture {
-public:
+ public:
   Texture(Image image) : image_(move(image)) {
     for (const auto &line : image_) {
       assert(line.size() == image_[0].size());
@@ -20,7 +20,7 @@ public:
 
   const Image &GetImage() const override { return image_; }
 
-private:
+ private:
   Image image_;
 };
 

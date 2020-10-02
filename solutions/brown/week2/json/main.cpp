@@ -1,10 +1,10 @@
-#include "json.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+#include "json.h"
+#include "test_runner.h"
 
 using namespace std;
 

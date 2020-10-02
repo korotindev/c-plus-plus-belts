@@ -1,7 +1,8 @@
 #include "requests.h"
-#include "transport_router.h"
 
 #include <vector>
+
+#include "transport_router.h"
 
 using namespace std;
 
@@ -97,4 +98,4 @@ vector<Json::Node> ProcessAll(const TransportCatalog &db, const vector<Json::Nod
   return responses;
 }
 
-} // namespace Requests
+}  // namespace Requests

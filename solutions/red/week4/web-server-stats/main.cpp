@@ -1,9 +1,9 @@
+#include <map>
+#include <string_view>
+
 #include "http_request.h"
 #include "stats.h"
 #include "test_runner.h"
-
-#include <map>
-#include <string_view>
 using namespace std;
 
 Stats ServeRequests(istream &input) {

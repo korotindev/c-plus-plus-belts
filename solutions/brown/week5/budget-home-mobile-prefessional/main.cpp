@@ -17,12 +17,12 @@ using namespace std;
 
 template <typename It>
 class Range {
-public:
+ public:
   Range(It begin, It end) : begin_(begin), end_(end) {}
   It begin() const { return begin_; }
   It end() const { return end_; }
 
-private:
+ private:
   It begin_;
   It end_;
 };
@@ -106,19 +106,19 @@ struct BulkMoneyAdder {
 };
 
 class BulkTaxApplier {
-public:
+ public:
   BulkTaxApplier(size_t percentage = 0) { factor = 1.0 - percentage / 100.0; }
 
   void Apply(BulkTaxApplier other) { factor *= other.factor; }
 
   double GetFactor() const { return factor; }
 
-private:
+ private:
   double factor = 1;
 };
 
 class BulkLinearUpdater {
-public:
+ public:
   BulkLinearUpdater() = default;
 
   BulkLinearUpdater(const BulkMoneyAdder &add) : add_(add) {}
@@ -138,7 +138,7 @@ public:
     };
   }
 
-private:
+ private:
   // apply tax first, then add
   BulkTaxApplier tax_;
   BulkMoneyAdder add_;
@@ -146,7 +146,7 @@ private:
 
 template <typename Data, typename BulkOperation>
 class SummingSegmentTree {
-public:
+ public:
   SummingSegmentTree(size_t size) : root_(Build({0, size})) {}
 
   Data ComputeSum(IndexSegment segment) const { return this->TraverseWithQuery(root_, segment, ComputeSumVisitor{}); }
@@ -155,7 +155,7 @@ public:
     this->TraverseWithQuery(root_, segment, AddBulkOperationVisitor{operation});
   }
 
-private:
+ private:
   struct Node;
   using NodeHolder = unique_ptr<Node>;
 
@@ -211,7 +211,7 @@ private:
   }
 
   class ComputeSumVisitor {
-  public:
+   public:
     using ResultType = Data;
 
     Data ProcessEmpty(const NodeHolder &) const { return {}; }
@@ -224,7 +224,7 @@ private:
   };
 
   class AddBulkOperationVisitor {
-  public:
+   public:
     using ResultType = void;
 
     explicit AddBulkOperationVisitor(const BulkOperation &operation) : operation_(operation) {}
@@ -240,7 +240,7 @@ private:
       node->data = (node->left ? node->left->data : Data()) + (node->right ? node->right->data : Data());
     }
 
-  private:
+   private:
     const BulkOperation &operation_;
   };
 
@@ -256,7 +256,7 @@ private:
 };
 
 class Date {
-public:
+ public:
   static Date FromString(string_view str) {
     const int year = ConvertToInt(ReadToken(str, "-"));
     const int month = ConvertToInt(ReadToken(str, "-"));
@@ -279,7 +279,7 @@ public:
     return mktime(&t);
   }
 
-private:
+ private:
   int year_;
   int month_;
   int day_;
@@ -305,7 +305,7 @@ IndexSegment MakeDateSegment(const Date &date_from, const Date &date_to) {
 }
 
 class BudgetManager : public SummingSegmentTree<SegmentTreeData, BulkLinearUpdater> {
-public:
+ public:
   BudgetManager() : SummingSegmentTree(DAY_COUNT) {}
 };
 
@@ -419,16 +419,16 @@ struct SpendRequest : ModifyRequest {
 
 RequestHolder Request::Create(Request::Type type) {
   switch (type) {
-  case Request::Type::COMPUTE_INCOME:
-    return make_unique<ComputeIncomeRequest>();
-  case Request::Type::EARN:
-    return make_unique<EarnRequest>();
-  case Request::Type::PAY_TAX:
-    return make_unique<PayTaxRequest>();
-  case Request::Type::SPEND:
-    return make_unique<SpendRequest>();
-  default:
-    return nullptr;
+    case Request::Type::COMPUTE_INCOME:
+      return make_unique<ComputeIncomeRequest>();
+    case Request::Type::EARN:
+      return make_unique<EarnRequest>();
+    case Request::Type::PAY_TAX:
+      return make_unique<PayTaxRequest>();
+    case Request::Type::SPEND:
+      return make_unique<SpendRequest>();
+    default:
+      return nullptr;
   }
 }
 

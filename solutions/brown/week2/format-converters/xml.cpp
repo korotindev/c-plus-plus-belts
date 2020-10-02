@@ -71,4 +71,4 @@ void Node::AddChild(Node node) { children.push_back(move(node)); }
 
 string_view Node::Name() const { return name; }
 
-} // namespace Xml
+}  // namespace Xml

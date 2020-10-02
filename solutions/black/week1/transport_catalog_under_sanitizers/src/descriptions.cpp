@@ -29,7 +29,7 @@ vector<string> ParseStops(const vector<Json::Node> &stop_nodes, bool is_roundtri
   if (is_roundtrip || stops.size() <= 1) {
     return stops;
   }
-  stops.reserve(stops.size() * 2 - 1); // end stop is not repeated
+  stops.reserve(stops.size() * 2 - 1);  // end stop is not repeated
   for (size_t stop_idx = stops.size() - 1; stop_idx > 0; --stop_idx) {
     stops.push_back(stops[stop_idx - 1]);
   }
@@ -67,4 +67,4 @@ vector<InputQuery> ReadDescriptions(const vector<Json::Node> &nodes) {
   return result;
 }
 
-} // namespace Descriptions
+}  // namespace Descriptions

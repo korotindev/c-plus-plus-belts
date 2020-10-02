@@ -36,7 +36,7 @@ enum class ShapeType { Rectangle, Ellipse };
 
 // Интерфейс текстуры
 class ITexture {
-public:
+ public:
   virtual ~ITexture() = default;
 
   // Возвращает размер хранимого изображения
@@ -47,7 +47,7 @@ public:
 
 // Интерфейс фигуры
 class IShape {
-public:
+ public:
   virtual ~IShape() = default;
 
   // Возвращает точную копию фигуры.

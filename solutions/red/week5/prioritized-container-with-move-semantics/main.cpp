@@ -1,4 +1,3 @@
-#include "test_runner.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -9,11 +8,13 @@
 #include <utility>
 #include <vector>
 
+#include "test_runner.h"
+
 using namespace std;
 
 template <typename T>
 class PriorityCollection {
-public:
+ public:
   using Id = int;
   using Priority = int;
 
@@ -86,15 +87,15 @@ public:
     return {move(w.object), w.priority};
   }
 
-private:
+ private:
   map<Priority, map<Id, ObjectWrapper>> priority_to_objects_slice;
   map<Id, typename map<Id, ObjectWrapper>::iterator> objects_pool;
   Id next_id = 0;
 };
 
 class StringNonCopyable : public string {
-public:
-  using string::string; // Позволяет использовать конструкторы строки
+ public:
+  using string::string;  // Позволяет использовать конструкторы строки
   StringNonCopyable(const StringNonCopyable &) = delete;
 
   StringNonCopyable(StringNonCopyable &&) = default;

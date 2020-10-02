@@ -1,11 +1,12 @@
-#include "test_runner.h"
 #include <list>
 #include <string>
+
+#include "test_runner.h"
 
 using namespace std;
 
 class Editor {
-public:
+ public:
   // Реализуйте конструктор по умолчанию и объявленные методы
   Editor() { cursor = text.begin(); }
 
@@ -52,7 +53,7 @@ public:
 
   string GetText() const { return {text.begin(), text.end()}; }
 
-private:
+ private:
   list<char> text;
   list<char> buffer;
   list<char>::iterator cursor;
@@ -179,7 +180,7 @@ int main() {
   editor.Left();
   editor.Left();
   //Текущее состояние редактора: `world, hello|, `
-  editor.Cut(3); // Будут вырезаны 2 символа
+  editor.Cut(3);  // Будут вырезаны 2 символа
   // Текущее состояние редактора: `world, hello|`
   cout << editor.GetText();
   return 0;

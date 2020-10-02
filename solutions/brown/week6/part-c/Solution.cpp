@@ -41,8 +41,10 @@ void TestParseRequests_withModifyConverter() {
       "5\n"
       "Stop Tolstopaltsevo 1: 55.611087, 37.20829\n"
       "Stop Tolstopaltsevo 2: 55.611087, 37.20829, 9m to Tolstopaltsevo 1\n"
-      "Stop Tolstopaltsevo 3: 55.611087, 37.20829, 9m to Tolstopaltsevo 2, 1000000m to stop2, 15m to stop 3\n"
-      "Bus 256 2: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Zapadnoye\n"
+      "Stop Tolstopaltsevo 3: 55.611087, 37.20829, 9m to Tolstopaltsevo 2, "
+      "1000000m to stop2, 15m to stop 3\n"
+      "Bus 256 2: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Zapadnoye\n"
       "Bus 750 2: Tolstopaltsevo - Marushkino - Rasskazovka");
   const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 5ul);
@@ -84,10 +86,11 @@ void TestParseRequests_withModifyConverter() {
 }
 
 void TestParseRequests_withReadConverter() {
-  stringstream input("3\n"
-                     "Bus 2 56\n"
-                     "Stop 7 50\n"
-                     "Bus 751");
+  stringstream input(
+      "3\n"
+      "Bus 2 56\n"
+      "Stop 7 50\n"
+      "Bus 751");
   const vector<unique_ptr<Request>> requests = ParseRequests(READ_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 3ul);
   {
@@ -117,36 +120,43 @@ void TestIntegrationGenerator(string inputText, string expectedText) {
 }
 
 void TestIntegrationPartC() {
-  TestIntegrationGenerator(
-      ("13\n"
-       "Stop Tolstopaltsevo: 55.611087, 37.20829, 3900m to Marushkino\n"
-       "Stop Marushkino: 55.595884, 37.209755, 9900m to Rasskazovka\n"
-       "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > "
-       "Biryulyovo Zapadnoye\n"
-       "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
-       "Stop Rasskazovka: 55.632761, 37.333324\n"
-       "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517, 7500m to Rossoshanskaya ulitsa, 1800m to Biryusinka, 2400m to "
-       "Universam\n"
-       "Stop Biryusinka: 55.581065, 37.64839, 750m to Universam\n"
-       "Stop Universam: 55.587655, 37.645687, 5600m to Rossoshanskaya ulitsa, 900m to Biryulyovo Tovarnaya\n"
-       "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656, 1300m to Biryulyovo Passazhirskaya\n"
-       "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164, 1200m to Biryulyovo Zapadnoye\n"
-       "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye\n"
-       "Stop Rossoshanskaya ulitsa: 55.595579, 37.605757\n"
-       "Stop Prazhskaya: 55.611678, 37.603831\n"
-       "6\n"
-       "Bus 256\n"
-       "Bus 750\n"
-       "Bus 751\n"
-       "Stop Samara\n"
-       "Stop Prazhskaya\n"
-       "Stop Biryulyovo Zapadnoye"),
-      ("Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.361239 curvature\n"
-       "Bus 750: 5 stops on route, 3 unique stops, 27600 route length, 1.318084 curvature\n"
-       "Bus 751: not found\n"
-       "Stop Samara: not found\n"
-       "Stop Prazhskaya: no buses\n"
-       "Stop Biryulyovo Zapadnoye: buses 256 828\n"));
+  TestIntegrationGenerator(("13\n"
+                            "Stop Tolstopaltsevo: 55.611087, 37.20829, 3900m to Marushkino\n"
+                            "Stop Marushkino: 55.595884, 37.209755, 9900m to Rasskazovka\n"
+                            "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+                            "Tovarnaya > Biryulyovo Passazhirskaya > "
+                            "Biryulyovo Zapadnoye\n"
+                            "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
+                            "Stop Rasskazovka: 55.632761, 37.333324\n"
+                            "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517, 7500m to Rossoshanskaya "
+                            "ulitsa, 1800m to Biryusinka, 2400m to "
+                            "Universam\n"
+                            "Stop Biryusinka: 55.581065, 37.64839, 750m to Universam\n"
+                            "Stop Universam: 55.587655, 37.645687, 5600m to Rossoshanskaya ulitsa, "
+                            "900m to Biryulyovo Tovarnaya\n"
+                            "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656, 1300m to Biryulyovo "
+                            "Passazhirskaya\n"
+                            "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164, 1200m to "
+                            "Biryulyovo Zapadnoye\n"
+                            "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > "
+                            "Biryulyovo Zapadnoye\n"
+                            "Stop Rossoshanskaya ulitsa: 55.595579, 37.605757\n"
+                            "Stop Prazhskaya: 55.611678, 37.603831\n"
+                            "6\n"
+                            "Bus 256\n"
+                            "Bus 750\n"
+                            "Bus 751\n"
+                            "Stop Samara\n"
+                            "Stop Prazhskaya\n"
+                            "Stop Biryulyovo Zapadnoye"),
+                           ("Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.361239 "
+                            "curvature\n"
+                            "Bus 750: 5 stops on route, 3 unique stops, 27600 route length, "
+                            "1.318084 curvature\n"
+                            "Bus 751: not found\n"
+                            "Stop Samara: not found\n"
+                            "Stop Prazhskaya: no buses\n"
+                            "Stop Biryulyovo Zapadnoye: buses 256 828\n"));
 }
 
 void TestIntegrationPartC_byGrader() {
@@ -169,12 +179,16 @@ void TestIntegrationPartC_byGrader() {
                             "Bus bus3"),
                            ("Stop G3CI8GVWJuzWKu: not found\n"
                             "Stop stop2: buses bus1 bus2 bus3\n"
-                            "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
-                            "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+                            "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, "
+                            "187.0497 curvature\n"
+                            "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, "
+                            "187.0497 curvature\n"
                             "Stop stop1: buses bus1 bus2 bus3\n"
                             "Stop stop2: buses bus1 bus2 bus3\n"
                             "Bus D12sVwF2FOANXi: not found\n"
-                            "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"
+                            "Bus bus1: 3 stops on route, 2 unique stops, 1588986 route length, "
+                            "187.0497 curvature\n"
                             "Bus RDBiZwD: not found\n"
-                            "Bus bus3: 3 stops on route, 2 unique stops, 1588986 route length, 187.0497 curvature\n"));
+                            "Bus bus3: 3 stops on route, 2 unique stops, 1588986 route length, "
+                            "187.0497 curvature\n"));
 }

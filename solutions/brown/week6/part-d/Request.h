@@ -1,15 +1,16 @@
 #ifndef C_PLUS_PLUS_BELTS_REQUEST_H
 #define C_PLUS_PLUS_BELTS_REQUEST_H
 
-#include "Coordinate.h"
-#include "Database.h"
-#include "Json.h"
 #include <map>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+
+#include "Coordinate.h"
+#include "Database.h"
+#include "Json.h"
 
 struct Request;
 using RequestHolder = std::unique_ptr<Request>;
@@ -92,4 +93,4 @@ struct ReadStopRequest : ReadRequest<Json::Document> {
   std::string stopName;
 };
 
-#endif // C_PLUS_PLUS_BELTS_REQUEST_H
+#endif  // C_PLUS_PLUS_BELTS_REQUEST_H

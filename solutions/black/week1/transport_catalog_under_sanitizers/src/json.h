@@ -14,7 +14,7 @@ class Node;
 using Dict = std::map<std::string, Node>;
 
 class Node : std::variant<std::vector<Node>, Dict, bool, int, double, std::string> {
-public:
+ public:
   using variant::variant;
   const variant &GetBase() const { return *this; }
 
@@ -29,12 +29,12 @@ public:
 };
 
 class Document {
-public:
+ public:
   explicit Document(Node root) : root(move(root)) {}
 
   const Node &GetRoot() const { return root; }
 
-private:
+ private:
   Node root;
 };
 
@@ -68,4 +68,4 @@ void PrintValue<Document>(const Document &doc, std::ostream &output);
 std::ostream &operator<<(std::ostream &output, const Document &rhs);
 
 bool operator==(const Document &lhs, const Document &rhs);
-} // namespace Json
+}  // namespace Json

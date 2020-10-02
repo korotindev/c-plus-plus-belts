@@ -1,7 +1,9 @@
 #include "requests.h"
-#include "transport_router.h"
 
+#include <iomanip>
 #include <vector>
+
+#include "transport_router.h"
 
 using namespace std;
 
@@ -74,14 +76,25 @@ Json::Dict Route::Process(const TransportCatalog &db) const {
   return dict;
 }
 
-variant<Stop, Bus, Route> Read(const Json::Dict &attrs) {
+Json::Dict Map::Process(const TransportCatalog &db) const {
+  Json::Dict dict;
+  const auto map = db.BuildMap();
+  stringstream ss;
+  ss << quoted(map.svg);
+  dict["map"] = ss.str();
+  return dict;
+}
+
+variant<Stop, Bus, Route, Map> Read(const Json::Dict &attrs) {
   const string &type = attrs.at("type").AsString();
   if (type == "Bus") {
     return Bus{attrs.at("name").AsString()};
   } else if (type == "Stop") {
     return Stop{attrs.at("name").AsString()};
-  } else {
+  } else if (type == "Route") {
     return Route{attrs.at("from").AsString(), attrs.at("to").AsString()};
+  } else {
+    return Map{};
   }
 }
 
@@ -97,4 +110,4 @@ vector<Json::Node> ProcessAll(const TransportCatalog &db, const vector<Json::Nod
   return responses;
 }
 
-} // namespace Requests
+}  // namespace Requests

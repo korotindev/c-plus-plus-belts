@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graph.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -12,14 +10,16 @@
 #include <utility>
 #include <vector>
 
+#include "graph.h"
+
 namespace Graph {
 
 template <typename Weight>
 class Router {
-private:
+ private:
   using Graph = DirectedWeightedGraph<Weight>;
 
-public:
+ public:
   Router(const Graph &graph);
 
   using RouteId = uint64_t;
@@ -34,7 +34,7 @@ public:
   EdgeId GetRouteEdge(RouteId route_id, size_t edge_idx) const;
   void ReleaseRoute(RouteId route_id);
 
-private:
+ private:
   const Graph &graph_;
 
   struct RouteInternalData {
@@ -110,4 +110,4 @@ void Router<Weight>::ReleaseRoute(RouteId route_id) {
   expanded_routes_cache_.erase(route_id);
 }
 
-} // namespace Graph
+}  // namespace Graph

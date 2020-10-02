@@ -1,3 +1,5 @@
+#pragma once
+
 #include <memory>
 #include <sstream>
 #include <string>
@@ -12,11 +14,24 @@ struct Point {
 };
 
 struct Rgb {
-  short red;
-  short green;
-  short blue;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+
   std::string str() {
     return "rgb(" + std::to_string(red) + "," + std::to_string(green) + "," + std::to_string(blue) + ")";
+  }
+};
+
+struct Rgba {
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  double alpha;
+
+  std::string str() {
+    return "rgba(" + std::to_string(red) + "," + std::to_string(green) + "," + std::to_string(blue) + "," +
+           std::to_string(alpha) + ")";
   }
 };
 
@@ -25,6 +40,7 @@ struct Color {
   Color(std::string value_) : value(move(value_)) {}
   Color(const char *value_) : value(value_) {}
   Color(Rgb rgb) : value(rgb.str()) {}
+  Color(Rgba rgba) : value(rgba.str()) {}
   const std::string value;
   const std::string &str() { return value; }
 };

@@ -1,7 +1,8 @@
-#include "test_runner.h"
 #include <limits>
 #include <random>
 #include <unordered_set>
+
+#include "test_runner.h"
 
 using namespace std;
 
@@ -99,7 +100,7 @@ void TestDistribution() {
   mt19937 gen(seed);
 
   uniform_int_distribution<int> height_dist(150, 200);
-  uniform_int_distribution<int> weight_dist(100, 240); // [50, 120]
+  uniform_int_distribution<int> weight_dist(100, 240);  // [50, 120]
   uniform_int_distribution<int> building_dist(1, 300);
   uniform_int_distribution<int> word_dist(0, WORDS.size() - 1);
 

@@ -1,9 +1,10 @@
-#include "test_runner.h"
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "test_runner.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ vector<string> ReadDomains(istream &input) {
 }
 
 class BadSubdomainsChecker {
-public:
+ public:
   BadSubdomainsChecker(vector<string> &&domain_names) {
     banned_domains.reserve(domain_names.size());
     for (auto &domain_name : domain_names) {
@@ -49,12 +50,12 @@ public:
     return result;
   }
 
-private:
+ private:
   class ReversedDomain {
-  public:
+   public:
     string name;
 
-  public:
+   public:
     ReversedDomain() {}
     ReversedDomain(ReversedDomain &&reversed) : name(move(reversed.name)) {}
 
@@ -105,9 +106,10 @@ void Solution(istream &input, ostream &output) {
 }
 
 void TestReadDomains() {
-  stringstream input("2\n"
-                     "yandex.ru\n"
-                     "google.com\n");
+  stringstream input(
+      "2\n"
+      "yandex.ru\n"
+      "google.com\n");
 
   vector<string> domains = ReadDomains(input);
   vector<string> expected_domains = {"yandex.ru", "google.com"};
@@ -115,12 +117,13 @@ void TestReadDomains() {
 }
 
 void TestDoubleReadDomains() {
-  stringstream input("2\n"
-                     "yandex.ru\n"
-                     "google.com\n"
-                     "2\n"
-                     "ya.ru\n"
-                     "mail.ru\n");
+  stringstream input(
+      "2\n"
+      "yandex.ru\n"
+      "google.com\n"
+      "2\n"
+      "ya.ru\n"
+      "mail.ru\n");
 
   vector<string> domains = ReadDomains(input);
   vector<string> expected_domains = {"yandex.ru", "google.com"};
@@ -169,26 +172,28 @@ void TestBadSubdomainChecker() {
 }
 
 void TestSolution() {
-  stringstream input("4\n"
-                     "ya.ru\n"
-                     "maps.me\n"
-                     "m.ya.ru\n"
-                     "com\n"
-                     "7\n"
-                     "ya.ru\n"
-                     "ya.com\n"
-                     "m.maps.me\n"
-                     "moscow.m.ya.ru\n"
-                     "maps.com\n"
-                     "maps.ru\n"
-                     "ya.ya\n");
-  string expected_output("Bad\n"
-                         "Bad\n"
-                         "Bad\n"
-                         "Bad\n"
-                         "Bad\n"
-                         "Good\n"
-                         "Good\n");
+  stringstream input(
+      "4\n"
+      "ya.ru\n"
+      "maps.me\n"
+      "m.ya.ru\n"
+      "com\n"
+      "7\n"
+      "ya.ru\n"
+      "ya.com\n"
+      "m.maps.me\n"
+      "moscow.m.ya.ru\n"
+      "maps.com\n"
+      "maps.ru\n"
+      "ya.ya\n");
+  string expected_output(
+      "Bad\n"
+      "Bad\n"
+      "Bad\n"
+      "Bad\n"
+      "Bad\n"
+      "Good\n"
+      "Good\n");
   stringstream output;
   Solution(input, output);
   ASSERT_EQUAL(expected_output, output.str());

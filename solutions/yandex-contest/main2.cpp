@@ -1,4 +1,3 @@
-#include "test_runner.h"
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -6,6 +5,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "test_runner.h"
 
 using namespace std;
 using Palletes = vector<pair<int, int>>;

@@ -9,14 +9,14 @@
 
 template <typename It>
 class Range {
-public:
+ public:
   using ValueType = typename std::iterator_traits<It>::value_type;
 
   Range(It begin, It end) : begin_(begin), end_(end) {}
   It begin() const { return begin_; }
   It end() const { return end_; }
 
-private:
+ private:
   It begin_;
   It end_;
 };
@@ -41,4 +41,4 @@ Number ReadNumberOnLine(std::istream &stream) {
 
 static const size_t DEFAULT_PRECISION = 7;
 
-#endif // C_PLUS_PLUS_BELTS_CUSTOMUTILS_H
+#endif  // C_PLUS_PLUS_BELTS_CUSTOMUTILS_H

@@ -1,23 +1,24 @@
-#include "profile.h"
-#include "test_runner.h"
 #include <algorithm>
 #include <iostream>
 #include <numeric>
 #include <tuple>
 #include <vector>
 
+#include "profile.h"
+#include "test_runner.h"
+
 using namespace std;
 
 template <typename It>
 class Range {
-public:
+ public:
   Range(It begin, It end) : begin_(begin), end_(end) {}
 
   It begin() const { return begin_; }
 
   It end() const { return end_; }
 
-private:
+ private:
   It begin_;
   It end_;
 };
@@ -30,7 +31,7 @@ class Date {
   friend DateHasher;
   friend DateIterator;
 
-public:
+ public:
   Date() = default;
 
   Date(size_t year_, size_t month_, size_t day_) : year(year_), month(month_), day(day_) {}
@@ -60,14 +61,14 @@ public:
     return output;
   }
 
-private:
+ private:
   size_t year = 2000;
   size_t month = 0;
   size_t day = 0;
 };
 
 class DateIterator {
-public:
+ public:
   DateIterator(Date date_) : begin_date(date_) {}
 
   DateIterator operator++(int) {
@@ -97,7 +98,7 @@ public:
 
   Date &operator*() { return begin_date; }
 
-private:
+ private:
   bool IsLeapYear() {
     return (begin_date.year % 4 == 0) && !(begin_date.year % 100 == 0 && begin_date.year % 400 != 0);
   }
@@ -124,7 +125,7 @@ class DB {
   static const size_t min_year = 2000;
   static const size_t max_year = 2099;
 
-public:
+ public:
   DB() {
     Date minDate(min_year, 1, 1);
     Date maxDate(max_year, 12, 31);
@@ -168,7 +169,7 @@ public:
               [diff_per_day](double d) { return d += diff_per_day; });
   }
 
-private:
+ private:
   size_t DateToUnixEpoch(Date d) { return date_to_size_t[d]; }
 
   template <class Container>

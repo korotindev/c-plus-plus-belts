@@ -1,9 +1,10 @@
 #pragma once
 
-#include "CustomUtils.h"
 #include <cstdlib>
 #include <deque>
 #include <vector>
+
+#include "CustomUtils.h"
 
 namespace Graph {
 
@@ -19,11 +20,11 @@ struct Edge {
 
 template <typename Weight>
 class DirectedWeightedGraph {
-private:
+ private:
   using IncidenceList = std::vector<EdgeId>;
   using IncidentEdgesRange = Range<typename IncidenceList::const_iterator>;
 
-public:
+ public:
   DirectedWeightedGraph(size_t vertex_count);
   EdgeId AddEdge(const Edge<Weight> &edge);
 
@@ -32,7 +33,7 @@ public:
   const Edge<Weight> &GetEdge(EdgeId edge_id) const;
   IncidentEdgesRange GetIncidentEdges(VertexId vertex) const;
 
-private:
+ private:
   std::vector<Edge<Weight>> edges_;
   std::vector<IncidenceList> incidence_lists_;
 };
@@ -64,9 +65,9 @@ const Edge<Weight> &DirectedWeightedGraph<Weight>::GetEdge(EdgeId edge_id) const
 }
 
 template <typename Weight>
-typename DirectedWeightedGraph<Weight>::IncidentEdgesRange
-DirectedWeightedGraph<Weight>::GetIncidentEdges(VertexId vertex) const {
+typename DirectedWeightedGraph<Weight>::IncidentEdgesRange DirectedWeightedGraph<Weight>::GetIncidentEdges(
+    VertexId vertex) const {
   const auto &edges = incidence_lists_[vertex];
   return {std::begin(edges), std::end(edges)};
 }
-} // namespace Graph
+}  // namespace Graph

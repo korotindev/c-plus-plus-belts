@@ -1,13 +1,14 @@
 #ifndef C_PLUS_PLUS_BELTS_SOLUTION_H
 #define C_PLUS_PLUS_BELTS_SOLUTION_H
 
+#include <fstream>
+#include <iostream>
+#include <vector>
+
 #include "CustomUtils.h"
 #include "Json.h"
 #include "Request.h"
 #include "test_runner.h"
-#include <fstream>
-#include <iostream>
-#include <vector>
 
 std::vector<std::unique_ptr<Request>> ParseSpecificRequests(TypeConverter converter, Json::Document &document,
                                                             std::string key);
@@ -23,4 +24,4 @@ void TestIntegrationGenerator(std::string input, std::string expected);
 void TestIntegrationPartD();
 void TestIntegrationPartDRaw();
 
-#endif // C_PLUS_PLUS_BELTS_SOLUTION_H
+#endif  // C_PLUS_PLUS_BELTS_SOLUTION_H

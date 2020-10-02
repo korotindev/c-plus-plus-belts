@@ -1,10 +1,10 @@
-#include "simple_vector.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "simple_vector.h"
+#include "test_runner.h"
 using namespace std;
 
 void TestConstruction() {
@@ -36,7 +36,7 @@ void TestPushBack() {
 }
 
 class StringNonCopyable : public string {
-public:
+ public:
   using string::string;
   StringNonCopyable(string &&other) : string(move(other)) {}
   StringNonCopyable(const StringNonCopyable &) = delete;

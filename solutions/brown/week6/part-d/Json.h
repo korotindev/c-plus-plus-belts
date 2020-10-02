@@ -11,7 +11,7 @@
 namespace Json {
 
 class Node : public std::variant<std::vector<Node>, std::map<std::string, Node>, double, size_t, bool, std::string> {
-public:
+ public:
   using variant::variant;
 
   const auto &AsArray() const { return std::get<std::vector<Node>>(*this); }
@@ -28,12 +28,12 @@ public:
 };
 
 class Document {
-public:
+ public:
   explicit Document(Node root);
 
   const Node &GetRoot() const;
 
-private:
+ private:
   Node root;
 };
 
@@ -42,6 +42,6 @@ Document Load(std::istream &input);
 bool operator==(const Document &lhs, const Document &rhs);
 std::ostream &operator<<(std::ostream &output, const Document &rhs);
 std::ostream &operator<<(std::ostream &output, const Node &data);
-} // namespace Json
+}  // namespace Json
 
-#endif // C_PLUS_PLUS_BELTS_JSON_H
+#endif  // C_PLUS_PLUS_BELTS_JSON_H

@@ -7,7 +7,7 @@ using namespace std;
 
 template <typename T, size_t N>
 class StackVector {
-public:
+ public:
   explicit StackVector(size_t a_size = 0) {
     if (a_size > N) {
       throw invalid_argument("");
@@ -45,7 +45,7 @@ public:
     return data[--size];
   }
 
-private:
+ private:
   array<T, N> data;
   size_t size;
 };

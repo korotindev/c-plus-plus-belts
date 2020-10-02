@@ -1,16 +1,16 @@
 #pragma once
 
-#include "descriptions.h"
-#include "json.h"
-#include "transport_router.h"
-#include "utils.h"
-
 #include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+#include "descriptions.h"
+#include "json.h"
+#include "transport_router.h"
+#include "utils.h"
 
 namespace Responses {
 struct Stop {
@@ -23,14 +23,14 @@ struct Bus {
   int road_route_length = 0;
   double geo_route_length = 0.0;
 };
-} // namespace Responses
+}  // namespace Responses
 
 class TransportCatalog {
-private:
+ private:
   using Bus = Responses::Bus;
   using Stop = Responses::Stop;
 
-public:
+ public:
   TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict &routing_settings_json);
 
   const Stop *GetStop(const std::string &name) const;
@@ -40,7 +40,7 @@ public:
 
   std::string RenderMap() const;
 
-private:
+ private:
   static int ComputeRoadRouteLength(const std::vector<std::string> &stops, const Descriptions::StopsDict &stops_dict);
 
   static double ComputeGeoRouteDistance(const std::vector<std::string> &stops,

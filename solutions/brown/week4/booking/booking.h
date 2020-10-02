@@ -6,7 +6,7 @@
 namespace RAII {
 template <class Provider>
 class Booking {
-public:
+ public:
   Booking(const Booking &other) = delete;
 
   Booking(Booking &&other) : provider(other.provider), booking_id(other.booking_id) { other.provider = nullptr; };
@@ -25,8 +25,8 @@ public:
     }
   }
 
-private:
+ private:
   Provider *provider;
   int booking_id;
 };
-} // namespace RAII
+}  // namespace RAII

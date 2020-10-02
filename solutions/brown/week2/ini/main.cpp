@@ -1,8 +1,7 @@
-#include "test_runner.h"
+#include <sstream>
 
 #include "ini.h"
-
-#include <sstream>
+#include "test_runner.h"
 
 using namespace std;
 
@@ -78,10 +77,14 @@ void TestUnknownSection() {
 
   try {
     doc.GetSection("secondary");
-    Assert(false, "Ini::Document::GetSection() should throw std::out_of_range for unknown section");
+    Assert(false,
+           "Ini::Document::GetSection() should throw std::out_of_range for "
+           "unknown section");
   } catch (out_of_range &) {
   } catch (...) {
-    Assert(false, "Ini::Document::GetSection() throws unexpected exception for unknown section");
+    Assert(false,
+           "Ini::Document::GetSection() throws unexpected exception for "
+           "unknown section");
   }
 }
 

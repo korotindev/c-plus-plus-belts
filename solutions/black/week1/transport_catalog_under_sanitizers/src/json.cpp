@@ -39,7 +39,7 @@ Node LoadNumber(istream &input) {
   if (input.peek() != '.') {
     return Node(int_part * (is_negative ? -1 : 1));
   }
-  input.get(); // '.'
+  input.get();  // '.'
   double result = int_part;
   double frac_mult = 0.1;
   while (isdigit(input.peek())) {
@@ -155,4 +155,4 @@ bool operator==(const Document &lhs, const Document &rhs) {
   return output_lhs.str() == output_rhs.str();
 }
 
-} // namespace Json
+}  // namespace Json

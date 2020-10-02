@@ -1,9 +1,9 @@
-#include "profile.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <iostream>
 #include <vector>
+
+#include "profile.h"
+#include "test_runner.h"
 
 using namespace std;
 
@@ -31,7 +31,7 @@ void PrintCoeff(std::ostream &out, int i, const T &coef, bool printed) {
 
 template <typename T>
 class Polynomial {
-private:
+ private:
   std::vector<T> coeffs_ = {0};
 
   void Shrink() {
@@ -40,7 +40,7 @@ private:
     }
   }
 
-public:
+ public:
   Polynomial() = default;
 
   Polynomial(vector<T> coeffs) : coeffs_(std::move(coeffs)) { Shrink(); }
@@ -81,7 +81,7 @@ public:
   T operator[](size_t degree) const { return degree < coeffs_.size() ? coeffs_[degree] : 0; }
 
   class IndexProxy {
-  public:
+   public:
     IndexProxy(Polynomial &poly_, size_t degree_) : poly(poly_), degree(degree_) {}
 
     T operator=(T elem) {
@@ -95,7 +95,7 @@ public:
 
     operator T() const { return as_const(poly)[degree]; }
 
-  private:
+   private:
     Polynomial &poly;
     size_t degree;
   };

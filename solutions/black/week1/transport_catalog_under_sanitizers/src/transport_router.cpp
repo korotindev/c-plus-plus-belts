@@ -65,7 +65,7 @@ void TransportRouter::FillGraphWithBuses(const Descriptions::StopsDict &stops_di
         });
         graph_.AddEdge({
             start_vertex_id, finish_vertex_id,
-            total_distance * 1.0 / (routing_settings_.bus_velocity * 1000.0 / 60) // m / (km/h * 1000 / 60) = min
+            total_distance * 1.0 / (routing_settings_.bus_velocity * 1000.0 / 60)  // m / (km/h * 1000 / 60) = min
         });
       }
     }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "json.h"
-#include "sphere.h"
-
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+#include "json.h"
+#include "sphere.h"
 
 namespace Descriptions {
 struct Stop {
@@ -37,4 +37,4 @@ using Dict = std::unordered_map<std::string, const Object *>;
 
 using StopsDict = Dict<Stop>;
 using BusesDict = Dict<Bus>;
-} // namespace Descriptions
+}  // namespace Descriptions

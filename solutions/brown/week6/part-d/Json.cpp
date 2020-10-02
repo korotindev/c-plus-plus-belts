@@ -129,4 +129,4 @@ std::ostream &operator<<(std::ostream &output, const Node &data) {
   }
   return output;
 }
-} // namespace Json
+}  // namespace Json

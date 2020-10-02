@@ -13,4 +13,4 @@ struct Point {
 };
 
 double Distance(Point lhs, Point rhs);
-} // namespace Sphere
+}  // namespace Sphere

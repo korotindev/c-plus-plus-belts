@@ -1,16 +1,18 @@
 #pragma once
 
-#include "descriptions.h"
-#include "json.h"
-#include "transport_router.h"
-#include "utils.h"
-
 #include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+#include "descriptions.h"
+#include "json.h"
+#include "svg.h"
+#include "transport_drawer.h"
+#include "transport_router.h"
+#include "utils.h"
 
 namespace Responses {
 struct Stop {
@@ -23,24 +25,26 @@ struct Bus {
   int road_route_length = 0;
   double geo_route_length = 0.0;
 };
-} // namespace Responses
+
+}  // namespace Responses
 
 class TransportCatalog {
-private:
+ private:
   using Bus = Responses::Bus;
   using Stop = Responses::Stop;
 
-public:
-  TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict &routing_settings_json);
+ public:
+  TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict &routing_settings_json,
+                   const Json::Dict &render_settings_json);
 
   const Stop *GetStop(const std::string &name) const;
   const Bus *GetBus(const std::string &name) const;
 
   std::optional<TransportRouter::RouteInfo> FindRoute(const std::string &stop_from, const std::string &stop_to) const;
 
-  std::string RenderMap() const;
+  TransportDrawer::Map BuildMap() const;
 
-private:
+ private:
   static int ComputeRoadRouteLength(const std::vector<std::string> &stops, const Descriptions::StopsDict &stops_dict);
 
   static double ComputeGeoRouteDistance(const std::vector<std::string> &stops,
@@ -49,4 +53,5 @@ private:
   std::unordered_map<std::string, Stop> stops_;
   std::unordered_map<std::string, Bus> buses_;
   std::unique_ptr<TransportRouter> router_;
+  std::unique_ptr<TransportDrawer> drawer_;
 };

@@ -1,5 +1,3 @@
-#include "test_runner.h"
-
 #include <future>
 #include <mutex>
 #include <numeric>
@@ -8,11 +6,13 @@
 #include <thread>
 #include <vector>
 
+#include "test_runner.h"
+
 using namespace std;
 
 template <typename T>
 class Synchronized {
-public:
+ public:
   explicit Synchronized(T initial = T()) : value(move(initial)) {}
 
   struct Access {
@@ -22,7 +22,7 @@ public:
 
   Access GetAccess() { return Access{value, lock_guard(m)}; }
 
-private:
+ private:
   T value;
   mutex m;
 };

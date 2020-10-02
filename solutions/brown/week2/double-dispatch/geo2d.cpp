@@ -122,4 +122,4 @@ bool Collide(Circle c1, Circle c2) {
   return DistanceSquared(c1.center, c2.center) <= Sqr<uint64_t>(c1.radius + c2.radius);
 }
 
-} // namespace geo2d
+}  // namespace geo2d

@@ -1,11 +1,11 @@
-#include "new_booking_providers.h"
-
 #include <vector>
+
+#include "new_booking_providers.h"
 
 using namespace std;
 
 class Trip {
-public:
+ public:
   vector<HotelProvider::Booking> hotels;
   vector<FlightProvider::Booking> flights;
 
@@ -23,7 +23,7 @@ public:
 };
 
 class TripManager {
-public:
+ public:
   struct BookingData {
     string city_from;
     string city_to;
@@ -52,7 +52,7 @@ public:
 
   void Cancel(Trip &trip) { trip.Cancel(); }
 
-private:
+ private:
   HotelProvider hotel_provider;
   FlightProvider flight_provider;
 };

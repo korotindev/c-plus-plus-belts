@@ -1,7 +1,3 @@
-#include "parse.h"
-#include "search_server.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <fstream>
 #include <iterator>
@@ -11,6 +7,10 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+#include "parse.h"
+#include "search_server.h"
+#include "test_runner.h"
 
 using namespace std;
 
@@ -135,7 +135,8 @@ void TestBasicSearch() {
   const vector<string> docs = {"we are ready to go",
                                "come on everybody shake you hands",
                                "i love this game",
-                               "just like exception safety is not about writing try catch everywhere in your code move "
+                               "just like exception safety is not about writing try catch everywhere in "
+                               "your code move "
                                "semantics are not about typing double ampersand everywhere in your code",
                                "daddy daddy daddy dad dad dad",
                                "tell me the meaning of being lonely",
@@ -226,7 +227,7 @@ void GenerateLargeTextFiles() {
       "database.txt",
       rd,
       possible_words,
-      11000, // 50000
+      11000,  // 50000
       50,
       max_word_len,
       80,
@@ -239,7 +240,7 @@ void GenerateLargeTextFiles() {
       "queries.txt",
       rd,
       possible_words,
-      12000, // 500000
+      12000,  // 500000
       50,
       max_word_len,
       80,
@@ -271,7 +272,7 @@ void TestSearchServer(vector<pair<istream *, ostream *>> streams) {
   TotalDuration updateDocumentBase("UpdateDocumentBase");
   TotalDuration addQueriesStream("addQueriesStream");
   LOG_DURATION("SRV LIVE");
-  std::mt19937_64 eng{std::random_device{}()}; // or seed however you want
+  std::mt19937_64 eng{std::random_device{}()};  // or seed however you want
   std::uniform_int_distribution<> dist{0, 100};
   SearchServer srv(*streams.front().first);
   for (auto &[input, output] : IteratorRange(begin(streams) + 1, end(streams))) {
@@ -288,7 +289,6 @@ void TestSearchServer(vector<pair<istream *, ostream *>> streams) {
 
 void TestMultithread() {
   {
-
     ifstream docs1("database1.txt");
     ifstream docs2("database2.txt");
     ifstream docs3("database3.txt");

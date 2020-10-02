@@ -1,6 +1,5 @@
 #pragma once
 
-#include "profile.h"
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -11,6 +10,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "profile.h"
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const std::vector<T> &s) {
@@ -97,7 +98,7 @@ void AssertEqual(const T &t, const U &u, const std::string &hint = {}) {
 inline void Assert(bool b, const std::string &hint) { AssertEqual(b, true, hint); }
 
 class TestRunner {
-public:
+ public:
   template <class TestFunc>
   void RunTest(TestFunc func, const std::string &test_name) {
     {
@@ -122,22 +123,22 @@ public:
     }
   }
 
-private:
+ private:
   int fail_count = 0;
 };
 
-#define ASSERT_EQUAL(x, y)                                                                                             \
-  {                                                                                                                    \
-    std::ostringstream os;                                                                                             \
-    os << #x << " != " << #y << ", " << __FILE__ << ":" << __LINE__;                                                   \
-    AssertEqual(x, y, os.str());                                                                                       \
+#define ASSERT_EQUAL(x, y)                                           \
+  {                                                                  \
+    std::ostringstream os;                                           \
+    os << #x << " != " << #y << ", " << __FILE__ << ":" << __LINE__; \
+    AssertEqual(x, y, os.str());                                     \
   }
 
-#define ASSERT(x)                                                                                                      \
-  {                                                                                                                    \
-    std::ostringstream os;                                                                                             \
-    os << #x << " is false, " << __FILE__ << ":" << __LINE__;                                                          \
-    Assert(x, os.str());                                                                                               \
+#define ASSERT(x)                                             \
+  {                                                           \
+    std::ostringstream os;                                    \
+    os << #x << " is false, " << __FILE__ << ":" << __LINE__; \
+    Assert(x, os.str());                                      \
   }
 
 #define RUN_TEST(tr, func) tr.RunTest(func, #func)

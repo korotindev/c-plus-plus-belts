@@ -1,10 +1,11 @@
 #ifndef C_PLUS_PLUS_BELTS_SOLUTION_H
 #define C_PLUS_PLUS_BELTS_SOLUTION_H
 
+#include <vector>
+
 #include "CustomUtils.h"
 #include "Request.h"
 #include "test_runner.h"
-#include <vector>
 
 std::vector<std::unique_ptr<Request>> ParseRequests(const TypeConverter &converter, std::istream &input);
 
@@ -20,4 +21,4 @@ void TestIntegrationGenerator(std::string input, std::string expected);
 void TestIntegrationPartC();
 void TestIntegrationPartC_byGrader();
 
-#endif // C_PLUS_PLUS_BELTS_SOLUTION_H
+#endif  // C_PLUS_PLUS_BELTS_SOLUTION_H

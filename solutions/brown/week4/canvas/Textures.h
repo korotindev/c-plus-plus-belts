@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Common.h"
-
 #include <memory>
+
+#include "Common.h"
 
 std::unique_ptr<ITexture> MakeTextureSolid(Size size, char pixel);
 

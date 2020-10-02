@@ -9,14 +9,14 @@ using namespace std;
 
 template <typename Iterator>
 class IteratorRange {
-public:
+ public:
   IteratorRange(Iterator begin, Iterator end) : first(begin), last(end) {}
 
   Iterator begin() const { return first; }
 
   Iterator end() const { return last; }
 
-private:
+ private:
   Iterator first, last;
 };
 
@@ -105,11 +105,12 @@ StatsData BuildStatsData(vector<Person> people) {
 
 int main() {
   // Основной проблемой исходного решения было то, что в нём случайно изменялись
-  // входные данные. Чтобы ганатировать, что этого не произойдёт, мы организовываем код
-  // так, чтобы в месте обработки запросов были видны только константные данные.
+  // входные данные. Чтобы ганатировать, что этого не произойдёт, мы
+  // организовываем код так, чтобы в месте обработки запросов были видны только
+  // константные данные.
   //
-  // Для этого всю их предобработку мы вынесли в отдельную функцию, результат которой
-  // сохраняем в константной переменной.
+  // Для этого всю их предобработку мы вынесли в отдельную функцию, результат
+  // которой сохраняем в константной переменной.
   const StatsData stats = BuildStatsData(ReadPeople(cin));
 
   for (string command; cin >> command;) {

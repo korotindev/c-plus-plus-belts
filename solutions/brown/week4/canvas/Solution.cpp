@@ -5,7 +5,7 @@ using namespace std;
 // Этот файл сдаётся на проверку
 // Здесь напишите реализацию необходимых классов-потомков `IShape`
 class OrdinaryShape : public IShape {
-public:
+ public:
   void SetPosition(Point p) final { this->point = p; }
 
   Point GetPosition() const final { return this->point; }
@@ -27,14 +27,14 @@ public:
     return p.y < textureSize.height && p.x < textureSize.width;
   }
 
-protected:
+ protected:
   shared_ptr<ITexture> texture;
   Point point;
   Size size;
 };
 
 class RectangleShape : public OrdinaryShape {
-public:
+ public:
   std::unique_ptr<IShape> Clone() const final { return make_unique<RectangleShape>(*this); }
 
   void Draw(Image &image) const final {
@@ -54,7 +54,7 @@ public:
 };
 
 class EllipseShape : public OrdinaryShape {
-public:
+ public:
   std::unique_ptr<IShape> Clone() const final { return make_unique<EllipseShape>(*this); }
 
   void Draw(Image &image) const final {
@@ -78,10 +78,10 @@ public:
 // Напишите реализацию функции
 unique_ptr<IShape> MakeShape(ShapeType shape_type) {
   switch (shape_type) {
-  case ShapeType::Rectangle:
-    return make_unique<RectangleShape>();
+    case ShapeType::Rectangle:
+      return make_unique<RectangleShape>();
 
-  case ShapeType::Ellipse:
-    return make_unique<EllipseShape>();
+    case ShapeType::Ellipse:
+      return make_unique<EllipseShape>();
   }
 }

@@ -20,4 +20,4 @@ double Distance(Point lhs, Point rhs) {
               cos(lhs.latitude) * cos(rhs.latitude) * cos(abs(lhs.longitude - rhs.longitude))) *
          EARTH_RADIUS;
 }
-} // namespace Sphere
+}  // namespace Sphere

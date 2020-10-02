@@ -1,10 +1,10 @@
-#include "test_runner.h"
-#include "xml.h"
-
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+#include "test_runner.h"
+#include "xml.h"
 
 using namespace std;
 

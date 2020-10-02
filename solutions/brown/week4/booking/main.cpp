@@ -1,14 +1,13 @@
 //#include "old_trip_manager.h"  // со старыми классами все тесты проходят
-#include "new_trip_manager.h"
-
-#include "test_runner.h"
-
 #include <stdexcept>
+
+#include "new_trip_manager.h"
+#include "test_runner.h"
 
 using namespace std;
 
-// Эти определения статических переменных правильнее было бы поместить в соответствующий cpp-файл,
-// но мы для простоты разместим их здесь
+// Эти определения статических переменных правильнее было бы поместить в
+// соответствующий cpp-файл, но мы для простоты разместим их здесь
 
 int FlightProvider::capacity = 0;
 int FlightProvider::counter = 0;

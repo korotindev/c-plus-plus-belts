@@ -109,9 +109,9 @@ Database::CustomGraphVertex::CustomGraphVertex(size_t id_, Database::CustomGraph
                                                std::string_view stopName_)
     : id(id_), type(type_), stopName(stopName_) {}
 
-shared_ptr<Database::CustomGraphVertex>
-Database::findOrCreateStop(std::unordered_map<std::string_view, std::shared_ptr<CustomGraphVertex>> &store,
-                           CustomGraphVertexType type, std::string_view stopName) {
+shared_ptr<Database::CustomGraphVertex> Database::findOrCreateStop(
+    std::unordered_map<std::string_view, std::shared_ptr<CustomGraphVertex>> &store, CustomGraphVertexType type,
+    std::string_view stopName) {
   if (auto it = store.find(stopName); it != store.end()) {
     return it->second;
   }

@@ -1,6 +1,3 @@
-#include "profile.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <fstream>
 #include <future>
@@ -11,6 +8,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "profile.h"
+#include "test_runner.h"
 using namespace std;
 
 struct Stats {
@@ -117,8 +117,8 @@ void TestMtAgainstSt() {
   //
   //    auto random_word = [&](size_t len) {
   //      string result(len, ' ');
-  //      std::generate(begin(result), end(result), [&] { return char_gen(rd); });
-  //      return result;
+  //      std::generate(begin(result), end(result), [&] { return char_gen(rd);
+  //      }); return result;
   //    };
   //
   //    std::uniform_int_distribution<size_t> len_gen(5, 21);
@@ -142,8 +142,8 @@ void TestMtAgainstSt() {
   //      auto line_len = line_len_gen(rd);
   //      for (size_t i = 0; i < line_len; ++i) {
   //        if (word_choice(rd) < 20) {
-  //          std::uniform_int_distribution<size_t> word_index(0, key_words.size() - 1);
-  //          line_out << key_words[word_index(rd)];
+  //          std::uniform_int_distribution<size_t> word_index(0,
+  //          key_words.size() - 1); line_out << key_words[word_index(rd)];
   //        } else {
   //          line_out << random_word(len_gen(rd));
   //        }

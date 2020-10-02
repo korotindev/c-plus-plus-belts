@@ -1,12 +1,13 @@
 #ifndef C_PLUS_PLUS_BELTS_READRESPONSE_H
 #define C_PLUS_PLUS_BELTS_READRESPONSE_H
 
-#include "Json.h"
 #include <cmath>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "Json.h"
 
 struct ReadResponse {
   size_t requestId;
@@ -55,4 +56,4 @@ struct ReadBusMetricsResponse : ReadBusResponse {
   double routeDistanceV2;
 };
 
-#endif // C_PLUS_PLUS_BELTS_READRESPONSE_H
+#endif  // C_PLUS_PLUS_BELTS_READRESPONSE_H

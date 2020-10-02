@@ -55,6 +55,11 @@
         "forward_list": "cpp",
         "iomanip": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "transport_catalog_renderercpp": "cpp"
+    },
+    "search.exclude": {
+        "**/solutions": true,
+        "**/build": true
     },
 }

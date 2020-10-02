@@ -4,7 +4,8 @@
 
 using namespace std;
 
-TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict &routing_settings_json) {
+TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict &routing_settings_json,
+                                   const Json::Dict &render_settings_json) {
   auto stops_end =
       partition(begin(data), end(data), [](const auto &item) { return holds_alternative<Descriptions::Stop>(item); });
 
@@ -30,6 +31,7 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
   }
 
   router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
+  drawer_ = make_unique<TransportDrawer>(render_settings_json);
 }
 
 const TransportCatalog::Stop *TransportCatalog::GetStop(const string &name) const {
@@ -60,3 +62,5 @@ double TransportCatalog::ComputeGeoRouteDistance(const vector<string> &stops,
   }
   return result;
 }
+
+TransportDrawer::Map TransportCatalog::BuildMap() const { return drawer_->Draw(*this); }

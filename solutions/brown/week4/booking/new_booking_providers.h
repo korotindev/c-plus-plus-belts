@@ -1,18 +1,20 @@
 #pragma once
 
-// Здесь будет подключён ваш файл с определением шаблонного класса Booking в пространстве имён RAII
-#include "booking.h"
-
+// Здесь будет подключён ваш файл с определением шаблонного класса Booking в
+// пространстве имён RAII
 #include <stdexcept>
 #include <string>
+
+#include "booking.h"
 
 using namespace std;
 
 class FlightProvider {
-public:
+ public:
   using BookingId = int;
   using Booking = RAII::Booking<FlightProvider>;
-  friend Booking; // Явно разрешаем функциям класса Booking вызывать private-функции нашего класса FlightProvider
+  friend Booking;  // Явно разрешаем функциям класса Booking вызывать
+                   // private-функции нашего класса FlightProvider
 
   struct BookingData {
     string city_from;
@@ -28,17 +30,18 @@ public:
     return {this, counter};
   }
 
-private:
-  // Скрываем эту функцию в private, чтобы её мог позвать только соответствующий friend-класс Booking
+ private:
+  // Скрываем эту функцию в private, чтобы её мог позвать только соответствующий
+  // friend-класс Booking
   void CancelOrComplete(const Booking &booking) { --counter; }
 
-public:
+ public:
   static int capacity;
   static int counter;
 };
 
 class HotelProvider {
-public:
+ public:
   using BookingId = int;
   using Booking = RAII::Booking<HotelProvider>;
   friend Booking;
@@ -57,10 +60,10 @@ public:
     return {this, counter};
   }
 
-private:
+ private:
   void CancelOrComplete(const Booking &booking) { --counter; }
 
-public:
+ public:
   static int capacity;
   static int counter;
 };
