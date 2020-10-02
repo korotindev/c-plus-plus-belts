@@ -16,9 +16,6 @@
 	"extensions": [
 		"ms-vscode.cpptools",
 		"ms-vscode.cmake-tools",
-		"jbenden.c-cpp-flylint",
-		"eamodio.gitlens",
-		"twxs.cmake",
 	],
 	// Uncomment the next line if you want start specific services in your Docker Compose config.
 	// "runServices": [],
