@@ -7,14 +7,14 @@
 #include <variant>
 #include <vector>
 
+#include "descriptions.h"
 #include "json.h"
 #include "svg.h"
 
-class TransportCatalog;
-
 class TransportDrawer {
  public:
-  TransportDrawer(const Json::Dict &render_settings_json);
+  TransportDrawer(const Descriptions::StopsDict &stops_dict, const Descriptions::BusesDict &buses_dict,
+                  const Json::Dict &render_settings_json);
 
   struct RenderSettings {
     double width;
@@ -29,14 +29,30 @@ class TransportDrawer {
     std::vector<Svg::Color> color_palette;
   };
 
+  struct ProjectionSettings {
+    double min_lat = 0.0;
+    double max_lat = 0.0;
+    double min_lon = 0.0;
+    double max_lon = 0.0;
+    double zoom_coef = 0.0;
+  };
+
   struct Map {
     std::string svg;
   };
 
-  Map Draw(const TransportCatalog &db_) const;
+  Map Draw() const;
 
  private:
   static RenderSettings MakeRenderSettings(const Json::Dict &json);
+  static ProjectionSettings MakeProjectionSettings(const RenderSettings &render_settings,
+                                                   const Descriptions::StopsDict &stops_dict);
+
+  Svg::Point ConvertSpherePointToSvgPoint(Sphere::Point sphere_point) const;
+
+  Descriptions::StopsDict stops_dict_;
+  Descriptions::BusesDict buses_dict_;
 
   RenderSettings render_settings_;
+  ProjectionSettings projection_settings_;
 };
