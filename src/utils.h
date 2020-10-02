@@ -20,19 +20,17 @@ private:
 };
 
 template <typename C>
-auto AsRange(const C& container) {
+auto AsRange(const C &container) {
   return Range{std::begin(container), std::end(container)};
 }
 
 template <typename It>
 size_t ComputeUniqueItemsCount(Range<It> range) {
-  return std::unordered_set<typename Range<It>::ValueType>{
-      range.begin(), range.end()
-  }.size();
+  return std::unordered_set<typename Range<It>::ValueType>{range.begin(), range.end()}.size();
 }
 
 template <typename K, typename V>
-const V* GetValuePointer(const std::unordered_map<K, V>& map, const K& key) {
+const V *GetValuePointer(const std::unordered_map<K, V> &map, const K &key) {
   if (auto it = map.find(key); it != end(map)) {
     return &it->second;
   } else {

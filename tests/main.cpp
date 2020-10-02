@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
   if (argc == 1) {
     for (auto &[name, test] : tests) {
-        tr.RunTest(test, "test " + name);
+      tr.RunTest(test, "test " + name);
     }
   } else {
     if (auto it = tests.find(argv[1]); it != tests.end()) {

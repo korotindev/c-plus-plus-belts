@@ -3,7 +3,7 @@ project(tests VERSION 0.1.0)
 
 set(TARGET tests_runner)
 
-file(GLOB TARGET_SRC "*.h" "*.cpp")
+file(GLOB TARGET_SRC "*.h" "*.hpp" "*.cpp")
 
 add_executable(${TARGET} ${TARGET_SRC})
 
