@@ -30,6 +30,8 @@ TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, cons
                                  const Json::Dict &render_settings_json)
     : render_settings_(MakeRenderSettings(render_settings_json)),
       projection_settings_(MakeProjectionSettings(render_settings_, stops_dict)) {
+
+  sorted_stops_names_.reserve(stops_dict.size());
   for (const auto &[_, stop_info] : stops_dict) {
     auto stop =
         make_shared<Stop>(Stop{.name = stop_info->name, .position = ConvertSpherePointToSvgPoint(stop_info->position)});
@@ -39,13 +41,9 @@ TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, cons
 
   sort(sorted_stops_names_.begin(), sorted_stops_names_.end());
 
+  sorted_buses_names_.reserve(buses_dict.size());
   for (const auto &[_, bus_info] : buses_dict) {
-    auto bus = make_shared<Bus>(Bus{.name = bus_info->name, .stops = {}});
-
-    for (string_view stop_name_sv : bus_info->stops) {
-      auto it = stops_.find(stop_name_sv);
-      bus->stops.emplace_back(it->first);
-    }
+    auto bus = make_shared<Bus>(Bus{.name = bus_info->name, .stops = bus_info->stops});
     sorted_buses_names_.emplace_back(bus->name);
     buses_.emplace(bus->name, bus);
   }

@@ -62,7 +62,7 @@ class TransportDrawer {
 
   struct Bus {
     std::string name;
-    std::vector<std::string_view> stops;
+    std::vector<std::string> stops;
   };
 
   std::unordered_map<std::string_view, std::shared_ptr<Stop>> stops_;
