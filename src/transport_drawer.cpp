@@ -139,6 +139,32 @@ void TransportDrawer::DrawBusRoute(size_t id, Svg::Document &document) const {
   document.Add(move(polyline));
 }
 
+void TransportDrawer::DrawStop(size_t id, Svg::Document &document) const {
+  const auto stop = stops_.at(sorted_stops_names_.at(id));
+  auto circle = Svg::Circle().SetCenter(stop->position).SetRadius(render_settings_.stop_radius).SetFillColor("white");
+
+  document.Add(move(circle));
+
+  auto shared_text = Svg::Text()
+                         .SetPoint(stop->position)
+                         .SetOffset(render_settings_.stop_label_offset)
+                         .SetFontSize(render_settings_.stop_label_font_size)
+                         .SetFontFamily("Verdana")
+                         .SetData(stop->name);
+
+  auto underlayer = Svg::Text(shared_text)
+                        .SetFillColor(render_settings_.underlayer_color)
+                        .SetStrokeColor(render_settings_.underlayer_color)
+                        .SetStrokeWidth(render_settings_.underlayer_width)
+                        .SetStrokeLineCap("round")
+                        .SetStrokeLineJoin("round");
+
+  auto text = Svg::Text(shared_text).SetFillColor("black");
+
+  document.Add(move(underlayer));
+  document.Add(move(text));
+}
+
 TransportDrawer::Map TransportDrawer::Draw() const {
   Svg::Document doc;
 
@@ -147,7 +173,9 @@ TransportDrawer::Map TransportDrawer::Draw() const {
     DrawBusRoute(i, doc);
   }
 
-  // DrawStop
+  for (size_t i = 0; i < sorted_stops_names_.size(); ++i) {
+    DrawStop(i, doc);
+  }
 
   doc.Render(out);
   return {.svg = out.str()};

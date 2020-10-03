@@ -51,6 +51,7 @@ class TransportDrawer {
 
   Svg::Point ConvertSpherePointToSvgPoint(Sphere::Point sphere_point) const;
   void DrawBusRoute(size_t id, Svg::Document &document) const;
+  void DrawStop(size_t id, Svg::Document &document) const;
 
   struct Stop {
     std::string name;
