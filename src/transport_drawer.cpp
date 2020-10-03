@@ -28,10 +28,30 @@ Svg::Color ParseColor(const Json::Node &node) {
 
 TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, const Descriptions::BusesDict &buses_dict,
                                  const Json::Dict &render_settings_json)
-    : stops_dict_(stops_dict),
-      buses_dict_(buses_dict),
-      render_settings_(MakeRenderSettings(render_settings_json)),
-      projection_settings_(MakeProjectionSettings(render_settings_, stops_dict)) {}
+    : render_settings_(MakeRenderSettings(render_settings_json)),
+      projection_settings_(MakeProjectionSettings(render_settings_, stops_dict)) {
+  for (const auto &[_, stop_info] : stops_dict) {
+    auto stop =
+        make_shared<Stop>(Stop{.name = stop_info->name, .position = ConvertSpherePointToSvgPoint(stop_info->position)});
+    sorted_stops_names_.emplace_back(stop->name);
+    stops_.emplace(stop->name, stop);
+  }
+
+  sort(sorted_stops_names_.begin(), sorted_stops_names_.end());
+
+  for (const auto &[_, bus_info] : buses_dict) {
+    auto bus = make_shared<Bus>(Bus{.name = bus_info->name, .stops = {}});
+
+    for (string_view stop_name_sv : bus_info->stops) {
+      auto it = stops_.find(stop_name_sv);
+      bus->stops.emplace_back(it->first);
+    }
+    sorted_buses_names_.emplace_back(bus->name);
+    buses_.emplace(bus->name, bus);
+  }
+
+  sort(sorted_buses_names_.begin(), sorted_buses_names_.end());
+}
 
 TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::Dict &json) {
   const auto &palette = json.at("color_palette").AsArray();
@@ -58,6 +78,11 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
 TransportDrawer::ProjectionSettings TransportDrawer::MakeProjectionSettings(
     const TransportDrawer::RenderSettings &render_settings, const Descriptions::StopsDict &stops_dict) {
   ProjectionSettings projection_settings;
+
+  if (!stops_dict.empty()) {
+    projection_settings.min_lat = stops_dict.begin()->second->position.latitude;
+    projection_settings.min_lon = stops_dict.begin()->second->position.longitude;
+  }
 
   for (auto &[_, stop] : stops_dict) {
     projection_settings.max_lat = max(projection_settings.max_lat, stop->position.latitude);
@@ -97,8 +122,33 @@ Svg::Point TransportDrawer::ConvertSpherePointToSvgPoint(Sphere::Point sphere_po
   };
 }
 
-TransportDrawer::Map TransportDrawer::Draw() const {
-  Map map;
+void TransportDrawer::DrawBusRoute(size_t id, Svg::Document &document) const {
+  const auto bus = buses_.at(sorted_buses_names_.at(id));
+  const Svg::Color &color = render_settings_.color_palette[id % render_settings_.color_palette.size()];
+  auto polyline = Svg::Polyline()
+                      .SetStrokeColor(color)
+                      .SetStrokeWidth(render_settings_.line_width)
+                      .SetStrokeLineCap("round")
+                      .SetStrokeLineJoin("round");
 
-  return map;
+  for (const auto stop_name : bus->stops) {
+    auto stop = stops_.at(stop_name);
+    polyline.AddPoint(stop->position);
+  }
+
+  document.Add(move(polyline));
+}
+
+TransportDrawer::Map TransportDrawer::Draw() const {
+  Svg::Document doc;
+
+  stringstream out;
+  for (size_t i = 0; i < sorted_buses_names_.size(); ++i) {
+    DrawBusRoute(i, doc);
+  }
+
+  // DrawStop
+
+  doc.Render(out);
+  return {.svg = out.str()};
 }

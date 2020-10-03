@@ -56,7 +56,13 @@
         "iomanip": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "transport_catalog_renderercpp": "cpp"
+        "transport_catalog_renderercpp": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "future": "cpp",
+        "mutex": "cpp",
+        "shared_mutex": "cpp",
+        "thread": "cpp"
     },
     "search.exclude": {
         "**/solutions": true,

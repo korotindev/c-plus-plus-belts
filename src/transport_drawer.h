@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -49,9 +50,22 @@ class TransportDrawer {
                                                    const Descriptions::StopsDict &stops_dict);
 
   Svg::Point ConvertSpherePointToSvgPoint(Sphere::Point sphere_point) const;
+  void DrawBusRoute(size_t id, Svg::Document &document) const;
 
-  Descriptions::StopsDict stops_dict_;
-  Descriptions::BusesDict buses_dict_;
+  struct Stop {
+    std::string name;
+    Svg::Point position;
+  };
+
+  struct Bus {
+    std::string name;
+    std::vector<std::string_view> stops;
+  };
+
+  std::unordered_map<std::string_view, std::shared_ptr<Stop>> stops_;
+  std::unordered_map<std::string_view, std::shared_ptr<Bus>> buses_;
+  std::vector<std::string_view> sorted_stops_names_;
+  std::vector<std::string_view> sorted_buses_names_;
 
   RenderSettings render_settings_;
   ProjectionSettings projection_settings_;
