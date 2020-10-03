@@ -81,7 +81,7 @@ Json::Dict Map::Process(const TransportCatalog &db) const {
   const auto map = db.BuildMap();
   string s;
   s.reserve(map.svg.size());
-  for(auto &sym : map.svg) {
+  for (auto &sym : map.svg) {
     if (sym == '\\' || sym == '"') {
       s.push_back('\\');
     }
