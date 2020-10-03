@@ -145,6 +145,11 @@ void TransportDrawer::DrawStop(size_t id, Svg::Document &document) const {
 
   document.Add(move(circle));
 
+}
+
+void TransportDrawer::DrawStopName(size_t id, Svg::Document &document) const {
+  const auto stop = stops_.at(sorted_stops_names_.at(id));
+
   auto shared_text = Svg::Text()
                          .SetPoint(stop->position)
                          .SetOffset(render_settings_.stop_label_offset)
@@ -175,6 +180,10 @@ TransportDrawer::Map TransportDrawer::Draw() const {
 
   for (size_t i = 0; i < sorted_stops_names_.size(); ++i) {
     DrawStop(i, doc);
+  }
+
+  for (size_t i = 0; i < sorted_stops_names_.size(); ++i) {
+    DrawStopName(i, doc);
   }
 
   doc.Render(out);
