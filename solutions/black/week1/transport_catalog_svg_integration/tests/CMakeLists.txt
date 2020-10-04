@@ -12,4 +12,7 @@ target_compile_options(${TARGET} PUBLIC -Wall -Wextra -Werror -pedantic)
 target_include_directories(${TARGET} PUBLIC ./utils ${executor_SOURCE_DIR})
 target_link_libraries(${TARGET} executor)
 
-add_test(NAME test1 COMMAND ${TARGET})
+add_test(NAME test1 COMMAND ${TARGET} 1)
+add_test(NAME test2 COMMAND ${TARGET} 2)
+add_test(NAME test3 COMMAND ${TARGET} 3)
+add_test(NAME test4 COMMAND ${TARGET} 4)
