@@ -2,12 +2,12 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <variant>
 #include <vector>
-#include <memory>
 
 namespace Json {
 
@@ -54,7 +54,8 @@ template <>
 void PrintValue<std::string>(const std::string &value, std::ostream &output);
 
 template <>
-void PrintValue<std::shared_ptr<const std::string>>(const std::shared_ptr<const std::string> &value, std::ostream &output);
+void PrintValue<std::shared_ptr<const std::string>>(const std::shared_ptr<const std::string> &value,
+                                                    std::ostream &output);
 
 template <>
 void PrintValue<bool>(const bool &value, std::ostream &output);

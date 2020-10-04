@@ -35,13 +35,14 @@ class TransportDrawer {
 
  private:
   std::shared_ptr<const std::string> svg_map;
-  void DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict, Svg::Document &document) const;
-  void DrawStop(const Descriptions::Stop* stop, Svg::Document &document) const;
-  void DrawStopName(const Descriptions::Stop* stop, Svg::Document &document) const;
+  void DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict,
+                    Svg::Document &document) const;
+  void DrawStop(const Descriptions::Stop *stop, Svg::Document &document) const;
+  void DrawStopName(const Descriptions::Stop *stop, Svg::Document &document) const;
   RenderSettings MakeRenderSettings(const Json::Dict &render_settings_json);
 
   struct Projection {
-    Projection(const RenderSettings& render_settings);
+    Projection(const RenderSettings &render_settings);
     const RenderSettings &render_settings_;
     double max_lat = 0.0;
     double min_lon = 0.0;

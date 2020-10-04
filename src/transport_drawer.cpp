@@ -28,8 +28,7 @@ Svg::Color ParseColor(const Json::Node &node) {
 
 TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, const Descriptions::BusesDict &buses_dict,
                                  const Json::Dict &render_settings_json)
-    : render_settings_(MakeRenderSettings(render_settings_json)),
-      projection_(render_settings_) {
+    : render_settings_(MakeRenderSettings(render_settings_json)), projection_(render_settings_) {
   double min_lat = 0, max_lon = 0;
 
   if (!stops_dict.empty()) {
@@ -100,7 +99,7 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
   return render_settings;
 }
 
-TransportDrawer::Projection::Projection(const RenderSettings& render_settings) : render_settings_(render_settings) {} 
+TransportDrawer::Projection::Projection(const RenderSettings &render_settings) : render_settings_(render_settings) {}
 
 void TransportDrawer::Projection::CaculateZoom(double min_lat, double max_lon) {
   double width_zoom_coef = -1;
@@ -127,7 +126,8 @@ Svg::Point TransportDrawer::Projection::ConvertSpherePoint(const Sphere::Point &
   };
 }
 
-void TransportDrawer::DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict, Svg::Document &document) const {
+void TransportDrawer::DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict,
+                                   Svg::Document &document) const {
   const Svg::Color &color = render_settings_.color_palette[id % render_settings_.color_palette.size()];
   auto polyline = Svg::Polyline()
                       .SetStrokeColor(color)
@@ -143,13 +143,16 @@ void TransportDrawer::DrawBusRoute(size_t id, const Descriptions::Bus *bus, cons
   document.Add(move(polyline));
 }
 
-void TransportDrawer::DrawStop(const Descriptions::Stop* stop, Svg::Document &document) const {
-  auto circle = Svg::Circle().SetCenter(projection_.ConvertSpherePoint(stop->position)).SetRadius(render_settings_.stop_radius).SetFillColor("white");
+void TransportDrawer::DrawStop(const Descriptions::Stop *stop, Svg::Document &document) const {
+  auto circle = Svg::Circle()
+                    .SetCenter(projection_.ConvertSpherePoint(stop->position))
+                    .SetRadius(render_settings_.stop_radius)
+                    .SetFillColor("white");
 
   document.Add(move(circle));
 }
 
-void TransportDrawer::DrawStopName(const Descriptions::Stop* stop, Svg::Document &document) const {
+void TransportDrawer::DrawStopName(const Descriptions::Stop *stop, Svg::Document &document) const {
   auto shared_text = Svg::Text()
                          .SetPoint(projection_.ConvertSpherePoint(stop->position))
                          .SetOffset(render_settings_.stop_label_offset)
@@ -170,6 +173,4 @@ void TransportDrawer::DrawStopName(const Descriptions::Stop* stop, Svg::Document
   document.Add(move(text));
 }
 
-shared_ptr<const string> TransportDrawer::Draw() const {
-  return this->svg_map;
-}
+shared_ptr<const string> TransportDrawer::Draw() const { return this->svg_map; }
