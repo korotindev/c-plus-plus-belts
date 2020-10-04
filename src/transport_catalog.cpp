@@ -63,4 +63,4 @@ double TransportCatalog::ComputeGeoRouteDistance(const vector<string> &stops,
   return result;
 }
 
-const string &TransportCatalog::BuildMap() const { return drawer_->Draw(); }
+shared_ptr<const string> TransportCatalog::BuildMap() const { return drawer_->Draw(); }

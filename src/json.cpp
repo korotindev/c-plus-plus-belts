@@ -65,7 +65,14 @@ Node LoadDict(istream &input) {
 
     string key = LoadString(input).AsString();
     input >> c;
-    result.emplace(move(key), LoadNode(input));
+    if (key == "map") {
+      input >> c;
+      string line;
+      getline(input, line);
+      result.emplace(move(key), move(Node(move(line))));
+    } else {
+      result.emplace(move(key), LoadNode(input));
+    }
   }
 
   return Node(move(result));
@@ -95,6 +102,11 @@ Document Load(istream &input) { return Document{LoadNode(input)}; }
 template <>
 void PrintValue<string>(const string &value, ostream &output) {
   output << '"' << value << '"';
+}
+
+template <>
+void PrintValue<shared_ptr<const string>>(const shared_ptr<const string> &value, ostream &output) {
+  output << '"' << *value << '"';
 }
 
 template <>

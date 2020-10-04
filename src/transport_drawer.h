@@ -31,10 +31,10 @@ class TransportDrawer {
     std::vector<Svg::Color> color_palette;
   };
 
-  const std::string &Draw() const;
+  std::shared_ptr<const std::string> Draw() const;
 
  private:
-  std::string svg_map;
+  std::shared_ptr<const std::string> svg_map;
   void DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict, Svg::Document &document) const;
   void DrawStop(const Descriptions::Stop* stop, Svg::Document &document) const;
   void DrawStopName(const Descriptions::Stop* stop, Svg::Document &document) const;

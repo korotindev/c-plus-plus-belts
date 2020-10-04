@@ -75,7 +75,7 @@ TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, cons
   }
 
   doc.Render(out);
-  this->svg_map = out.str();
+  this->svg_map = make_shared<const string>(out.str());
 }
 
 TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::Dict &json) {
@@ -170,6 +170,6 @@ void TransportDrawer::DrawStopName(const Descriptions::Stop* stop, Svg::Document
   document.Add(move(text));
 }
 
-const string &TransportDrawer::Draw() const {
+shared_ptr<const string> TransportDrawer::Draw() const {
   return this->svg_map;
 }

@@ -7,13 +7,14 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <memory>
 
 namespace Json {
 
 class Node;
 using Dict = std::map<std::string, Node>;
 
-class Node : std::variant<std::vector<Node>, Dict, bool, int, double, std::string> {
+class Node : std::variant<std::vector<Node>, Dict, bool, int, double, std::string, std::shared_ptr<const std::string>> {
  public:
   using variant::variant;
   const variant &GetBase() const { return *this; }
@@ -51,6 +52,9 @@ void PrintValue(const Value &value, std::ostream &output) {
 
 template <>
 void PrintValue<std::string>(const std::string &value, std::ostream &output);
+
+template <>
+void PrintValue<std::shared_ptr<const std::string>>(const std::shared_ptr<const std::string> &value, std::ostream &output);
 
 template <>
 void PrintValue<bool>(const bool &value, std::ostream &output);

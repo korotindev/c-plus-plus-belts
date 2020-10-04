@@ -78,7 +78,7 @@ Json::Dict Route::Process(const TransportCatalog &db) const {
 
 Json::Dict Map::Process(const TransportCatalog &db) const {
   Json::Dict dict;
-  const auto &svg_map = db.BuildMap();
+  const auto svg_map = db.BuildMap();
   dict["map"] = svg_map;
   return dict;
 }
