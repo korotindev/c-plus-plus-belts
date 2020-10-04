@@ -173,13 +173,13 @@ void TransportDrawer::DrawBusName(size_t id, const Descriptions::Bus *bus,
   };
 
   if (bus->stops.size() > 1) {
-    draw_text(stops_dict.at(bus->stops[0]));
-  }
+    auto first_final_stop = stops_dict.at(bus->stops[0]);
+    auto second_final_stop = stops_dict.at(bus->stops.at(bus->stops.size() / 2));
+    draw_text(first_final_stop);
 
-  if (!(bus->is_roundtrip) && bus->stops.size() > 1) {
-    auto final_stop_id = bus->stops.size() / 2;
-    auto final_stop = bus->stops[final_stop_id];
-    draw_text(stops_dict.at(final_stop));
+    if (!(bus->is_roundtrip) && first_final_stop != second_final_stop) {
+      draw_text(second_final_stop);
+    }
   }
 }
 
