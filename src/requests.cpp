@@ -78,17 +78,8 @@ Json::Dict Route::Process(const TransportCatalog &db) const {
 
 Json::Dict Map::Process(const TransportCatalog &db) const {
   Json::Dict dict;
-  const auto map = db.BuildMap();
-  string s;
-  s.reserve(map.svg.size());
-  for (auto &sym : map.svg) {
-    if (sym == '\\' || sym == '"') {
-      s.push_back('\\');
-    }
-
-    s.push_back(move(sym));
-  }
-  dict["map"] = move(s);
+  const auto &svg_map = db.BuildMap();
+  dict["map"] = svg_map;
   return dict;
 }
 

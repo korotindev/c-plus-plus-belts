@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <set>
@@ -7,7 +8,6 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
-#include <algorithm>
 
 #include "descriptions.h"
 #include "json.h"
@@ -31,45 +31,25 @@ class TransportDrawer {
     std::vector<Svg::Color> color_palette;
   };
 
-  struct ProjectionSettings {
-    double min_lat = 0.0;
-    double max_lat = 0.0;
-    double min_lon = 0.0;
-    double max_lon = 0.0;
-    double zoom_coef = 0.0;
-  };
-
-  struct Map {
-    std::string svg;
-  };
-
-  Map Draw() const;
+  const std::string &Draw() const;
 
  private:
-  static RenderSettings MakeRenderSettings(const Json::Dict &json);
-  static ProjectionSettings MakeProjectionSettings(const RenderSettings &render_settings,
-                                                   const Descriptions::StopsDict &stops_dict);
+  std::string svg_map;
+  void DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict, Svg::Document &document) const;
+  void DrawStop(const Descriptions::Stop* stop, Svg::Document &document) const;
+  void DrawStopName(const Descriptions::Stop* stop, Svg::Document &document) const;
+  RenderSettings MakeRenderSettings(const Json::Dict &render_settings_json);
 
-  Svg::Point ConvertSpherePointToSvgPoint(Sphere::Point sphere_point) const;
-  void DrawBusRoute(size_t id, Svg::Document &document) const;
-  void DrawStop(size_t id, Svg::Document &document) const;
-  void DrawStopName(size_t id, Svg::Document &document) const;
-
-  struct Stop {
-    std::string name;
-    Svg::Point position;
+  struct Projection {
+    Projection(const RenderSettings& render_settings);
+    const RenderSettings &render_settings_;
+    double max_lat = 0.0;
+    double min_lon = 0.0;
+    double zoom_coef = 0.0;
+    Svg::Point ConvertSpherePoint(const Sphere::Point &sphere_point) const;
+    void CaculateZoom(double min_lat, double max_lon);
   };
-
-  struct Bus {
-    std::string name;
-    std::vector<std::string> stops;
-  };
-
-  std::unordered_map<std::string_view, std::shared_ptr<Stop>> stops_;
-  std::unordered_map<std::string_view, std::shared_ptr<Bus>> buses_;
-  std::vector<std::string_view> sorted_stops_names_;
-  std::vector<std::string_view> sorted_buses_names_;
 
   RenderSettings render_settings_;
-  ProjectionSettings projection_settings_;
+  Projection projection_;
 };

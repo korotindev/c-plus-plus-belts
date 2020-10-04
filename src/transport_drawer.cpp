@@ -29,26 +29,53 @@ Svg::Color ParseColor(const Json::Node &node) {
 TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, const Descriptions::BusesDict &buses_dict,
                                  const Json::Dict &render_settings_json)
     : render_settings_(MakeRenderSettings(render_settings_json)),
-      projection_settings_(MakeProjectionSettings(render_settings_, stops_dict)) {
+      projection_(render_settings_) {
+  double min_lat = 0, max_lon = 0;
 
-  sorted_stops_names_.reserve(stops_dict.size());
+  if (!stops_dict.empty()) {
+    min_lat = stops_dict.begin()->second->position.latitude;
+    projection_.min_lon = stops_dict.begin()->second->position.longitude;
+  }
+
+  vector<string> sorted_stops_names;
+  sorted_stops_names.reserve(stops_dict.size());
   for (const auto &[_, stop_info] : stops_dict) {
-    auto stop =
-        make_shared<Stop>(Stop{.name = stop_info->name, .position = ConvertSpherePointToSvgPoint(stop_info->position)});
-    sorted_stops_names_.emplace_back(stop->name);
-    stops_.emplace(stop->name, stop);
+    sorted_stops_names.emplace_back(stop_info->name);
+
+    projection_.max_lat = max(projection_.max_lat, stop_info->position.latitude);
+    min_lat = min(min_lat, stop_info->position.latitude);
+
+    max_lon = max(max_lon, stop_info->position.longitude);
+    projection_.min_lon = min(projection_.min_lon, stop_info->position.longitude);
   }
+  sort(sorted_stops_names.begin(), sorted_stops_names.end());
 
-  sort(sorted_stops_names_.begin(), sorted_stops_names_.end());
-
-  sorted_buses_names_.reserve(buses_dict.size());
+  vector<string> sorted_buses_names;
+  sorted_buses_names.reserve(buses_dict.size());
   for (const auto &[_, bus_info] : buses_dict) {
-    auto bus = make_shared<Bus>(Bus{.name = bus_info->name, .stops = bus_info->stops});
-    sorted_buses_names_.emplace_back(bus->name);
-    buses_.emplace(bus->name, bus);
+    sorted_buses_names.emplace_back(bus_info->name);
+  }
+  sort(sorted_buses_names.begin(), sorted_buses_names.end());
+
+  projection_.CaculateZoom(min_lat, max_lon);
+
+  Svg::Document doc;
+
+  stringstream out;
+  for (size_t i = 0; i < sorted_buses_names.size(); ++i) {
+    DrawBusRoute(i, buses_dict.at(sorted_buses_names[i]), stops_dict, doc);
   }
 
-  sort(sorted_buses_names_.begin(), sorted_buses_names_.end());
+  for (size_t i = 0; i < sorted_stops_names.size(); ++i) {
+    DrawStop(stops_dict.at(sorted_stops_names[i]), doc);
+  }
+
+  for (size_t i = 0; i < sorted_stops_names.size(); ++i) {
+    DrawStopName(stops_dict.at(sorted_stops_names[i]), doc);
+  }
+
+  doc.Render(out);
+  this->svg_map = out.str();
 }
 
 TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::Dict &json) {
@@ -73,55 +100,34 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
   return render_settings;
 }
 
-TransportDrawer::ProjectionSettings TransportDrawer::MakeProjectionSettings(
-    const TransportDrawer::RenderSettings &render_settings, const Descriptions::StopsDict &stops_dict) {
-  ProjectionSettings projection_settings;
+TransportDrawer::Projection::Projection(const RenderSettings& render_settings) : render_settings_(render_settings) {} 
 
-  if (!stops_dict.empty()) {
-    projection_settings.min_lat = stops_dict.begin()->second->position.latitude;
-    projection_settings.min_lon = stops_dict.begin()->second->position.longitude;
-  }
-
-  for (auto &[_, stop] : stops_dict) {
-    projection_settings.max_lat = max(projection_settings.max_lat, stop->position.latitude);
-    projection_settings.min_lat = min(projection_settings.min_lat, stop->position.latitude);
-
-    projection_settings.max_lon = max(projection_settings.max_lon, stop->position.longitude);
-    projection_settings.min_lon = min(projection_settings.min_lon, stop->position.longitude);
-  }
-
+void TransportDrawer::Projection::CaculateZoom(double min_lat, double max_lon) {
   double width_zoom_coef = -1;
-  if (projection_settings.max_lon != projection_settings.min_lon) {
-    width_zoom_coef = (render_settings.width - 2 * render_settings.padding) /
-                      (projection_settings.max_lon - projection_settings.min_lon);
+  if (max_lon != min_lon) {
+    width_zoom_coef = (render_settings_.width - 2 * render_settings_.padding) / (max_lon - min_lon);
   }
 
   double height_zoom_coef = -1;
-  if (projection_settings.max_lat != projection_settings.min_lat) {
-    height_zoom_coef = (render_settings.height - 2 * render_settings.padding) /
-                       (projection_settings.max_lat - projection_settings.min_lat);
+  if (max_lat != min_lat) {
+    height_zoom_coef = (render_settings_.height - 2 * render_settings_.padding) / (max_lat - min_lat);
   }
 
   if ((width_zoom_coef == -1) ^ (height_zoom_coef == -1)) {
-    projection_settings.zoom_coef = max(height_zoom_coef, width_zoom_coef);
+    zoom_coef = max(height_zoom_coef, width_zoom_coef);
   } else if ((width_zoom_coef != -1) && (height_zoom_coef != -1)) {
-    projection_settings.zoom_coef = min(height_zoom_coef, width_zoom_coef);
+    zoom_coef = min(height_zoom_coef, width_zoom_coef);
   }
-
-  return projection_settings;
 }
 
-Svg::Point TransportDrawer::ConvertSpherePointToSvgPoint(Sphere::Point sphere_point) const {
+Svg::Point TransportDrawer::Projection::ConvertSpherePoint(const Sphere::Point &sphere_point) const {
   return {
-      .x = (sphere_point.longitude - projection_settings_.min_lon) * projection_settings_.zoom_coef +
-           render_settings_.padding,
-      .y = (projection_settings_.max_lat - sphere_point.latitude) * projection_settings_.zoom_coef +
-           render_settings_.padding,
+      .x = (sphere_point.longitude - min_lon) * zoom_coef + render_settings_.padding,
+      .y = (max_lat - sphere_point.latitude) * zoom_coef + render_settings_.padding,
   };
 }
 
-void TransportDrawer::DrawBusRoute(size_t id, Svg::Document &document) const {
-  const auto bus = buses_.at(sorted_buses_names_.at(id));
+void TransportDrawer::DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict, Svg::Document &document) const {
   const Svg::Color &color = render_settings_.color_palette[id % render_settings_.color_palette.size()];
   auto polyline = Svg::Polyline()
                       .SetStrokeColor(color)
@@ -130,26 +136,22 @@ void TransportDrawer::DrawBusRoute(size_t id, Svg::Document &document) const {
                       .SetStrokeLineJoin("round");
 
   for (const auto stop_name : bus->stops) {
-    auto stop = stops_.at(stop_name);
-    polyline.AddPoint(stop->position);
+    auto stop = stops_dict.at(stop_name);
+    polyline.AddPoint(projection_.ConvertSpherePoint(stop->position));
   }
 
   document.Add(move(polyline));
 }
 
-void TransportDrawer::DrawStop(size_t id, Svg::Document &document) const {
-  const auto stop = stops_.at(sorted_stops_names_.at(id));
-  auto circle = Svg::Circle().SetCenter(stop->position).SetRadius(render_settings_.stop_radius).SetFillColor("white");
+void TransportDrawer::DrawStop(const Descriptions::Stop* stop, Svg::Document &document) const {
+  auto circle = Svg::Circle().SetCenter(projection_.ConvertSpherePoint(stop->position)).SetRadius(render_settings_.stop_radius).SetFillColor("white");
 
   document.Add(move(circle));
-
 }
 
-void TransportDrawer::DrawStopName(size_t id, Svg::Document &document) const {
-  const auto stop = stops_.at(sorted_stops_names_.at(id));
-
+void TransportDrawer::DrawStopName(const Descriptions::Stop* stop, Svg::Document &document) const {
   auto shared_text = Svg::Text()
-                         .SetPoint(stop->position)
+                         .SetPoint(projection_.ConvertSpherePoint(stop->position))
                          .SetOffset(render_settings_.stop_label_offset)
                          .SetFontSize(render_settings_.stop_label_font_size)
                          .SetFontFamily("Verdana")
@@ -168,22 +170,6 @@ void TransportDrawer::DrawStopName(size_t id, Svg::Document &document) const {
   document.Add(move(text));
 }
 
-TransportDrawer::Map TransportDrawer::Draw() const {
-  Svg::Document doc;
-
-  stringstream out;
-  for (size_t i = 0; i < sorted_buses_names_.size(); ++i) {
-    DrawBusRoute(i, doc);
-  }
-
-  for (size_t i = 0; i < sorted_stops_names_.size(); ++i) {
-    DrawStop(i, doc);
-  }
-
-  for (size_t i = 0; i < sorted_stops_names_.size(); ++i) {
-    DrawStopName(i, doc);
-  }
-
-  doc.Render(out);
-  return {.svg = out.str()};
+const string &TransportDrawer::Draw() const {
+  return this->svg_map;
 }

@@ -89,6 +89,11 @@ class Node : public AbstractNode {
     properties["stroke-linejoin"] = linejoin;
     return self();
   }
+  void RenderProps(std::ostream &out) const {
+    for (const auto &[prop, val] : properties) {
+      out << prop << "=\\\"" << val << "\\\" ";
+    }
+  }
 
  protected:
   std::unordered_map<std::string, std::string> properties;
@@ -112,9 +117,7 @@ class Circle : public Node<Circle> {
 
   virtual void Render(std::ostream &out) const override {
     out << "<circle ";
-    for (const auto &[prop, val] : properties) {
-      out << prop << "=\"" << val << "\" ";
-    }
+    RenderProps(out);
     out << "/>";
   }
 };
@@ -136,9 +139,7 @@ class Polyline : public Node<Polyline> {
 
   virtual void Render(std::ostream &out) const override {
     out << "<polyline ";
-    for (const auto &[prop, val] : properties) {
-      out << prop << "=\"" << val << "\" ";
-    }
+    RenderProps(out);
     out << "/>";
   }
 };
@@ -176,9 +177,7 @@ class Text : public Node<Text> {
 
   virtual void Render(std::ostream &out) const override {
     out << "<text ";
-    for (const auto &[prop, val] : properties) {
-      out << prop << "=\"" << val << "\" ";
-    }
+    RenderProps(out);
     out << ">" << data << "</text>";
   }
 
@@ -195,8 +194,8 @@ class Document {
   }
 
   void Render(std::ostream &out) {
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
-    out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">";
+    out << "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>";
+    out << "<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" version=\\\"1.1\\\">";
     for (const auto &node : nodes) {
       node->Render(out);
     }

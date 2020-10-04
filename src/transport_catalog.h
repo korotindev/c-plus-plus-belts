@@ -42,7 +42,7 @@ class TransportCatalog {
 
   std::optional<TransportRouter::RouteInfo> FindRoute(const std::string &stop_from, const std::string &stop_to) const;
 
-  TransportDrawer::Map BuildMap() const;
+  const std::string &BuildMap() const;
 
  private:
   static int ComputeRoadRouteLength(const std::vector<std::string> &stops, const Descriptions::StopsDict &stops_dict);
