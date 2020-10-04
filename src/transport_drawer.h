@@ -29,12 +29,15 @@ class TransportDrawer {
     Svg::Color underlayer_color;
     double underlayer_width;
     std::vector<Svg::Color> color_palette;
+    uint32_t bus_label_font_size;
+    Svg::Point bus_label_offset;
   };
 
   std::shared_ptr<const std::string> Draw() const;
 
  private:
   void DrawBusRoute(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict) const;
+  void DrawBusName(size_t id, const Descriptions::Bus *bus, const Descriptions::StopsDict &stops_dict) const;
   void DrawStop(const Descriptions::Stop *stop) const;
   void DrawStopName(const Descriptions::Stop *stop) const;
   RenderSettings MakeRenderSettings(const Json::Dict &render_settings_json);

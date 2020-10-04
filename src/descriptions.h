@@ -23,6 +23,7 @@ std::vector<std::string> ParseStops(const std::vector<Json::Node> &stop_nodes, b
 
 struct Bus {
   std::string name;
+  bool is_roundtrip;
   std::vector<std::string> stops;
 
   static Bus ParseFrom(const Json::Dict &attrs);

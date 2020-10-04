@@ -65,6 +65,10 @@ TransportDrawer::TransportDrawer(const Descriptions::StopsDict &stops_dict, cons
     DrawBusRoute(i, buses_dict.at(sorted_buses_names[i]), stops_dict);
   }
 
+  for (size_t i = 0; i < sorted_buses_names.size(); ++i) {
+    DrawBusName(i, buses_dict.at(sorted_buses_names[i]), stops_dict);
+  }
+
   for (size_t i = 0; i < sorted_stops_names.size(); ++i) {
     DrawStop(stops_dict.at(sorted_stops_names[i]));
   }
@@ -91,7 +95,10 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
                                       .y = json.at("stop_label_offset").AsArray()[1].AsDouble()},
       .underlayer_color = ParseColor(json.at("underlayer_color")),
       .underlayer_width = json.at("underlayer_width").AsDouble(),
-      .color_palette = move(color_palette)};
+      .color_palette = move(color_palette),
+      .bus_label_font_size = static_cast<uint32_t>(json.at("bus_label_font_size").AsInt()),
+      .bus_label_offset = Svg::Point{.x = json.at("bus_label_offset").AsArray()[0].AsDouble(),
+                                     .y = json.at("bus_label_offset").AsArray()[1].AsDouble()}};
 
   return render_settings;
 }
@@ -138,6 +145,42 @@ void TransportDrawer::DrawBusRoute(size_t id, const Descriptions::Bus *bus,
   }
 
   renderer_->Add(move(polyline));
+}
+
+void TransportDrawer::DrawBusName(size_t id, const Descriptions::Bus *bus,
+                                  const Descriptions::StopsDict &stops_dict) const {
+  const Svg::Color &color = render_settings_.color_palette[id % render_settings_.color_palette.size()];
+  auto draw_text = [&](const Descriptions::Stop *stop) {
+    auto shared_text = Svg::Text()
+                           .SetPoint(projection_.ConvertSpherePoint(stop->position))
+                           .SetOffset(render_settings_.bus_label_offset)
+                           .SetFontSize(render_settings_.bus_label_font_size)
+                           .SetFontFamily("Verdana")
+                           .SetFontWeight("bold")
+                           .SetData(bus->name);
+
+    auto underlayer = Svg::Text(shared_text)
+                          .SetFillColor(render_settings_.underlayer_color)
+                          .SetStrokeColor(render_settings_.underlayer_color)
+                          .SetStrokeWidth(render_settings_.underlayer_width)
+                          .SetStrokeLineCap("round")
+                          .SetStrokeLineJoin("round");
+
+    auto text = Svg::Text(shared_text).SetFillColor(color);
+
+    renderer_->Add(move(underlayer));
+    renderer_->Add(move(text));
+  };
+
+  if (bus->stops.size() > 1) {
+    draw_text(stops_dict.at(bus->stops[0]));
+  }
+
+  if (!(bus->is_roundtrip) && bus->stops.size() > 1) {
+    auto final_stop_id = bus->stops.size() / 2;
+    auto final_stop = bus->stops[final_stop_id];
+    draw_text(stops_dict.at(final_stop));
+  }
 }
 
 void TransportDrawer::DrawStop(const Descriptions::Stop *stop) const {

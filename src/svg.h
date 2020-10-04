@@ -170,6 +170,11 @@ class Text : public Node<Text> {
     return *this;
   }
 
+  Text &SetFontWeight(const std::string &weight) {
+    properties["font-weight"] = weight;
+    return *this;
+  }
+
   Text &SetData(const std::string &data_) {
     data = data_;
     return *this;

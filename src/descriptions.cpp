@@ -47,6 +47,7 @@ int ComputeStopsDistance(const Stop &lhs, const Stop &rhs) {
 Bus Bus::ParseFrom(const Json::Dict &attrs) {
   return Bus{
       .name = attrs.at("name").AsString(),
+      .is_roundtrip = attrs.at("is_roundtrip").AsBool(),
       .stops = ParseStops(attrs.at("stops").AsArray(), attrs.at("is_roundtrip").AsBool()),
   };
 }
