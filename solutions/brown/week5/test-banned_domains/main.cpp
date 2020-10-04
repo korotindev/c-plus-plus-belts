@@ -1,5 +1,3 @@
-#include "test_runner.h"
-
 #include <algorithm>
 #include <iostream>
 #include <optional>
@@ -7,18 +5,20 @@
 #include <string_view>
 #include <vector>
 
+#include "test_runner.h"
+
 using namespace std;
 
 template <typename It>
 class Range {
-public:
+ public:
   Range(It begin, It end) : begin_(begin), end_(end) {}
 
   It begin() const { return begin_; }
 
   It end() const { return end_; }
 
-private:
+ private:
   It begin_;
   It end_;
 };
@@ -49,7 +49,7 @@ vector<string_view> Split(string_view s, string_view delimiter = " ") {
 }
 
 class Domain {
-public:
+ public:
   explicit Domain(string_view text) {
     vector<string_view> parts = Split(text, ".");
     parts_reversed_.assign(rbegin(parts), rend(parts));
@@ -63,7 +63,7 @@ public:
 
   bool operator==(const Domain &other) const { return parts_reversed_ == other.parts_reversed_; }
 
-private:
+ private:
   vector<string> parts_reversed_;
 };
 
@@ -93,7 +93,7 @@ bool IsSubOrSuperDomain(const Domain &lhs, const Domain &rhs) {
 }
 
 class DomainChecker {
-public:
+ public:
   template <typename InputIt>
   DomainChecker(InputIt domains_begin, InputIt domains_end) {
     sorted_domains_.reserve(distance(domains_begin, domains_end));
@@ -113,7 +113,7 @@ public:
     return ::IsSubdomain(candidate, **prev(it));
   }
 
-private:
+ private:
   vector<const Domain *> sorted_domains_;
 
   static bool IsDomainLess(const Domain *lhs, const Domain *rhs) {

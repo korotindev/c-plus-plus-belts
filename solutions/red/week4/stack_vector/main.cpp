@@ -1,10 +1,9 @@
-#include "stack_vector.h"
-
-#include "profile.h"
-#include "test_runner.h"
-
 #include <random>
 #include <stdexcept>
+
+#include "profile.h"
+#include "stack_vector.h"
+#include "test_runner.h"
 using namespace std;
 
 void TestConstruction() {

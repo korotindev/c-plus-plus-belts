@@ -53,7 +53,7 @@ void ValidateBounds(Number number_to_check, Number min_value, Number max_value) 
 }
 
 class Date {
-public:
+ public:
   static Date FromString(string_view str) {
     const int year = ConvertToInt(ReadToken(str, "-"));
     const int month = ConvertToInt(ReadToken(str, "-"));
@@ -76,7 +76,7 @@ public:
     return mktime(&t);
   }
 
-private:
+ private:
   int year_;
   int month_;
   int day_;

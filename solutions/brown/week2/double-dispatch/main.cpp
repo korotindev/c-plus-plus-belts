@@ -1,18 +1,17 @@
-#include "game_object.h"
-#include "geo2d.h"
-
-#include "test_runner.h"
-
 #include <memory>
 #include <vector>
 
+#include "game_object.h"
+#include "geo2d.h"
+#include "test_runner.h"
+
 using namespace std;
 
-// Определите классы Unit, Building, Tower и Fence так, чтобы они наследовались от
-// GameObject и реализовывали его интерфейс.
+// Определите классы Unit, Building, Tower и Fence так, чтобы они наследовались
+// от GameObject и реализовывали его интерфейс.
 
 class Unit : public GameObject {
-public:
+ public:
   explicit Unit(geo2d::Point position) : point(position) {}
 
   bool Collide(const GameObject &that) const override { return that.CollideWith(*this); }
@@ -28,7 +27,7 @@ public:
 };
 
 class Building : public GameObject {
-public:
+ public:
   explicit Building(geo2d::Rectangle geometry) : geometry(geometry) {}
 
   bool Collide(const GameObject &that) const override { return that.CollideWith(*this); }
@@ -43,7 +42,7 @@ public:
 };
 
 class Tower : public GameObject {
-public:
+ public:
   explicit Tower(geo2d::Circle geometry) : circle(geometry) {}
 
   bool Collide(const GameObject &that) const override { return that.CollideWith(*this); }
@@ -56,7 +55,7 @@ public:
 };
 
 class Fence : public GameObject {
-public:
+ public:
   explicit Fence(geo2d::Segment geometry) : segment(geometry) {}
 
   bool Collide(const GameObject &that) const override { return that.CollideWith(*this); }
@@ -85,9 +84,10 @@ bool Tower::CollideWith(const Fence &that) const { return geo2d::Collide(this->c
 bool Collide(const GameObject &first, const GameObject &second) { return first.Collide(second); }
 
 void TestAddingNewObjectOnMap() {
-  // Юнит-тест моделирует ситуацию, когда на игровой карте уже есть какие-то объекты,
-  // и мы хотим добавить на неё новый, например, построить новое здание или башню.
-  // Мы можем его добавить, только если он не пересекается ни с одним из существующих.
+  // Юнит-тест моделирует ситуацию, когда на игровой карте уже есть какие-то
+  // объекты, и мы хотим добавить на неё новый, например, построить новое здание
+  // или башню. Мы можем его добавить, только если он не пересекается ни с одним
+  // из существующих.
   using namespace geo2d;
 
   const vector<shared_ptr<GameObject>> game_map = {make_shared<Unit>(Point{3, 3}),

@@ -1,13 +1,13 @@
-#include "test_runner.h"
-
 #include <functional>
 #include <string>
+
+#include "test_runner.h"
 
 using namespace std;
 
 template <typename T>
 class LazyValue {
-public:
+ public:
   explicit LazyValue(function<T()> init) : init(move(init)) {}
 
   bool HasValue() const { return static_cast<bool>(cache); }
@@ -19,7 +19,7 @@ public:
     return *cache;
   }
 
-private:
+ private:
   mutable optional<T> cache;
   std::function<T()> init;
 };

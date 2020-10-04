@@ -1,6 +1,3 @@
-#include "profile.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <deque>
 #include <future>
@@ -10,11 +7,14 @@
 #include <utility>
 #include <vector>
 
+#include "profile.h"
+#include "test_runner.h"
+
 using namespace std;
 
 template <typename K, typename V, typename Hash = std::hash<K>>
 class ConcurrentMap {
-public:
+ public:
   using MapType = unordered_map<K, V, Hash>;
 
   struct WriteAccess {
@@ -64,7 +64,7 @@ public:
     return result;
   }
 
-private:
+ private:
   Hash hasher;
   deque<MapType> maps;
   mutable deque<mutex> mutexes;

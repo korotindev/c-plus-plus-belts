@@ -2,7 +2,7 @@
 #define C_PLUS_PLUS_BELTS_COORDINATE_H
 
 static const double PI = 3.1415926535;
-static const double EARTH_RADIUS = 6371.0; // kilometers
+static const double EARTH_RADIUS = 6371.0;  // kilometers
 
 struct Coordinate {
   double Latitude;
@@ -10,4 +10,4 @@ struct Coordinate {
   double GetDistance(const Coordinate &other) const;
 };
 
-#endif // C_PLUS_PLUS_BELTS_COORDINATE_H
+#endif  // C_PLUS_PLUS_BELTS_COORDINATE_H

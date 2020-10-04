@@ -1,6 +1,11 @@
 #ifndef C_PLUS_PLUS_BELTS_DATABASE_H
 #define C_PLUS_PLUS_BELTS_DATABASE_H
 
+#include <memory>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+
 #include "BusStorage.h"
 #include "Coordinate.h"
 #include "Graph.h"
@@ -8,10 +13,6 @@
 #include "Router.h"
 #include "Settings.h"
 #include "StopsStorage.h"
-#include <memory>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
 
 class Database {
   enum CustomGraphVertexType { Wait, Ride };
@@ -45,14 +46,14 @@ class Database {
   std::vector<std::shared_ptr<CustomGraphEdge>> edges;
   StopsStorage stopsStorage;
   BusStorage busStorage;
-  std::shared_ptr<CustomGraphVertex>
-  findOrCreateStop(std::unordered_map<std::string_view, std::shared_ptr<CustomGraphVertex>> &store,
-                   CustomGraphVertexType type, std::string_view stopName);
+  std::shared_ptr<CustomGraphVertex> findOrCreateStop(
+      std::unordered_map<std::string_view, std::shared_ptr<CustomGraphVertex>> &store, CustomGraphVertexType type,
+      std::string_view stopName);
   void createEdge(CustomGraphEdgeType type, std::shared_ptr<Database::CustomGraphVertex> from,
                   std::shared_ptr<Database::CustomGraphVertex> to, std::string_view busName, double weight,
                   size_t span_count);
 
-public:
+ public:
   void BuildRouter();
   void EntertainStop(Stop stop);
   void EntertainBus(Bus bus);
@@ -61,4 +62,4 @@ public:
   std::unique_ptr<ReadRouteResponse> ReadRoute(const size_t requestId, const std::string &from, const std::string &to);
 };
 
-#endif // C_PLUS_PLUS_BELTS_DATABASE_H
+#endif  // C_PLUS_PLUS_BELTS_DATABASE_H

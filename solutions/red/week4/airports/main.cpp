@@ -1,6 +1,3 @@
-#include "profile.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <array>
 #include <forward_list>
@@ -8,12 +5,15 @@
 #include <random>
 #include <vector>
 
+#include "profile.h"
+#include "test_runner.h"
+
 using namespace std;
 
 // TAirport should be enum with sequential items and last item TAirport::Last_
 template <typename TAirport>
 class AirportCounter {
-public:
+ public:
   AirportCounter() { airportIdToDeparturesCount.fill(0); }
 
   template <typename TIterator>
@@ -43,7 +43,7 @@ public:
     return items;
   }
 
-private:
+ private:
   size_t &GetRef(TAirport airport) { return airportIdToDeparturesCount[static_cast<size_t>(airport)]; }
 
   const size_t &GetRef(TAirport airport) const { return airportIdToDeparturesCount[static_cast<size_t>(airport)]; }
@@ -74,10 +74,10 @@ void TestMoscow() {
   }
   ASSERT_EQUAL(items.size(), 4);
 
-#define ASSERT_EQUAL_ITEM(idx, expected_enum, expected_count)                                                          \
-  do {                                                                                                                 \
-    ASSERT_EQUAL(static_cast<size_t>(items[idx].first), static_cast<size_t>(MoscowAirport::expected_enum));            \
-    ASSERT_EQUAL(items[idx].second, expected_count);                                                                   \
+#define ASSERT_EQUAL_ITEM(idx, expected_enum, expected_count)                                               \
+  do {                                                                                                      \
+    ASSERT_EQUAL(static_cast<size_t>(items[idx].first), static_cast<size_t>(MoscowAirport::expected_enum)); \
+    ASSERT_EQUAL(items[idx].second, expected_count);                                                        \
   } while (false)
 
   ASSERT_EQUAL_ITEM(0, VKO, 1);

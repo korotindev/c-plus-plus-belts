@@ -1,7 +1,7 @@
 #include <string>
 
 class Animal {
-public:
+ public:
   virtual std::string Voice() const { return "Not implemented yet"; }
   virtual ~Animal() {}
 };

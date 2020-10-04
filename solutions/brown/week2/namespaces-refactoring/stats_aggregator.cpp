@@ -69,4 +69,4 @@ void Mode::Process(int value) {
 }
 
 void Mode::PrintValue(std::ostream &out) const { out << "Mode is " << mode; }
-} // namespace StatsAggregators
+}  // namespace StatsAggregators

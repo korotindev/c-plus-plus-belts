@@ -1,15 +1,16 @@
-#include "profile.h"
-#include "test_runner.h"
 #include <algorithm>
 #include <cstdint>
 #include <future>
 #include <numeric>
 #include <vector>
 
+#include "profile.h"
+#include "test_runner.h"
+
 using namespace std;
 template <typename Iterator>
 class IteratorRange {
-public:
+ public:
   IteratorRange(Iterator begin, Iterator end) : first(begin), last(end), size_(distance(first, last)) {}
 
   Iterator begin() const { return first; }
@@ -18,17 +19,17 @@ public:
 
   size_t size() const { return size_; }
 
-private:
+ private:
   Iterator first, last;
   size_t size_;
 };
 
 template <typename Iterator>
 class Paginator {
-private:
+ private:
   vector<IteratorRange<Iterator>> pages;
 
-public:
+ public:
   Paginator(Iterator begin, Iterator end, size_t page_size) {
     for (size_t left = distance(begin, end); left > 0;) {
       size_t current_page_size = min(page_size, left);

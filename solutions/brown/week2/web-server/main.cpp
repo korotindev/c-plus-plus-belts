@@ -1,5 +1,3 @@
-#include "test_runner.h"
-
 #include <iostream>
 #include <map>
 #include <optional>
@@ -8,6 +6,8 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include "test_runner.h"
 
 using namespace std;
 
@@ -49,7 +49,7 @@ enum class HttpCode {
 };
 
 class HttpResponse {
-public:
+ public:
   explicit HttpResponse(HttpCode code) { this->code = code; }
 
   HttpResponse &AddHeader(string name, string value) {
@@ -70,15 +70,15 @@ public:
   friend ostream &operator<<(ostream &output, const HttpResponse &resp) {
     output << "HTTP/1.1 " << static_cast<int>(resp.code) << " ";
     switch (resp.code) {
-    case HttpCode::Ok:
-      output << "OK";
-      break;
-    case HttpCode::Found:
-      output << "Found";
-      break;
-    case HttpCode::NotFound:
-      output << "Not found";
-      break;
+      case HttpCode::Ok:
+        output << "OK";
+        break;
+      case HttpCode::Found:
+        output << "Found";
+        break;
+      case HttpCode::NotFound:
+        output << "Not found";
+        break;
     }
     output << "\n";
 
@@ -98,19 +98,19 @@ public:
     return output;
   }
 
-private:
+ private:
   vector<pair<string, string>> headers;
   string content;
   HttpCode code;
 };
 
 class CommentServer {
-private:
+ private:
   vector<vector<string>> comments_;
   std::optional<LastCommentInfo> last_comment;
   unordered_set<size_t> banned_users;
 
-public:
+ public:
   HttpResponse ServeRequest(const HttpRequest &req) {
     HttpResponse response(HttpCode::Ok);
 
@@ -155,7 +155,9 @@ public:
         }
         response.SetContent(commentsStr);
       } else if (req.path == "/captcha") {
-        response.SetContent("What's the answer for The Ultimate Question of Life, the Universe, and Everything?");
+        response.SetContent(
+            "What's the answer for The Ultimate Question of Life, the "
+            "Universe, and Everything?");
       } else {
         response.SetCode(HttpCode::NotFound);
       }
@@ -235,7 +237,10 @@ void TestServer() {
   Test(cs, {"GET", "/user_comments", "", {{"user_id", "0"}}}, {200, {}, "Hello\nWhat are you selling?\n"});
   Test(cs, {"GET", "/user_comments", "", {{"user_id", "1"}}}, {200, {}, "Hi\nBuy my goods\nEnlarge\n"});
   Test(cs, {"GET", "/captcha"},
-       {200, {}, {"What's the answer for The Ultimate Question of Life, the Universe, and Everything?"}});
+       {200,
+        {},
+        {"What's the answer for The Ultimate Question of Life, the Universe, "
+         "and Everything?"}});
   Test(cs, {"POST", "/checkcaptcha", "1 24"}, redirect_to_captcha);
   Test(cs, {"POST", "/checkcaptcha", "1 42"}, ok);
   Test(cs, {"POST", "/add_comment", "1 Sorry! No spam any more"}, ok);

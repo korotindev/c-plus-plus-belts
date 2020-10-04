@@ -1,12 +1,13 @@
-#include "Common.h"
 #include <list>
 #include <mutex>
 #include <unordered_map>
 
+#include "Common.h"
+
 using namespace std;
 
 class LruCache : public ICache {
-public:
+ public:
   LruCache(shared_ptr<IBooksUnpacker> books_unpacker_, const Settings &settings_)
       : books_unpacker(move(books_unpacker_)), max_memory(settings_.max_memory), allocated_space(0) {}
 
@@ -42,7 +43,7 @@ public:
     return result;
   }
 
-private:
+ private:
   using BooksList = list<BookPtr>;
   using BooksListIter = BooksList::const_iterator;
 

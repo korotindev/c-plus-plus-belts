@@ -1,4 +1,5 @@
 #include "Coordinate.h"
+
 #include <cmath>
 
 using namespace std;
@@ -17,5 +18,5 @@ double Coordinate::GetDistance(const Coordinate &other) const {
   double distance = 2.0 * EARTH_RADIUS *
                     asin(sqrt(sinusLatitudeMultiplication +
                               cos(latitudeRadian) * cos(otherLatitudeRadian) * sinusLongitudeMultiplication));
-  return distance * 1000; // to kilometers;
+  return distance * 1000;  // to kilometers;
 }

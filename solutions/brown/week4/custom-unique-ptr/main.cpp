@@ -1,16 +1,16 @@
-#include "test_runner.h"
+#include <cstddef>  // нужно для nullptr_t
 
-#include <cstddef> // нужно для nullptr_t
+#include "test_runner.h"
 
 using namespace std;
 
 // Реализуйте шаблон класса UniquePtr
 template <typename T>
 class UniquePtr {
-private:
+ private:
   T *__data_ptr = nullptr;
 
-public:
+ public:
   UniquePtr() : __data_ptr(nullptr) {}
 
   UniquePtr(T *ptr) : __data_ptr(ptr) {}

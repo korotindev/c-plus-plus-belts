@@ -36,7 +36,7 @@ class Document;
 class AbstractNode {
   friend Document;
 
-public:
+ public:
   virtual ~AbstractNode() = default;
   virtual void Render(std::ostream &out) const = 0;
   virtual std::unique_ptr<AbstractNode> Clone() const = 0;
@@ -44,7 +44,7 @@ public:
 
 template <class Derived>
 class Node : public AbstractNode {
-public:
+ public:
   Node() { SetFillColor(NoneColor).SetStrokeColor(NoneColor).SetStrokeWidth(1.0); }
   Node(Node &&) = default;
   Node &operator=(Node &&) = default;
@@ -74,14 +74,14 @@ public:
     return self();
   }
 
-protected:
+ protected:
   std::unordered_map<std::string, std::string> properties;
   Derived &self() { return static_cast<Derived &>(*this); }
   const Derived &self() const { return static_cast<const Derived &>(*this); }
 };
 
 class Circle : public Node<Circle> {
-public:
+ public:
   Circle() : Node() { SetCenter(Point{0, 0}).SetRadius(1.0); }
 
   Circle &SetCenter(Point p) {
@@ -104,7 +104,7 @@ public:
 };
 
 class Polyline : public Node<Polyline> {
-public:
+ public:
   Polyline() : Node() { properties["points"] = ""; }
   Polyline &AddPoint(Point point) {
     auto it = properties.find("points");
@@ -128,7 +128,7 @@ public:
 };
 
 class Text : public Node<Text> {
-public:
+ public:
   Text() : Node() { SetPoint(Point{}).SetOffset(Point{}).SetFontSize(1); }
 
   Text &SetPoint(Point point) {
@@ -166,12 +166,12 @@ public:
     out << ">" << data << "</text>";
   }
 
-private:
+ private:
   std::string data;
 };
 
 class Document {
-public:
+ public:
   template <typename NodesItem>
   void Add(NodesItem &&node) {
     auto node_ptr = node.Clone();
@@ -190,7 +190,7 @@ public:
     out << "</svg>";
   }
 
-private:
+ private:
   std::vector<std::unique_ptr<AbstractNode>> nodes;
 };
-} // namespace Svg
+}  // namespace Svg

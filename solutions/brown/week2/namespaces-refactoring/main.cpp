@@ -1,6 +1,3 @@
-#include "stats_aggregator.h"
-#include "test_runner.h"
-
 #include <functional>
 #include <iostream>
 #include <map>
@@ -8,6 +5,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "stats_aggregator.h"
+#include "test_runner.h"
 using namespace std;
 
 void TestAll();

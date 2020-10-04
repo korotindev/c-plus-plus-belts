@@ -12,7 +12,7 @@
 using namespace std;
 
 class InvertedIndex {
-public:
+ public:
   void Add(const string &document);
   void Optimize();
 
@@ -22,7 +22,7 @@ public:
 
   size_t DocsCount() { return docs.size(); }
 
-private:
+ private:
   map<string, vector<pair<size_t, size_t>>> index;
   map<string, map<size_t, size_t>> not_optimized_internal_index__;
   vector<string> docs;
@@ -30,7 +30,7 @@ private:
 };
 
 class SearchServer {
-public:
+ public:
   SearchServer() = default;
 
   explicit SearchServer(istream &document_input);
@@ -39,6 +39,6 @@ public:
 
   void AddQueriesStream(istream &query_input, ostream &search_results_output);
 
-private:
+ private:
   InvertedIndex index;
 };

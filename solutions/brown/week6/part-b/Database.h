@@ -1,8 +1,6 @@
 #ifndef C_PLUS_PLUS_BELTS_DATABASE_H
 #define C_PLUS_PLUS_BELTS_DATABASE_H
 
-#include "Coordinate.h"
-#include "ReadResponse.h"
 #include <iostream>
 #include <memory>
 #include <set>
@@ -10,6 +8,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "Coordinate.h"
+#include "ReadResponse.h"
 
 class StopsStorage;
 class BusStorage;
@@ -43,7 +44,7 @@ class StopsStorage {
   std::unordered_map<std::string, StopData> storage;
   mutable std::unordered_map<std::pair<std::string, std::string>, double, PairHasher> distanceStorage;
 
-public:
+ public:
   void Add(Stop stop);
   bool Exist(const std::string &busName) const;
   void AddBusToStop(const std::string &stopName, const std::string &busName);
@@ -55,7 +56,7 @@ class BusStorage {
   std::unordered_map<std::string, std::vector<std::string>> storage;
   std::unordered_map<std::string, std::unordered_set<std::string>> uniqueStorage;
 
-public:
+ public:
   void Add(Bus bus);
   const std::vector<std::string> &GetStops(const std::string &busName) const;
   bool Exist(const std::string &busName) const;
@@ -66,11 +67,11 @@ class Database {
   StopsStorage stopsStorage;
   BusStorage busStorage;
 
-public:
+ public:
   void EntertainStop(Stop stop);
   void EntertainBus(Bus bus);
   std::unique_ptr<ReadBusResponse> ReadBus(const std::string &busName);
   std::unique_ptr<ReadStopResponse> ReadStop(const std::string &stopName);
 };
 
-#endif // C_PLUS_PLUS_BELTS_DATABASE_H
+#endif  // C_PLUS_PLUS_BELTS_DATABASE_H

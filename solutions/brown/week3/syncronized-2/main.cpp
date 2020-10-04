@@ -1,16 +1,16 @@
-#include "test_runner.h"
-
 #include <future>
 #include <mutex>
 #include <numeric>
 #include <queue>
 #include <string>
 #include <vector>
+
+#include "test_runner.h"
 using namespace std;
 
 template <typename T>
 class Synchronized {
-public:
+ public:
   explicit Synchronized(T initial = T()) : value(initial) {}
 
   template <typename U>
@@ -23,7 +23,7 @@ public:
 
   Access<const T> GetAccess() const { return {lock_guard(m), value}; }
 
-private:
+ private:
   T value;
   mutable mutex m;
 };

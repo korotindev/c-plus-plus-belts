@@ -1,10 +1,6 @@
 #ifndef C_PLUS_PLUS_BELTS_STOPSSTORAGE_H
 #define C_PLUS_PLUS_BELTS_STOPSSTORAGE_H
 
-#include "Coordinate.h"
-#include "CustomUtils.h"
-#include "ReadResponse.h"
-#include "Router.h"
 #include <iostream>
 #include <memory>
 #include <set>
@@ -12,6 +8,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "Coordinate.h"
+#include "CustomUtils.h"
+#include "ReadResponse.h"
+#include "Router.h"
 
 class Database;
 
@@ -57,7 +58,7 @@ class StopsStorage {
   std::unordered_map<std::string, StopData> storage;
   std::unordered_map<Road, RoadData, RoadHasher> distanceStorage;
 
-public:
+ public:
   void Add(Stop stop);
   bool Exist(const std::string &busName) const;
   void AddBusToStop(const std::string &stopName, const std::string &busName);
@@ -70,4 +71,4 @@ bool operator==(const Road &lhs, const Road &rhs);
 bool operator==(const StopDistance &lhs, const StopDistance &rhs);
 std::ostream &operator<<(std::ostream &output, const StopDistance &data);
 
-#endif // C_PLUS_PLUS_BELTS_STOPSSTORAGE_H
+#endif  // C_PLUS_PLUS_BELTS_STOPSSTORAGE_H

@@ -14,7 +14,7 @@ struct Record {
 };
 
 class Database {
-public:
+ public:
   bool Put(const Record &record) {
     auto [it, inserted] = storage.insert({record.id, Data{record, {}, {}, {}}});
 
@@ -85,7 +85,7 @@ public:
     }
   }
 
-private:
+ private:
   template <typename Type>
   using Index = multimap<Type, const Record *>;
 
@@ -96,7 +96,7 @@ private:
     Index<string>::iterator user_iter;
   };
 
-private:
+ private:
   unordered_map<string, Data> storage;
   Index<int> timestamp_index;
   Index<int> karma_index;

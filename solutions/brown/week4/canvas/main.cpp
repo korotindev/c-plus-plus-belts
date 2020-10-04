@@ -1,14 +1,14 @@
+#include <iostream>
+#include <map>
+
 #include "Common.h"
 #include "Textures.h"
 #include "test_runner.h"
 
-#include <iostream>
-#include <map>
-
 using namespace std;
 
 class Canvas {
-public:
+ public:
   using ShapeId = size_t;
 
   void SetSize(Size size) { size_ = size; }
@@ -49,7 +49,7 @@ public:
     output << '#' << string(size_.width, '#') << "#\n";
   }
 
-private:
+ private:
   using Shapes = map<ShapeId, unique_ptr<IShape>>;
 
   Shapes::iterator GetShapeNodeById(ShapeId id) {
@@ -78,11 +78,12 @@ void TestSimple() {
   stringstream output;
   canvas.Print(output);
 
-  const auto answer = "#######\n"
-                      "# ... #\n"
-                      "# ... #\n"
-                      "# ... #\n"
-                      "#######\n";
+  const auto answer =
+      "#######\n"
+      "# ... #\n"
+      "# ... #\n"
+      "# ... #\n"
+      "#######\n";
 
   ASSERT_EQUAL(answer, output.str());
 }
@@ -96,12 +97,13 @@ void TestSmallTexture() {
   stringstream output;
   canvas.Print(output);
 
-  const auto answer = "########\n"
-                      "#      #\n"
-                      "# ***. #\n"
-                      "# .... #\n"
-                      "#      #\n"
-                      "########\n";
+  const auto answer =
+      "########\n"
+      "#      #\n"
+      "# ***. #\n"
+      "# .... #\n"
+      "#      #\n"
+      "########\n";
 
   ASSERT_EQUAL(answer, output.str());
 }
@@ -154,25 +156,45 @@ void TestCpp() {
   stringstream output;
   canvas.Print(output);
 
-  const auto answer = "###############################################################################\n"
-                      "#                                                                             #\n"
-                      "#            cCcCcCcCcC                                                       #\n"
-                      "#        CcCcCcCcCcCcCcCcCc                                                   #\n"
-                      "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++         #\n"
-                      "#    CcCcCcCcCcCc                      ++++++                  ++++++         #\n"
-                      "#   CcCcCcCcC                          ++++++                  ++++++         #\n"
-                      "#   cCcCcCc                            ++++++                  ++++++         #\n"
-                      "#  cCcCcC                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
-                      "#  CcCcCc                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
-                      "#  cCcCcC                      ++++++++++++++++++++++  ++++++++++++++++++++++ #\n"
-                      "#   cCcCcCc                            ++++++                  ++++++         #\n"
-                      "#   CcCcCcCcC                          ++++++                  ++++++         #\n"
-                      "#    CcCcCcCcCcCc                      ++++++                  ++++++         #\n"
-                      "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++         #\n"
-                      "#        CcCcCcCcCcCcCcCcCc                                                   #\n"
-                      "#            cCcCcCcCcC                                                       #\n"
-                      "#                                                                             #\n"
-                      "###############################################################################\n";
+  const auto answer =
+      "########################################################################"
+      "#######\n"
+      "#                                                                       "
+      "      #\n"
+      "#            cCcCcCcCcC                                                 "
+      "      #\n"
+      "#        CcCcCcCcCcCcCcCcCc                                             "
+      "      #\n"
+      "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++   "
+      "      #\n"
+      "#    CcCcCcCcCcCc                      ++++++                  ++++++   "
+      "      #\n"
+      "#   CcCcCcCcC                          ++++++                  ++++++   "
+      "      #\n"
+      "#   cCcCcCc                            ++++++                  ++++++   "
+      "      #\n"
+      "#  cCcCcC                      ++++++++++++++++++++++  "
+      "++++++++++++++++++++++ #\n"
+      "#  CcCcCc                      ++++++++++++++++++++++  "
+      "++++++++++++++++++++++ #\n"
+      "#  cCcCcC                      ++++++++++++++++++++++  "
+      "++++++++++++++++++++++ #\n"
+      "#   cCcCcCc                            ++++++                  ++++++   "
+      "      #\n"
+      "#   CcCcCcCcC                          ++++++                  ++++++   "
+      "      #\n"
+      "#    CcCcCcCcCcCc                      ++++++                  ++++++   "
+      "      #\n"
+      "#      cCcCcCcCcCcCcCcCcCcCcC          ++++++                  ++++++   "
+      "      #\n"
+      "#        CcCcCcCcCcCcCcCcCc                                             "
+      "      #\n"
+      "#            cCcCcCcCcC                                                 "
+      "      #\n"
+      "#                                                                       "
+      "      #\n"
+      "########################################################################"
+      "#######\n";
 
   ASSERT_EQUAL(answer, output.str());
 }

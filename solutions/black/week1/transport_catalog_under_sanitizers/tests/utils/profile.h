@@ -6,7 +6,7 @@
 #include <string>
 
 class LogDuration {
-public:
+ public:
   explicit LogDuration(const std::string &msg = "") : message(msg + ": "), start(std::chrono::steady_clock::now()) {}
 
   ~LogDuration() {
@@ -17,7 +17,7 @@ public:
     std::cerr << message << s_count << " (s) | " << ms_count << " (ms)" << std::endl;
   }
 
-private:
+ private:
   std::string message;
   std::chrono::steady_clock::time_point start;
 };
@@ -38,13 +38,13 @@ struct TotalDuration {
   }
 };
 class AddDuration {
-public:
+ public:
   explicit AddDuration(std::chrono::steady_clock::duration &dest)
       : add_to(dest), start(std::chrono::steady_clock::now()) {}
   explicit AddDuration(TotalDuration &dest) : AddDuration(dest.value) {}
   ~AddDuration() { add_to += std::chrono::steady_clock::now() - start; }
 
-private:
+ private:
   std::chrono::steady_clock::duration &add_to;
   std::chrono::steady_clock::time_point start;
 };

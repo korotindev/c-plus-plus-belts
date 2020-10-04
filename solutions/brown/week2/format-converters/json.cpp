@@ -87,4 +87,4 @@ Node LoadNode(istream &input) {
 
 Document Load(istream &input) { return Document{LoadNode(input)}; }
 
-} // namespace Json
+}  // namespace Json

@@ -1,10 +1,11 @@
-#include "test_runner.h"
 #include <istream>
 #include <map>
 #include <ostream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+
+#include "test_runner.h"
 
 namespace Ini {
 std::pair<std::string_view, std::string_view> Split(std::string_view line, char by) {
@@ -21,7 +22,7 @@ std::pair<std::string_view, std::string_view> Split(std::string_view line, char 
 using Section = std::unordered_map<std::string, std::string>;
 
 class Document {
-public:
+ public:
   Section &AddSection(std::string s) {
     auto [iter, _] = sections.emplace(std::move(s), Section());
     return GetSection(iter->first);
@@ -32,7 +33,7 @@ public:
 
   size_t SectionCount() const { return sections.size(); }
 
-private:
+ private:
   std::unordered_map<std::string, Section> sections;
 };
 
@@ -49,4 +50,4 @@ Document Load(std::istream &input) {
   }
   return doc;
 }
-} // namespace Ini
+}  // namespace Ini

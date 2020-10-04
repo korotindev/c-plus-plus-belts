@@ -1,19 +1,19 @@
-#include "test_runner.h"
-
 #include <algorithm>
 #include <forward_list>
 #include <iterator>
+
+#include "test_runner.h"
 
 using namespace std;
 
 template <typename Type, typename Hasher>
 class HashSet {
-public:
+ public:
   using BucketList = forward_list<Type>;
   vector<BucketList> buckets;
   const Hasher &h;
 
-public:
+ public:
   explicit HashSet(size_t num_buckets, const Hasher &hasher = {}) : buckets(num_buckets), h(hasher) {}
 
   void Add(const Type &value) {

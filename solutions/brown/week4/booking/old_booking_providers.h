@@ -6,7 +6,7 @@
 using namespace std;
 
 class FlightProvider {
-public:
+ public:
   using BookingId = int;
 
   struct BookingData {
@@ -30,13 +30,13 @@ public:
     }
   }
 
-public:
+ public:
   static int capacity;
   static int counter;
 };
 
 class HotelProvider {
-public:
+ public:
   using BookingId = int;
 
   struct BookingData {
@@ -60,7 +60,7 @@ public:
     }
   }
 
-public:
+ public:
   static int capacity;
   static int counter;
 };

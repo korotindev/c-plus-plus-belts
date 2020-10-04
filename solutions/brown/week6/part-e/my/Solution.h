@@ -1,14 +1,15 @@
 #ifndef C_PLUS_PLUS_BELTS_SOLUTION_H
 #define C_PLUS_PLUS_BELTS_SOLUTION_H
 
+#include <fstream>
+#include <iostream>
+#include <vector>
+
 #include "CustomUtils.h"
 #include "Json.h"
 #include "Request.h"
 #include "Settings.h"
 #include "test_runner.h"
-#include <fstream>
-#include <iostream>
-#include <vector>
 
 void InitializeSettings(const Json::Document &document, const std::string &key);
 
@@ -29,4 +30,4 @@ void TestIntegrationTest2();
 void TestIntegrationTest3();
 void TestIntegrationTest4();
 
-#endif // C_PLUS_PLUS_BELTS_SOLUTION_H
+#endif  // C_PLUS_PLUS_BELTS_SOLUTION_H

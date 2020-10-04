@@ -1,7 +1,8 @@
-#include "test_runner.h"
 #include <cassert>
 #include <deque>
 #include <iostream>
+
+#include "test_runner.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ struct Node {
 };
 
 class NodeBuilder {
-public:
+ public:
   Node *CreateRoot(int value) {
     nodes.emplace_back(value, nullptr);
     return &nodes.back();
@@ -35,7 +36,7 @@ public:
     return me->right;
   }
 
-private:
+ private:
   deque<Node> nodes;
 };
 

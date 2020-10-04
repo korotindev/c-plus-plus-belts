@@ -1,6 +1,3 @@
-#include "profile.h"
-#include "test_runner.h"
-
 #include <algorithm>
 #include <cmath>
 #include <deque>
@@ -11,11 +8,14 @@
 #include <string>
 #include <vector>
 
+#include "profile.h"
+#include "test_runner.h"
+
 using namespace std;
 
 template <typename T>
 class Synchronized {
-public:
+ public:
   explicit Synchronized(T initial = T()) : value(move(initial)) {}
 
   struct Access {
@@ -25,14 +25,14 @@ public:
 
   Access GetAccess() { return Access{value, lock_guard(m)}; }
 
-private:
+ private:
   T value;
   mutex m;
 };
 
 template <typename K, typename V>
 class ConcurrentMap {
-public:
+ public:
   static_assert(is_integral_v<K>, "ConcurrentMap supports only integer keys");
 
   struct Access {
@@ -67,7 +67,7 @@ public:
     return res;
   }
 
-private:
+ private:
   deque<map<K, V>> data;
   deque<mutex> mutexes;
   size_t bucket_count;

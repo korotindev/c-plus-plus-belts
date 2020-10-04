@@ -5,7 +5,7 @@
 
 // Интерфейс, представляющий книгу
 class IBook {
-public:
+ public:
   virtual ~IBook() = default;
 
   // Возвращает название книги
@@ -18,7 +18,7 @@ public:
 
 // Интерфейс, позволяющий распаковывать книги
 class IBooksUnpacker {
-public:
+ public:
   virtual ~IBooksUnpacker() = default;
 
   // Распаковывает книгу с указанным названием из хранилища
@@ -27,7 +27,7 @@ public:
 
 // Интерфейс, представляющий кэш
 class ICache {
-public:
+ public:
   // Настройки кэша
   struct Settings {
     // Максимальный допустимый объём памяти, потребляемый закэшированными
@@ -37,7 +37,7 @@ public:
 
   using BookPtr = std::shared_ptr<const IBook>;
 
-public:
+ public:
   virtual ~ICache() = default;
 
   // Возвращает книгу с заданным названием. Если её в данный момент нет

@@ -1,5 +1,3 @@
-#include "test_runner.h"
-
 #include <algorithm>
 #include <iostream>
 #include <list>
@@ -7,11 +5,13 @@
 #include <stdexcept>
 #include <string>
 
+#include "test_runner.h"
+
 using namespace std;
 
 template <class T>
 class ObjectPool {
-public:
+ public:
   T *Allocate() {
     if (pool.empty()) {
       pool.emplace_back(new T);
@@ -46,7 +46,7 @@ public:
     }
   }
 
-private:
+ private:
   list<T *> pool;
   set<T *> allocated;
 };

@@ -1,11 +1,13 @@
 #include "search_server.h"
-#include "iterator_range.h"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
 #include <iterator>
 #include <sstream>
+
+#include "iterator_range.h"
 
 vector<string> SplitIntoWords(const string &line) {
   istringstream words_input(line);
@@ -112,8 +114,7 @@ void SearchServer::AddQueriesStreamSync(istream &query_input, ostream &search_re
 
     search_results_output << current_query << ':';
     for (auto &elem : Head(docId_count, 5ul)) {
-      if (elem.second == 0)
-        continue;
+      if (elem.second == 0) continue;
       search_results_output << " {"
                             << "docid: " << elem.first << ", "
                             << "hitcount: " << elem.second << '}';

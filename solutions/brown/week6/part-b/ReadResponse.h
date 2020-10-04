@@ -44,4 +44,4 @@ struct ReadBusMetricsResponse : ReadBusResponse {
   double routeDistance;
 };
 
-#endif // C_PLUS_PLUS_BELTS_READRESPONSE_H
+#endif  // C_PLUS_PLUS_BELTS_READRESPONSE_H

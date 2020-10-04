@@ -9,7 +9,7 @@
 using namespace std;
 
 class Node {
-public:
+ public:
   Node(string name, unordered_map<string, string> attrs);
 
   const vector<Node> &Children() const;
@@ -19,19 +19,19 @@ public:
   template <typename T>
   T AttributeValue(const string &name) const;
 
-private:
+ private:
   string name;
   vector<Node> children;
   unordered_map<string, string> attrs;
 };
 
 class Document {
-public:
+ public:
   explicit Document(Node root);
 
   const Node &GetRoot() const;
 
-private:
+ private:
   Node root;
 };
 

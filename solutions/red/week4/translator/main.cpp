@@ -1,13 +1,13 @@
-#include "profile.h"
-#include "test_runner.h"
-
 #include <forward_list>
 #include <string_view>
+
+#include "profile.h"
+#include "test_runner.h"
 
 using namespace std;
 
 class Translator {
-public:
+ public:
   void Add(string_view source, string_view target) {
     auto strv_target = GetCachedClone(target);
     auto strv_source = GetCachedClone(source);
@@ -16,18 +16,16 @@ public:
   }
 
   string_view TranslateForward(string_view source) const {
-    if (forward.count(source) == 0)
-      return {};
+    if (forward.count(source) == 0) return {};
     return forward.at(source);
   }
 
   string_view TranslateBackward(string_view target) const {
-    if (backward.count(target) == 0)
-      return "";
+    if (backward.count(target) == 0) return "";
     return backward.at(target);
   }
 
-private:
+ private:
   string_view GetCachedClone(string_view str) {
     for (const auto *dict : {&forward, &backward}) {
       const auto it = dict->find(str);

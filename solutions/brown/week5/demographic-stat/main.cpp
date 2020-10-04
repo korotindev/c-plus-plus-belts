@@ -1,16 +1,17 @@
-#include "profile.h"
-#include "test_runner.h"
 #include <iostream>
 #include <vector>
+
+#include "profile.h"
+#include "test_runner.h"
 
 using namespace std;
 
 enum class Gender { FEMALE, MALE };
 
 struct Person {
-  int age;          // возраст
-  Gender gender;    // пол
-  bool is_employed; // имеет ли работу
+  int age;           // возраст
+  Gender gender;     // пол
+  bool is_employed;  // имеет ли работу
 };
 
 // Это пример функции, его не нужно отправлять вместе с функцией PrintStats

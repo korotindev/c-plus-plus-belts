@@ -1,8 +1,9 @@
+#include <iostream>
+#include <sstream>
+
 #include "CustomUtils.h"
 #include "Request.h"
 #include "test_runner.h"
-#include <iostream>
-#include <sstream>
 
 using namespace std;
 
@@ -41,11 +42,13 @@ void PrintResponses(const vector<string> &responses, ostream &stream = cout) {
 }
 
 void TestParseRequests_withModifyConverter() {
-  stringstream input("3\n"
-                     "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka");
+  stringstream input(
+      "3\n"
+      "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n"
+      "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka");
   const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 3ul);
   {
@@ -71,13 +74,16 @@ void TestParseRequests_withModifyConverter() {
 }
 
 void TestParseRequests_withModifyConverter2() {
-  stringstream input("4\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus lw5PH5: qwe > eee > qwe\n"
-                     "Bus lw5PH6: qwe - eee\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n");
+  stringstream input(
+      "4\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n"
+      "Bus lw5PH5: qwe > eee > qwe\n"
+      "Bus lw5PH6: qwe - eee\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n");
   const vector<unique_ptr<Request>> requests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 4ul);
   {
@@ -111,10 +117,11 @@ void TestParseRequests_withModifyConverter2() {
 }
 
 void TestParseRequests_withReadConverter() {
-  stringstream input("3\n"
-                     "Bus 256\n"
-                     "Bus 750\n"
-                     "Bus 751");
+  stringstream input(
+      "3\n"
+      "Bus 256\n"
+      "Bus 750\n"
+      "Bus 751");
   const vector<unique_ptr<Request>> requests = ParseRequests(READ_TYPES_CONVERTER, input);
   ASSERT_EQUAL(requests.size(), 3ul);
   {
@@ -132,31 +139,33 @@ void TestParseRequests_withReadConverter() {
 }
 
 void TestIntegration() {
-  stringstream input("15\n"
-                     "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
-                     "Stop Marushkino: 55.595884, 37.209755\n"
-                     "Stop qwe: 55.611087, 37.20829\n"
-                     "Stop eee: 55.595884, 37.209755\n"
-                     "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo "
-                     "Passazhirskaya > Biryulyovo Zapadnoye\n"
-                     "Bus lw5PH5 second: qwe > eee > qwe\n"
-                     "Bus lw5PH6: qwe - eee\n"
-                     "Bus lw5PH7: \n"
-                     "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
-                     "Stop Rasskazovka: 55.632761, 37.333324\n"
-                     "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517\n"
-                     "Stop Biryusinka: 55.581065, 37.64839\n"
-                     "Stop Universam: 55.587655, 37.645687\n"
-                     "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656\n"
-                     "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164\n"
-                     "7\n"
-                     "Bus 256\n"
-                     "Bus 750\n"
-                     "Bus 752\n"
-                     "Bus lw5PH5 second\n"
-                     "Bus lw5PH6\n"
-                     "Bus lw5PH7\n"
-                     "Bus 751 1");
+  stringstream input(
+      "15\n"
+      "Stop Tolstopaltsevo: 55.611087, 37.20829\n"
+      "Stop Marushkino: 55.595884, 37.209755\n"
+      "Stop qwe: 55.611087, 37.20829\n"
+      "Stop eee: 55.595884, 37.209755\n"
+      "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo "
+      "Tovarnaya > Biryulyovo "
+      "Passazhirskaya > Biryulyovo Zapadnoye\n"
+      "Bus lw5PH5 second: qwe > eee > qwe\n"
+      "Bus lw5PH6: qwe - eee\n"
+      "Bus lw5PH7: \n"
+      "Bus 750: Tolstopaltsevo - Marushkino - Rasskazovka\n"
+      "Stop Rasskazovka: 55.632761, 37.333324\n"
+      "Stop Biryulyovo Zapadnoye: 55.574371, 37.6517\n"
+      "Stop Biryusinka: 55.581065, 37.64839\n"
+      "Stop Universam: 55.587655, 37.645687\n"
+      "Stop Biryulyovo Tovarnaya: 55.592028, 37.653656\n"
+      "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164\n"
+      "7\n"
+      "Bus 256\n"
+      "Bus 750\n"
+      "Bus 752\n"
+      "Bus lw5PH5 second\n"
+      "Bus lw5PH6\n"
+      "Bus lw5PH7\n"
+      "Bus 751 1");
   auto modifyRequests = ParseRequests(MODIFY_TYPES_CONVERTER, input);
   Database db;
   ProcessModifyRequests(db, modifyRequests);
@@ -164,13 +173,14 @@ void TestIntegration() {
   auto responses = ProcessReadRequests(db, readRequests);
   stringstream output;
   PrintResponses(responses, output);
-  string actual("Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
-                "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
-                "Bus 752: not found\n"
-                "Bus lw5PH5 second: 3 stops on route, 2 unique stops, 3386 route length\n"
-                "Bus lw5PH6: 3 stops on route, 2 unique stops, 3386 route length\n"
-                "Bus lw5PH7: 0 stops on route, 0 unique stops, 0 route length\n"
-                "Bus 751 1: not found\n");
+  string actual(
+      "Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length\n"
+      "Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length\n"
+      "Bus 752: not found\n"
+      "Bus lw5PH5 second: 3 stops on route, 2 unique stops, 3386 route length\n"
+      "Bus lw5PH6: 3 stops on route, 2 unique stops, 3386 route length\n"
+      "Bus lw5PH7: 0 stops on route, 0 unique stops, 0 route length\n"
+      "Bus 751 1: not found\n");
   ASSERT_EQUAL(output.str(), actual);
 }
 

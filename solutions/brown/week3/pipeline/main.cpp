@@ -1,10 +1,11 @@
-#include "test_runner.h"
 #include <functional>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include "test_runner.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ struct Email {
 };
 
 class Worker {
-public:
+ public:
   virtual ~Worker() = default;
 
   virtual void Process(unique_ptr<Email> email) = 0;
@@ -25,7 +26,7 @@ public:
     throw logic_error("Unimplemented");
   }
 
-protected:
+ protected:
   // реализации должны вызывать PassOn, чтобы передать объект дальше
   // по цепочке обработчиков
   void PassOn(unique_ptr<Email> email) const {
@@ -34,14 +35,14 @@ protected:
     }
   }
 
-public:
+ public:
   void SetNext(unique_ptr<Worker> next_) { this->next = move(next_); }
 
   unique_ptr<Worker> next;
 };
 
 class Reader : public Worker {
-public:
+ public:
   Reader(istream &input_) : input(input_) {}
 
   void Process(unique_ptr<Email> email) override { PassOn(move(email)); }
@@ -59,12 +60,12 @@ public:
     }
   }
 
-private:
+ private:
   istream &input;
 };
 
 class Filter : public Worker {
-public:
+ public:
   using Function = function<bool(const Email &)>;
 
   Filter(Function func) : predicate(move(func)) {}
@@ -75,12 +76,12 @@ public:
     }
   }
 
-private:
+ private:
   Function predicate;
 };
 
 class Copier : public Worker {
-public:
+ public:
   Copier(string recipient_) : recipient(move(recipient_)) {}
 
   void Process(unique_ptr<Email> email) {
@@ -94,12 +95,12 @@ public:
     }
   }
 
-private:
+ private:
   string recipient;
 };
 
 class Sender : public Worker {
-public:
+ public:
   Sender(ostream &output_) : output(output_) {}
 
   void Process(unique_ptr<Email> email) {
@@ -107,13 +108,13 @@ public:
     PassOn(move(email));
   }
 
-private:
+ private:
   ostream &output;
 };
 
 // реализуйте класс
 class PipelineBuilder {
-public:
+ public:
   // добавляет в качестве первого обработчика Reader
   explicit PipelineBuilder(istream &in) {
     head = make_unique<Reader>(in);
@@ -144,23 +145,24 @@ public:
   // возвращает готовую цепочку обработчиков
   unique_ptr<Worker> Build() { return move(head); }
 
-private:
+ private:
   unique_ptr<Worker> head;
   Worker *tail;
 };
 
 void TestSanity() {
-  string input = ("erich@example.com\n"
-                  "richard@example.com\n"
-                  "Hello there\n"
+  string input =
+      ("erich@example.com\n"
+       "richard@example.com\n"
+       "Hello there\n"
 
-                  "erich@example.com\n"
-                  "ralph@example.com\n"
-                  "Are you sure you pressed the right button?\n"
+       "erich@example.com\n"
+       "ralph@example.com\n"
+       "Are you sure you pressed the right button?\n"
 
-                  "ralph@example.com\n"
-                  "erich@example.com\n"
-                  "I do not make mistakes of that kind\n");
+       "ralph@example.com\n"
+       "erich@example.com\n"
+       "I do not make mistakes of that kind\n");
   istringstream inStream(input);
   ostringstream outStream;
 
@@ -172,17 +174,18 @@ void TestSanity() {
 
   pipeline->Run();
 
-  string expectedOutput = ("erich@example.com\n"
-                           "richard@example.com\n"
-                           "Hello there\n"
+  string expectedOutput =
+      ("erich@example.com\n"
+       "richard@example.com\n"
+       "Hello there\n"
 
-                           "erich@example.com\n"
-                           "ralph@example.com\n"
-                           "Are you sure you pressed the right button?\n"
+       "erich@example.com\n"
+       "ralph@example.com\n"
+       "Are you sure you pressed the right button?\n"
 
-                           "erich@example.com\n"
-                           "richard@example.com\n"
-                           "Are you sure you pressed the right button?\n");
+       "erich@example.com\n"
+       "richard@example.com\n"
+       "Are you sure you pressed the right button?\n");
 
   ASSERT_EQUAL(expectedOutput, outStream.str());
 }

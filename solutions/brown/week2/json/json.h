@@ -8,7 +8,7 @@
 using namespace std;
 
 class Node {
-public:
+ public:
   explicit Node(vector<Node> array);
   explicit Node(map<string, Node> map);
   explicit Node(int value);
@@ -19,7 +19,7 @@ public:
   int AsInt() const;
   const string &AsString() const;
 
-private:
+ private:
   vector<Node> as_array;
   map<string, Node> as_map;
   int as_int;
@@ -27,12 +27,12 @@ private:
 };
 
 class Document {
-public:
+ public:
   explicit Document(Node root);
 
   const Node &GetRoot() const;
 
-private:
+ private:
   Node root;
 };
 

@@ -1,4 +1,5 @@
 #include "Request.h"
+
 #include "CustomUtils.h"
 
 using namespace std;
@@ -46,14 +47,14 @@ string ReadBusRequest::Process(Database &db) {
 
 RequestHolder Request::Create(Request::Type type) {
   switch (type) {
-  case Request::Type::EntertainBus:
-    return make_unique<EntertainBusRequest>();
-  case Request::Type::EntertainStop:
-    return make_unique<EntertainStopRequest>();
-  case Request::Type::ReadBus:
-    return make_unique<ReadBusRequest>();
-  default:
-    return nullptr;
+    case Request::Type::EntertainBus:
+      return make_unique<EntertainBusRequest>();
+    case Request::Type::EntertainStop:
+      return make_unique<EntertainStopRequest>();
+    case Request::Type::ReadBus:
+      return make_unique<ReadBusRequest>();
+    default:
+      return nullptr;
   }
 }
 
