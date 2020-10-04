@@ -193,21 +193,24 @@ class Text : public Node<Text> {
 class Document {
  public:
   template <typename NodesItem>
-  void Add(NodesItem &&node) {
+  void Add(std::string layer, NodesItem &&node) {
     auto node_ptr = node.Clone();
-    nodes.push_back(move(node_ptr));
+    nodes[move(layer)].push_back(move(node_ptr));
   }
 
-  void Render(std::ostream &out) {
+  void Render(std::ostream &out, const std::vector<std::string>& layers) {
     out << "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>";
     out << "<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" version=\\\"1.1\\\">";
-    for (const auto &node : nodes) {
-      node->Render(out);
+
+    for (const auto &layer_name : layers) {
+      for (const auto &node : nodes[layer_name]) {
+        node->Render(out);
+      }
     }
     out << "</svg>";
   }
 
  private:
-  std::vector<std::unique_ptr<AbstractNode>> nodes;
+  std::unordered_map<std::string, std::vector<std::unique_ptr<AbstractNode>>> nodes;
 };
 }  // namespace Svg

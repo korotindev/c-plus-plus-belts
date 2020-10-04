@@ -84,6 +84,12 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
   transform(palette.cbegin(), palette.cend(), back_inserter(color_palette),
             [](auto &node) { return ParseColor(node); });
 
+
+  const auto &layers_nodes = json.at("layers").AsArray();
+  vector<string> layers;
+  transform(layers_nodes.cbegin(), layers_nodes.cend(), back_inserter(layers),
+            [](auto &node) { return node.AsString(); });
+
   RenderSettings render_settings{
       .width = json.at("width").AsDouble(),
       .height = json.at("height").AsDouble(),
@@ -98,7 +104,8 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
       .color_palette = move(color_palette),
       .bus_label_font_size = static_cast<uint32_t>(json.at("bus_label_font_size").AsInt()),
       .bus_label_offset = Svg::Point{.x = json.at("bus_label_offset").AsArray()[0].AsDouble(),
-                                     .y = json.at("bus_label_offset").AsArray()[1].AsDouble()}};
+                                     .y = json.at("bus_label_offset").AsArray()[1].AsDouble()},
+      .layers = move(layers)};
 
   return render_settings;
 }
@@ -144,7 +151,7 @@ void TransportDrawer::DrawBusRoute(size_t id, const Descriptions::Bus *bus,
     polyline.AddPoint(projection_.ConvertSpherePoint(stop->position));
   }
 
-  renderer_->Add(move(polyline));
+  renderer_->Add("bus_lines", move(polyline));
 }
 
 void TransportDrawer::DrawBusName(size_t id, const Descriptions::Bus *bus,
@@ -168,8 +175,8 @@ void TransportDrawer::DrawBusName(size_t id, const Descriptions::Bus *bus,
 
     auto text = Svg::Text(shared_text).SetFillColor(color);
 
-    renderer_->Add(move(underlayer));
-    renderer_->Add(move(text));
+    renderer_->Add("bus_labels", move(underlayer));
+    renderer_->Add("bus_labels", move(text));
   };
 
   if (bus->stops.size() > 1) {
@@ -189,7 +196,7 @@ void TransportDrawer::DrawStop(const Descriptions::Stop *stop) const {
                     .SetRadius(render_settings_.stop_radius)
                     .SetFillColor("white");
 
-  renderer_->Add(move(circle));
+  renderer_->Add("stop_points", move(circle));
 }
 
 void TransportDrawer::DrawStopName(const Descriptions::Stop *stop) const {
@@ -209,14 +216,14 @@ void TransportDrawer::DrawStopName(const Descriptions::Stop *stop) const {
 
   auto text = Svg::Text(shared_text).SetFillColor("black");
 
-  renderer_->Add(move(underlayer));
-  renderer_->Add(move(text));
+  renderer_->Add("stop_labels", move(underlayer));
+  renderer_->Add("stop_labels", move(text));
 }
 
 shared_ptr<const string> TransportDrawer::Draw() const {
   if (!svg_map_) {
     ostringstream ss;
-    renderer_->Render(ss);
+    renderer_->Render(ss, render_settings_.layers);
     this->svg_map_ = make_shared<const string>(ss.str());
   }
 

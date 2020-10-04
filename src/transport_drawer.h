@@ -31,6 +31,7 @@ class TransportDrawer {
     std::vector<Svg::Color> color_palette;
     uint32_t bus_label_font_size;
     Svg::Point bus_label_offset;
+    std::vector<std::string> layers;
   };
 
   std::shared_ptr<const std::string> Draw() const;
