@@ -84,7 +84,6 @@ TransportDrawer::RenderSettings TransportDrawer::MakeRenderSettings(const Json::
   transform(palette.cbegin(), palette.cend(), back_inserter(color_palette),
             [](auto &node) { return ParseColor(node); });
 
-
   const auto &layers_nodes = json.at("layers").AsArray();
   vector<string> layers;
   transform(layers_nodes.cbegin(), layers_nodes.cend(), back_inserter(layers),

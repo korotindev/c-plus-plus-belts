@@ -198,7 +198,7 @@ class Document {
     nodes[move(layer)].push_back(move(node_ptr));
   }
 
-  void Render(std::ostream &out, const std::vector<std::string>& layers) {
+  void Render(std::ostream &out, const std::vector<std::string> &layers) {
     out << "<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>";
     out << "<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" version=\\\"1.1\\\">";
 

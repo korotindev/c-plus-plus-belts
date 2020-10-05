@@ -68,4 +68,7 @@
         "**/solutions": true,
         "**/build": true
     },
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+    "C_Cpp.loggingLevel": "Debug",
 }
