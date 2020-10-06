@@ -9,7 +9,8 @@ add_executable(${TARGET} ${TARGET_SRC})
 
 target_compile_features(${TARGET} PUBLIC cxx_std_20)
 target_compile_options(${TARGET} PUBLIC -Wall -Wextra -Werror -pedantic) 
-target_include_directories(${TARGET} PUBLIC ./utils ${executor_SOURCE_DIR})
-target_link_libraries(${TARGET} executor)
+target_include_directories(${TARGET} PUBLIC ./utils ${executor_SOURCE_DIR} ${Protobuf_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(${TARGET} executor ${Protobuf_LIBRARIES})
+
 
 add_test(NAME test1 COMMAND ${TARGET})

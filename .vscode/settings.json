@@ -1,5 +1,4 @@
 {
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "files.associations": {
         "array": "cpp",
         "atomic": "cpp",
@@ -62,13 +61,10 @@
         "future": "cpp",
         "mutex": "cpp",
         "shared_mutex": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "*.inc": "cpp"
     },
     "search.exclude": {
         "**/solutions": true,
-        "**/build": true
     },
-    "C_Cpp.clang_format_fallbackStyle": "Google",
-    "C_Cpp.clang_format_path": "/usr/bin/clang-format",
-    "C_Cpp.loggingLevel": "Debug",
 }
