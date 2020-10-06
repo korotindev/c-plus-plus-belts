@@ -39,23 +39,21 @@ PhoneBook::ContactRange PhoneBook::FindByNamePrefix(string_view str) const {
 
   Contact tmp;
 
-  auto first = upper_bound(contacts_.cbegin(), contacts_.cend(), tmp);
-
   tmp.name = string(str);
 
-  auto last = upper_bound(first, contacts_.cend(), tmp, [str](const Contact &lhs, const Contact &rhs) {
+  auto p = equal_range(contacts_.cbegin(), contacts_.cend(), tmp, [str](const Contact &lhs, const Contact &rhs) {
     string_view lhs_sv = lhs.name;
     if (lhs_sv.size() > str.size()) {
-      lhs_sv.remove_prefix(lhs_sv.size() - str.size());
+      lhs_sv.remove_suffix(lhs_sv.size() - str.size());
     }
     string_view rhs_sv = rhs.name;
     if (rhs_sv.size() > str.size()) {
-      rhs_sv.remove_prefix(rhs_sv.size() - str.size());
+      rhs_sv.remove_suffix(rhs_sv.size() - str.size());
     }
-    return lhs_sv <= rhs_sv;
+    return lhs_sv < rhs_sv;
   });
 
-  return ContactRange(first, last);
+  return ContactRange(p.first, p.second);
 }
 
 PhoneBookSerialize::Contact Contact::Serialize() const {
