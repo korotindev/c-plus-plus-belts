@@ -12,6 +12,7 @@
 
 struct Date {
   int year, month, day;
+  PhoneBookSerialize::Date Serialize() const;
   static Date Deserealize(PhoneBookSerialize::Date &serialized_date);
 };
 
@@ -19,6 +20,7 @@ struct Contact {
   std::string name;
   std::optional<Date> birthday;
   std::vector<std::string> phones;
+  PhoneBookSerialize::Contact Serialize() const;
   static Contact Deserealize(PhoneBookSerialize::Contact &serialized_contact);
 };
 

@@ -2,6 +2,14 @@
 
 using namespace std;
 
+PhoneBookSerialize::Date Date::Serialize() const {
+  PhoneBookSerialize::Date date;
+  date.set_day(day);
+  date.set_month(month);
+  date.set_year(year);
+  return date;
+}
+
 Date Date::Deserealize(PhoneBookSerialize::Date &serialized_date) {
   return Date{.year = serialized_date.year(), .month = serialized_date.month(), .day = serialized_date.day()};
 }
@@ -50,10 +58,24 @@ PhoneBook::ContactRange PhoneBook::FindByNamePrefix(string_view str) const {
   return ContactRange(first, last);
 }
 
+PhoneBookSerialize::Contact Contact::Serialize() const {
+  PhoneBookSerialize::Contact contact;
+  contact.set_name(name);
+  if (birthday) {
+    *contact.mutable_birthday() = birthday->Serialize();
+  }
+  for (const auto &number : phones) {
+    contact.add_phone_number(number);
+  }
+  return contact;
+}
+
 void PhoneBook::SaveTo(ostream &out) const {
   PhoneBookSerialize::ContactList list;
 
-  // TODO
+  for (auto &contact : contacts_) {
+    *list.add_contact() = contact.Serialize();
+  }
 
   list.SerializeToOstream(&out);
 }
