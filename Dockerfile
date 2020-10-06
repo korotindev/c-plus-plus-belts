@@ -22,9 +22,27 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+ARG PROTOBUF_TARGET_VERSION=3.13.0
+ARG PROTOBUF_SOURCES=protobuf-${PROTOBUF_TARGET_VERSION}
+ARG PROTOBUF_SOURCES_ZIP=protobuf-cpp-${PROTOBUF_TARGET_VERSION}.zip
+
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
-    && apt-get -y install --no-install-recommends build-essential cmake valgrind cppcheck gdb clang-format \
+    && apt-get -y install --no-install-recommends build-essential autoconf automake libtool curl make g++ unzip cmake valgrind cppcheck gdb clang-format \
+    # BUILD PROTOBUF
+    && cd tmp \
+    && wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_TARGET_VERSION}/${PROTOBUF_SOURCES_ZIP} -O ${PROTOBUF_SOURCES_ZIP} \
+    && unzip ${PROTOBUF_SOURCES_ZIP} \
+    && rm ${PROTOBUF_SOURCES_ZIP} \
+    && cd ${PROTOBUF_SOURCES} \
+    && ./configure \
+    && make -j $(nproc) \
+    # && make check \ # Very long... :( It works with ubuntu:20.04
+    && sudo make install -j $(nproc) \
+    && sudo ldconfig \
+    && cd /tmp \
+    && rm -rf protopbuf-cpp \
+    # CLEANING UP
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
