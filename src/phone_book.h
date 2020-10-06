@@ -1,40 +1,40 @@
 #pragma once
 
-#include "iterator_range.h"
-#include "contact.pb.h"
-
+#include <iosfwd>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <iosfwd>
+#include <algorithm>
+
+#include "contact.pb.h"
+#include "iterator_range.h"
 
 struct Date {
   int year, month, day;
+  static Date Deserealize(PhoneBookSerialize::Date &serialized_date);
 };
 
 struct Contact {
   std::string name;
   std::optional<Date> birthday;
   std::vector<std::string> phones;
+  static Contact Deserealize(PhoneBookSerialize::Contact &serialized_contact);
 };
+
+bool operator<(const Contact &lhs, const Contact &rhs);
 
 class PhoneBook {
   std::vector<Contact> contacts_;
-public:
+
+ public:
   using ContactRange = IteratorRange<std::vector<Contact>::const_iterator>;
-  explicit PhoneBook(std::vector<Contact> contacts) : contacts_(std::move(contacts)) {}
 
-  ContactRange FindByNamePrefix(std::string_view) const {
-    // FIXME
-    return IteratorRange(contacts_.cbegin(), contacts_.cend());
-  }
+  explicit PhoneBook(std::vector<Contact> contacts);
 
-  void SaveTo(std::ostream& ) const {
-    
-  }
+  ContactRange FindByNamePrefix(std::string_view) const;
+
+  void SaveTo(std::ostream &out) const;
 };
 
-PhoneBook DeserializePhoneBook(std::istream&) {
-  return PhoneBook({});
-}
+PhoneBook DeserializePhoneBook(std::istream &in);

@@ -1,0 +1,69 @@
+#include "phone_book.h"
+
+using namespace std;
+
+Date Date::Deserealize(PhoneBookSerialize::Date &serialized_date) {
+  return Date{.year = serialized_date.year(), .month = serialized_date.month(), .day = serialized_date.day()};
+}
+
+Contact Contact::Deserealize(PhoneBookSerialize::Contact &serialized_contact) {
+  Contact contact;
+  contact.name = move(*serialized_contact.mutable_name());
+  if (serialized_contact.has_birthday()) {
+    contact.birthday = Date::Deserealize(*serialized_contact.mutable_birthday());
+  }
+
+  if (serialized_contact.phone_number_size() > 0) {
+    auto &container = *serialized_contact.mutable_phone_number();
+    contact.phones.assign(move_iterator(container.begin()), move_iterator(container.end()));
+  }
+  return contact;
+}
+
+bool operator<(const Contact &lhs, const Contact &rhs) { return lhs.name < rhs.name; }
+
+PhoneBook::PhoneBook(vector<Contact> contacts) : contacts_(move(contacts)) { sort(contacts_.begin(), contacts_.end()); }
+
+PhoneBook::ContactRange PhoneBook::FindByNamePrefix(string_view str) const {
+  if (str.empty()) {
+    return ContactRange(contacts_.cbegin(), contacts_.cend());
+  }
+
+  Contact tmp;
+
+  auto first = upper_bound(contacts_.cbegin(), contacts_.cend(), tmp);
+
+  tmp.name = string(str);
+
+  auto last = upper_bound(first, contacts_.cend(), tmp, [str](const Contact &lhs, const Contact &rhs) {
+    string_view lhs_sv = lhs.name;
+    if (lhs_sv.size() > str.size()) {
+      lhs_sv.remove_prefix(lhs_sv.size() - str.size());
+    }
+    string_view rhs_sv = rhs.name;
+    if (rhs_sv.size() > str.size()) {
+      rhs_sv.remove_prefix(rhs_sv.size() - str.size());
+    }
+    return lhs_sv <= rhs_sv;
+  });
+
+  return ContactRange(first, last);
+}
+
+void PhoneBook::SaveTo(ostream &out) const {
+  PhoneBookSerialize::ContactList list;
+
+  // TODO
+
+  list.SerializeToOstream(&out);
+}
+
+PhoneBook DeserializePhoneBook(istream &in) {
+  PhoneBookSerialize::ContactList list;
+  list.ParseFromIstream(&in);
+  vector<Contact> contacts;
+  for (auto &serialized_contact : *list.mutable_contact()) {
+    contacts.push_back(Contact::Deserealize(serialized_contact));
+  }
+  return PhoneBook(move(contacts));
+}
