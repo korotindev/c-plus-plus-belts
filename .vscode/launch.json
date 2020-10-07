@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch Executor",
+            "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/executor_runner",
+            "program": "${workspaceFolder}/build/bin/belts-runner",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/bin",
@@ -23,10 +23,10 @@
             "envFile": "${workspaceFolder}/debug.env"
         },
         {
-            "name": "(gdb) Launch Tests",
+            "name": "(gdb) Launch Unit tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/tests_runner",
+            "program": "${workspaceFolder}/build/bin/belts-unit-tests",
             "args": ["1"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/tests",
