@@ -1,21 +1,36 @@
-cmake_minimum_required(VERSION 3.16.3)
-project(executor VERSION 0.1.0)
+add_library(grader INTERFACE)
+target_sources(grader INTERFACE grader/profile.h grader/test_runner.h)
+target_include_directories(grader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/grader)
 
-file(GLOB PROTO_FILES "*.proto")
-if(PROTO_FILES)
-  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-endif()
+file(GLOB_RECURSE BELTS_PROTOS "protos/*.proto")
+protobuf_generate_cpp(BELTS_PROTO_SRCS BELTS_PROTO_HDRS ${BELTS_PROTOS})
+add_library(belts-protobuf ${BELTS_PROTO_SRCS} ${BELTS_PROTO_HDRS})
+target_include_directories(belts-protobuf PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(belts-protobuf PUBLIC ${Protobuf_LIBRARIES})
 
-set(TARGET_RUNNER executor_runner)
-set(TARGET_LIB executor)
+file(GLOB_RECURSE BELTS_HDRS "solution/*.h")
+file(GLOB_RECURSE BELTS_SRCS "solution/*.cpp")
 
-file(GLOB TARGET_SRCS "*.h" "*.cpp")
-add_executable(${TARGET_RUNNER} ${TARGET_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
-add_library(${TARGET_LIB} ${TARGET_SRCS} ${PROTO_SRCS} ${PROTO_HDRS})
+add_library(belts ${BELTS_HDRS} ${BELTS_SRCS})
+target_include_directories(belts PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solution)
+target_link_libraries(belts PUBLIC belts-protobuf grader)
+target_compile_options(belts PRIVATE 
+    -Werror
 
-foreach(TARGET IN ITEMS ${TARGET_RUNNER} ${TARGET_LIB})
-    target_compile_features(${TARGET} PUBLIC cxx_std_20)
-    target_compile_options(${TARGET} PUBLIC -Wall -Wextra -Werror -pedantic) 
-    target_include_directories(${TARGET} PUBLIC ${Protobuf_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
-    target_link_libraries(${TARGET} ${Protobuf_LIBRARIES})
-endforeach()
+    -Wall
+    -Wextra
+    -Wpedantic
+
+    -Wcast-align
+    -Wcast-qual
+    -Wconversion
+    -Wctor-dtor-privacy
+    -Wenum-compare
+    -Wfloat-equal
+    -Wnon-virtual-dtor
+    -Wold-style-cast
+    -Woverloaded-virtual
+    -Wredundant-decls
+    -Wsign-conversion
+    -Wsign-promo
+)
