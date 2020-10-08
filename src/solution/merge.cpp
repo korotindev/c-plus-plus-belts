@@ -33,9 +33,9 @@ void DeduplicateMessages(RepeatedMessageArr &arr) {
 
 void ProcessSingularField(Company &company, const Company &sig, const uint32_t priority, const string &field_name,
                           unordered_map<string, uint32_t> &last_priorities) {
-  const google::protobuf::Descriptor *descriptor = Company::GetDescriptor();
+  const google::protobuf::Descriptor *descriptor = company.GetDescriptor();
   const google::protobuf::FieldDescriptor *field = descriptor->FindFieldByName(field_name);
-  const google::protobuf::Reflection *reflection = Company::GetReflection();
+  const google::protobuf::Reflection *reflection = company.GetReflection();
 
   if (reflection->HasField(sig, field) && priority >= last_priorities[field_name]) {
     auto mutable_company_field_message = reflection->MutableMessage(&company, field);
