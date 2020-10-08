@@ -3,6 +3,9 @@
 #include "company.pb.h"
 #include "provider.pb.h"
 #include "signal.pb.h"
+#include "name.pb.h"
+#include "phone.pb.h"
+#include "url.pb.h"
 
 #include <unordered_map>
 #include <vector>

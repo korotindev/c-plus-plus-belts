@@ -1,8 +1,12 @@
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/reflection.h>
+#include <google/protobuf/util/message_differencer.h>
+
 #include <algorithm>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
-#include <google/protobuf/util/message_differencer.h>
 
 #include "yellow_pages.h"
 
@@ -27,6 +31,88 @@ void DeduplicateMessages(RepeatedMessageArr &arr) {
   arr.erase(last, arr.end());
 }
 
+void ProcessSingularField(Company &company, const Company &sig, const uint32_t priority, const string &field_name,
+                          unordered_map<string, uint32_t> &last_priorities) {
+  const google::protobuf::Descriptor *descriptor = Company::GetDescriptor();
+  const google::protobuf::FieldDescriptor *field = descriptor->FindFieldByName(field_name);
+  const google::protobuf::Reflection *reflection = Company::GetReflection();
+
+  if (reflection->HasField(sig, field) && priority >= last_priorities[field_name]) {
+    auto mutable_company_field_message = reflection->MutableMessage(&company, field);
+    const auto &signal_field_message = reflection->GetMessage(sig, field);
+
+    if (priority > last_priorities[field_name]) {
+      mutable_company_field_message->Clear();
+      last_priorities[field_name] = priority;
+    }
+
+    mutable_company_field_message->CopyFrom(signal_field_message);
+  }
+}
+
+class CompanySignalMerger {
+  using Field = const google::protobuf::FieldDescriptor *;
+
+  Company company;
+  unordered_map<string, uint32_t> last_priorities;
+
+ public:
+  Company &&TakeResult() { return move(company); }
+
+  void AddCompanySignal(const Company &dirty, uint32_t priority) {
+    for (const auto &field_name : {"address", "working_time"}) {
+      ProcessSingularField(dirty, priority, field_name, last_priorities[field_name]);
+    }
+
+    ProcessRepeatedField<Name>(dirty, priority, "names", last_priorities["names"]);
+    ProcessRepeatedField<Phone>(dirty, priority, "phones", last_priorities["phones"]);
+    ProcessRepeatedField<Url>(dirty, priority, "urls", last_priorities["urls"]);
+  }
+
+ private:
+  void ProcessSingularField(const Company &sig, const uint32_t priority, const string &field_name,
+                            uint32_t &last_priority) {
+    auto reflection = Company::GetReflection();
+    auto descriptor = Company::GetDescriptor();
+    auto field = descriptor->FindFieldByName(field_name);
+
+    if (reflection->HasField(sig, field) && priority >= last_priority) {
+      if (priority > last_priority) {
+        reflection->ClearField(&company, field);
+        last_priority = priority;
+      }
+
+      const auto &signal_field_message = reflection->GetMessage(sig, field);
+      auto mutable_company_field_message = reflection->MutableMessage(&company, field);
+
+      mutable_company_field_message->CopyFrom(signal_field_message);
+    }
+  }
+
+  template <class PB>
+  void ProcessRepeatedField(const Company &sig, const uint32_t priority, const string &field_name,
+                            uint32_t &last_priority) {
+    auto reflection = Company::GetReflection();
+    auto descriptor = Company::GetDescriptor();
+    auto field = descriptor->FindFieldByName(field_name);
+
+    if (reflection->FieldSize(sig, field) > 0 && priority >= last_priority) {
+      if (priority > last_priority) {
+        reflection->ClearField(&company, field);
+        last_priority = priority;
+      }
+
+      using namespace google::protobuf;
+
+      const auto &signal_repeated_field_message = reflection->GetRepeatedPtrField<PB>(sig, field);
+      auto mutable_company_repeated_field_message = reflection->MutableRepeatedPtrField<PB>(&company, field);
+
+      mutable_company_repeated_field_message->MergeFrom(signal_repeated_field_message);
+      DeduplicateMessages(*mutable_company_repeated_field_message);
+    }
+  }
+};
+
 Company Merge(const Signals &signals, const Providers &providers) {
   if (signals.empty()) {
     return {};
@@ -43,23 +129,8 @@ Company Merge(const Signals &signals, const Providers &providers) {
     const auto provider_priority = providers.at(signal.provider_id()).priority();
     const auto &company_signal = signal.company();
 
-    if (company_signal.has_address() && provider_priority >= last_priorities["address"]) {
-      if (provider_priority > last_priorities["address"]) {
-        company.mutable_address()->Clear();
-        last_priorities["address"] = provider_priority;
-      }
-
-      company.mutable_address()->CopyFrom(company_signal.address());
-    }
-
-    if (company_signal.has_working_time() && provider_priority >= last_priorities["working_time"]) {
-      if (provider_priority > last_priorities["working_time"]) {
-        company.mutable_working_time()->Clear();
-        last_priorities["working_time"] = provider_priority;
-      }
-
-      company.mutable_working_time()->CopyFrom(company_signal.working_time());
-    }
+    ProcessSingularField(company, company_signal, provider_priority, "address", last_priorities);
+    ProcessSingularField(company, company_signal, provider_priority, "working_time", last_priorities);
 
     if (company_signal.urls_size() > 0 && provider_priority >= last_priorities["urls"]) {
       if (provider_priority > last_priorities["urls"]) {
