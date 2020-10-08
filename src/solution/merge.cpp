@@ -31,25 +31,6 @@ void DeduplicateMessages(RepeatedMessageArr &arr) {
   arr.erase(last, arr.end());
 }
 
-void ProcessSingularField(Company &company, const Company &sig, const uint32_t priority, const string &field_name,
-                          unordered_map<string, uint32_t> &last_priorities) {
-  const google::protobuf::Descriptor *descriptor = company.GetDescriptor();
-  const google::protobuf::FieldDescriptor *field = descriptor->FindFieldByName(field_name);
-  const google::protobuf::Reflection *reflection = company.GetReflection();
-
-  if (reflection->HasField(sig, field) && priority >= last_priorities[field_name]) {
-    auto mutable_company_field_message = reflection->MutableMessage(&company, field);
-    const auto &signal_field_message = reflection->GetMessage(sig, field);
-
-    if (priority > last_priorities[field_name]) {
-      mutable_company_field_message->Clear();
-      last_priorities[field_name] = priority;
-    }
-
-    mutable_company_field_message->CopyFrom(signal_field_message);
-  }
-}
-
 class CompanySignalMerger {
   using Field = const google::protobuf::FieldDescriptor *;
 
@@ -72,8 +53,8 @@ class CompanySignalMerger {
  private:
   void ProcessSingularField(const Company &sig, const uint32_t priority, const string &field_name,
                             uint32_t &last_priority) {
-    auto reflection = Company::GetReflection();
-    auto descriptor = Company::GetDescriptor();
+    auto reflection = sig.GetReflection();
+    auto descriptor = sig.GetDescriptor();
     auto field = descriptor->FindFieldByName(field_name);
 
     if (reflection->HasField(sig, field) && priority >= last_priority) {
@@ -92,8 +73,8 @@ class CompanySignalMerger {
   template <class PB>
   void ProcessRepeatedField(const Company &sig, const uint32_t priority, const string &field_name,
                             uint32_t &last_priority) {
-    auto reflection = Company::GetReflection();
-    auto descriptor = Company::GetDescriptor();
+    auto reflection = sig.GetReflection();
+    auto descriptor = sig.GetDescriptor();
     auto field = descriptor->FindFieldByName(field_name);
 
     if (reflection->FieldSize(sig, field) > 0 && priority >= last_priority) {
@@ -117,9 +98,8 @@ Company Merge(const Signals &signals, const Providers &providers) {
   if (signals.empty()) {
     return {};
   }
-  Company company;
 
-  unordered_map<string, uint32_t> last_priorities;
+  CompanySignalMerger merger;
 
   for (const auto &signal : signals) {
     if (!signal.has_company()) {
@@ -129,44 +109,10 @@ Company Merge(const Signals &signals, const Providers &providers) {
     const auto provider_priority = providers.at(signal.provider_id()).priority();
     const auto &company_signal = signal.company();
 
-    ProcessSingularField(company, company_signal, provider_priority, "address", last_priorities);
-    ProcessSingularField(company, company_signal, provider_priority, "working_time", last_priorities);
-
-    if (company_signal.urls_size() > 0 && provider_priority >= last_priorities["urls"]) {
-      if (provider_priority > last_priorities["urls"]) {
-        company.mutable_urls()->Clear();
-        last_priorities["urls"] = provider_priority;
-      }
-
-      auto &urls = *company.mutable_urls();
-      urls.MergeFrom(company_signal.urls());
-      DeduplicateMessages(urls);
-    }
-
-    if (company_signal.phones_size() > 0 && provider_priority >= last_priorities["phones"]) {
-      if (provider_priority > last_priorities["phones"]) {
-        company.mutable_phones()->Clear();
-        last_priorities["phones"] = provider_priority;
-      }
-
-      auto &phones = *company.mutable_phones();
-      phones.MergeFrom(company_signal.phones());
-      DeduplicateMessages(phones);
-    }
-
-    if (company_signal.names_size() > 0 && provider_priority >= last_priorities["names"]) {
-      if (provider_priority > last_priorities["names"]) {
-        company.mutable_names()->Clear();
-        last_priorities["names"] = provider_priority;
-      }
-
-      auto &names = *company.mutable_names();
-      names.MergeFrom(company_signal.names());
-      DeduplicateMessages(names);
-    }
+    merger.AddCompanySignal(company_signal, provider_priority);
   }
 
-  return company;
+  return merger.TakeResult();
 }
 
 }  // namespace YellowPages
