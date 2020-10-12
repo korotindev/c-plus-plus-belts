@@ -132,11 +132,11 @@ Token Lexer::NextNumberToken(char c) {
 Token Lexer::NextWordToken(char c) {
   string s{c};
 
-  while (input_.get(c) && (isalpha(c) || c == '_')) {
+  while (input_.get(c) && (isalnum(c) || c == '_')) {
     s.push_back(c);
   }
 
-  if (!(isalpha(c) || c == '_')) {
+  if (!(isalnum(c) || c == '_')) {
     input_.putback(c);
   }
 
