@@ -171,9 +171,9 @@ size_t Lexer::ParseNumber(string_view str) {
 
 
 size_t Lexer::ParseString(string_view str) {
-  auto prefix_pos = str.rfind(str[0]);
-  str.remove_suffix(str.size() - (prefix_pos + 1));
-  str.remove_suffix(1);
+  auto prefix_pos = str.find(str[0], 1);
+  str.remove_suffix(str.size() - prefix_pos);
+  str.remove_prefix(1);
   tokens_.push(TokenType::String{string(str)});
   return prefix_pos + 1;
 }
