@@ -84,8 +84,8 @@ Token Lexer::NextToken() {
 void Lexer::Parse(std::istream& input) {
   string line;
   while (getline(input, line, '\n')) {
-    ParseLine(line);
-    if (input) {
+    size_t iterations = ParseLine(line);
+    if (input && iterations) {
       tokens_.push(TokenType::Newline());
     }
   };
@@ -209,11 +209,14 @@ size_t Lexer::ParseSymbol(string_view str) {
   return prefix;
 }
 
-void Lexer::ParseLine(string_view str) {
+size_t Lexer::ParseLine(string_view str) {
   size_t prefix_size = ParseIndent(str);
   str.remove_prefix(prefix_size);
 
+  size_t iterations = 0;
+
   while (str.size()) {
+    iterations++;
     if (isspace(str[0])) {
       prefix_size = 1;
     } else if (isalpha(str[0]) || str[0] == '_') {
@@ -227,6 +230,8 @@ void Lexer::ParseLine(string_view str) {
     }
     str.remove_prefix(prefix_size);
   }
+
+  return iterations;
 }
 
 } /* namespace Parse */

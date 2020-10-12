@@ -146,7 +146,7 @@ private:
   size_t depth_;
 
   void Parse(std::istream &input);
-  void ParseLine(std::string_view str);
+  size_t ParseLine(std::string_view str);
   size_t ParseIndent(std::string_view str);
   size_t ParseWord(std::string_view str);
   size_t ParseNumber(std::string_view str);
