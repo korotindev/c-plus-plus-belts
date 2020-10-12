@@ -104,16 +104,32 @@ class Lexer {
   Token NextToken();
 
   template <typename T>
-  const T& Expect() const {}
+  const T& Expect() const {
+    if (auto ptr = CurrentToken().TryAs<T>()) {
+      return *ptr;
+    } else {
+      throw LexerError("wrong type");
+    }
+  }
 
   template <typename T, typename U>
-  void Expect(const U& value) const {}
+  void Expect(const U& value) const {
+    if (auto ptr = CurrentToken().TryAs<T>(); !ptr || ptr->value != value) {
+      throw LexerError("wrong type");
+    }
+  }
 
   template <typename T>
-  const T& ExpectNext() {}
+  const T& ExpectNext() {
+    NextToken();
+    return Expect<T>();
+  }
 
   template <typename T, typename U>
-  void ExpectNext(const U& value) {}
+  void ExpectNext(const U& value) {
+    NextToken();
+    return Expect<T, U>(value);
+  }
 
  private:
   std::queue<Token> tokens_;
