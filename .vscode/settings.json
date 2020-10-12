@@ -62,7 +62,8 @@
         "mutex": "cpp",
         "shared_mutex": "cpp",
         "thread": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "charconv": "cpp"
     },
     "search.exclude": {
         "**/solutions": true,
