@@ -169,8 +169,9 @@ size_t Lexer::ParseWord(string_view str) {
 
 size_t Lexer::ParseNumber(string_view str) {
   size_t prefix = 0;
-  while (isdigit(str[prefix++]) && prefix < str.size())
-    ;
+  while (isdigit(str[prefix]) && prefix < str.size()) {
+    prefix++;
+  }
 
   str.remove_suffix(str.size() - prefix);
   tokens_.push(TokenType::Number{atoi(str.data())});
