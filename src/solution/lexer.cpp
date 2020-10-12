@@ -85,7 +85,11 @@ void Lexer::Parse(std::istream& input) {
   string line;
   while (getline(input, line, '\n')) {
     ParseLine(line);
+    if (input) {
+      tokens_.push(TokenType::Newline());
+    }
   };
+  tokens_.push(TokenType::Eof());
 }
 
 size_t Lexer::ParseIndent(string_view str) {
@@ -200,7 +204,7 @@ size_t Lexer::ParseSymbol(string_view str) {
   } else {
     token = TokenType::Char{tmp[0]};
   }
-  
+
   tokens_.push(move(token));
   return prefix;
 }
