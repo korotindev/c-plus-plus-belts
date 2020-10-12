@@ -171,6 +171,14 @@ Token Lexer::NextWordToken(char c) {
   return CurrentToken();
 }
 
+Token Lexer::NextStringToken(char c) {
+  string s;
+  getline(input_, s, c);
+  input_.ignore(1);
+  current_token_ = TokenType::String{move(s)};
+  return CurrentToken();
+}
+
 Token Lexer::NextSymbolToken(char c) {
   Token token;
   string s{c};
@@ -193,6 +201,13 @@ Token Lexer::NextSymbolToken(char c) {
     }
   } else {
     current_token_ = TokenType::Char{c};
+  }
+
+  if (current_token_.Is<TokenType::Char>()) {
+    char sym = current_token_.As<TokenType::Char>().value;
+    if (sym == '\'' || sym == '\"') {
+      return NextStringToken(sym);
+    }
   }
 
   return CurrentToken();

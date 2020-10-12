@@ -146,6 +146,7 @@ private:
   Token NextNumberToken(char c);
   Token NextWordToken(char c);
   Token NextSpaceToken(char c);
+  Token NextStringToken(char c);
   Token NextSymbolToken(char c);
 };
 
