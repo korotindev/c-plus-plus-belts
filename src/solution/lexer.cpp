@@ -89,6 +89,10 @@ void Lexer::Parse(std::istream& input) {
       tokens_.push(TokenType::Newline());
     }
   };
+
+  while(depth_--) {
+    tokens_.push(TokenType::Dedent());
+  }
   tokens_.push(TokenType::Eof());
 }
 
