@@ -70,170 +70,158 @@ std::ostream& operator<<(std::ostream& os, const Token& rhs) {
   return os << "Unknown token :(";
 }
 
-Lexer::Lexer(std::istream& input) : current_token_(), current_copies_(0), input_(input), depth_(0) { NextToken(); }
+Lexer::Lexer(std::istream& input) : tokens_(), depth_(0) { Parse(input); }
 
-const Token& Lexer::CurrentToken() const { return current_token_; }
+const Token& Lexer::CurrentToken() const { return tokens_.front(); }
 
-size_t ReadSpacesCount(std::istream& input) {
-  size_t spaces_count = 1;
-  char c;
+Token Lexer::NextToken() {
+  if (!CurrentToken().Is<TokenType::Eof>()) {
+    tokens_.pop();
+  }
+  return CurrentToken();
+}
 
-  while (input.get(c) && c == ' ') {
+void Lexer::Parse(std::istream& input) {
+  string line;
+  while (getline(input, line, '\n')) {
+    ParseLine(line);
+  };
+}
+
+size_t Lexer::ParseIndent(string_view str) {
+  size_t spaces_count = 0;
+  while (str[spaces_count] == ' ' && spaces_count < str.size()) {
     spaces_count++;
   }
 
-  if (c != ' ') {
-    input.putback(c);
+  size_t new_depth = spaces_count / 2;
+
+  if (depth_ == new_depth || spaces_count == str.size()) {
+    return spaces_count;
   }
 
+  if (new_depth > depth_) {
+    tokens_.push(TokenType::Indent());
+  } else {
+    size_t count = depth_ - new_depth;
+    while (count--) {
+      tokens_.push(TokenType::Dedent());
+    }
+  }
+
+  depth_ = new_depth;
   return spaces_count;
 }
 
-Token Lexer::NextSpaceToken(char c) {
-  if (c == '\n') {
-    current_token_ = TokenType::Newline();
-    return CurrentToken();
-  } else {
-    size_t spaces_count = ReadSpacesCount(input_);
-    size_t new_depth = spaces_count / 2;
-
-    if (!current_token_.Is<TokenType::Newline>() || depth_ == new_depth) {
-      return NextToken();
-    }
-
-    if (new_depth > depth_) {
-      current_token_ = TokenType::Indent();
-    } else {
-      size_t count = depth_ - new_depth - 1;
-      current_token_ = TokenType::Dedent();
-      current_copies_ = count;
-    }
-
-    depth_ = new_depth;
-    return CurrentToken();
+size_t Lexer::ParseWord(string_view str) {
+  size_t prefix = 0;
+  while (((isalnum(str[prefix]) || str[prefix] == '_')) && prefix < str.size()) {
+    prefix++;
   }
-}
+  str.remove_suffix(str.size() - prefix);
 
-Token Lexer::NextNumberToken(char c) {
-  string s{c};
-
-  while (input_.get(c) && isdigit(c)) {
-    s.push_back(c);
-  }
-
-  if (!isdigit(c)) {
-    input_.putback(c);
-  }
-
-  current_token_ = TokenType::Number{atoi(s.data())};
-  return CurrentToken();
-}
-
-Token Lexer::NextWordToken(char c) {
-  string s{c};
-
-  while (input_.get(c) && (isalnum(c) || c == '_')) {
-    s.push_back(c);
-  }
-
-  if (!(isalnum(c) || c == '_')) {
-    input_.putback(c);
-  }
-
-  if (s == "class") {
-    current_token_ = TokenType::Class();
-  } else if (s == "return") {
-    current_token_ = TokenType::Return();
-  } else if (s == "if") {
-    current_token_ = TokenType::If();
-  } else if (s == "else") {
-    current_token_ = TokenType::Else();
-  } else if (s == "def") {
-    current_token_ = TokenType::Def();
-  } else if (s == "print") {
-    current_token_ = TokenType::Print();
-  } else if (s == "or") {
-    current_token_ = TokenType::Or();
-  } else if (s == "None") {
-    current_token_ = TokenType::None();
-  } else if (s == "and") {
-    current_token_ = TokenType::And();
-  } else if (s == "not") {
-    current_token_ = TokenType::Not();
-  } else if (s == "True") {
-    current_token_ = TokenType::True();
-  } else if (s == "False") {
-    current_token_ = TokenType::False();
-  } else {
-    current_token_ = TokenType::Id{move(s)};
-  }
-
-  return CurrentToken();
-}
-
-Token Lexer::NextStringToken(char c) {
-  string s;
-  getline(input_, s, c);
-  input_.ignore(1);
-  current_token_ = TokenType::String{move(s)};
-  return CurrentToken();
-}
-
-Token Lexer::NextSymbolToken(char c) {
   Token token;
-  string s{c};
-  if (input_.get(c)) {
-    s.push_back(c);
-  }
 
-  if (s.size() == 2) {
-    if (s == ">=") {
-      current_token_ = TokenType::GreaterOrEq();
-    } else if (s == "<=") {
-      current_token_ = TokenType::LessOrEq();
-    } else if (s == "!=") {
-      current_token_ = TokenType::NotEq();
-    } else if (s == "==") {
-      current_token_ = TokenType::Eq();
-    } else {
-      input_.putback(c);
-      current_token_ = TokenType::Char{s[0]};
-    }
+  if (str == "class") {
+    token = TokenType::Class();
+  } else if (str == "return") {
+    token = TokenType::Return();
+  } else if (str == "if") {
+    token = TokenType::If();
+  } else if (str == "else") {
+    token = TokenType::Else();
+  } else if (str == "def") {
+    token = TokenType::Def();
+  } else if (str == "print") {
+    token = TokenType::Print();
+  } else if (str == "or") {
+    token = TokenType::Or();
+  } else if (str == "None") {
+    token = TokenType::None();
+  } else if (str == "and") {
+    token = TokenType::And();
+  } else if (str == "not") {
+    token = TokenType::Not();
+  } else if (str == "True") {
+    token = TokenType::True();
+  } else if (str == "False") {
+    token = TokenType::False();
   } else {
-    current_token_ = TokenType::Char{c};
+    token = TokenType::Id{string(str)};
   }
 
-  if (current_token_.Is<TokenType::Char>()) {
-    char sym = current_token_.As<TokenType::Char>().value;
-    if (sym == '\'' || sym == '\"') {
-      return NextStringToken(sym);
-    }
-  }
-
-  return CurrentToken();
+  tokens_.push(move(token));
+  return prefix;
 }
 
-Token Lexer::NextToken() {
-  if (current_copies_) {
-    current_copies_--;
-    return CurrentToken();
+
+size_t Lexer::ParseNumber(string_view str) {
+  size_t prefix = 0;
+  while (isdigit(str[prefix++]) && prefix < str.size());
+
+  str.remove_suffix(str.size() - prefix);
+  tokens_.push(TokenType::Number{atoi(str.data())});
+
+  return prefix;
+}
+
+
+size_t Lexer::ParseString(string_view str) {
+  auto prefix_pos = str.rfind(str[0]);
+  str.remove_suffix(str.size() - (prefix_pos + 1));
+  str.remove_suffix(1);
+  tokens_.push(TokenType::String{string(str)});
+  return prefix_pos + 1;
+}
+
+size_t Lexer::ParseSymbol(string_view str) {
+  size_t prefix = 1;
+  if (prefix < str.size()) {
+    prefix = 2;
   }
+  string_view tmp = str;
+  tmp.remove_suffix(str.size() - prefix);
 
-  char c;
+  Token token;
 
-  if (!input_.get(c)) {
-    current_token_ = TokenType::Eof();
-    return CurrentToken();
-  }
-
-  if (isalpha(c) || c == '_') {
-    return NextWordToken(c);
-  } else if (isdigit(c)) {
-    return NextNumberToken(c);
-  } else if (isspace(c)) {
-    return NextSpaceToken(c);
+  if (tmp.size() == 2) {
+    if (tmp == ">=") {
+      token = TokenType::GreaterOrEq();
+    } else if (tmp == "<=") {
+      token = TokenType::LessOrEq();
+    } else if (tmp == "!=") {
+      token = TokenType::NotEq();
+    } else if (tmp == "==") {
+      token = TokenType::Eq();
+    } else {
+      prefix = 1;
+      token = TokenType::Char{tmp[0]};
+    }
   } else {
-    return NextSymbolToken(c);
+    token = TokenType::Char{tmp[0]};
+  }
+  
+  tokens_.push(move(token));
+  return prefix;
+}
+
+void Lexer::ParseLine(string_view str) {
+  size_t prefix_size = ParseIndent(str);
+  str.remove_prefix(prefix_size);
+
+  while (str.size()) {
+    if (isspace(str[0])) {
+      prefix_size = 1;
+    } else if (isalpha(str[0]) || str[0] == '_') {
+      prefix_size = ParseWord(str);
+    } else if (isdigit(str[0])) {
+      prefix_size = ParseNumber(str);
+    } else if (str[0] == '\'' || str[0] == '\"') {
+      prefix_size = ParseString(str);
+    } else {
+      prefix_size = ParseSymbol(str);
+    }
+    str.remove_prefix(prefix_size);
   }
 }
 

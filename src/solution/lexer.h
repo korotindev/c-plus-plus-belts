@@ -2,6 +2,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <variant>
 #include <stdexcept>
@@ -49,6 +50,8 @@ namespace TokenType {
   struct None {};
   struct True {};
   struct False {};
+
+  struct Dummy {};
 }
 
 using TokenBase = std::variant<
@@ -75,7 +78,8 @@ using TokenBase = std::variant<
   TokenType::None,
   TokenType::True,
   TokenType::False,
-  TokenType::Eof
+  TokenType::Eof,
+  TokenType::Dummy
 >;
 
 
@@ -138,16 +142,16 @@ public:
   }
 
 private:
-  Token current_token_;
-  size_t current_copies_;
-  std::istream &input_;
+  std::queue<Token> tokens_;
   size_t depth_;
 
-  Token NextNumberToken(char c);
-  Token NextWordToken(char c);
-  Token NextSpaceToken(char c);
-  Token NextStringToken(char c);
-  Token NextSymbolToken(char c);
+  void Parse(std::istream &input);
+  void ParseLine(std::string_view str);
+  size_t ParseIndent(std::string_view str);
+  size_t ParseWord(std::string_view str);
+  size_t ParseNumber(std::string_view str);
+  size_t ParseSymbol(std::string_view str);
+  size_t ParseString(std::string_view str);
 };
 
 void RunLexerTests(TestRunner& test_runner);
