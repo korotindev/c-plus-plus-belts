@@ -70,7 +70,7 @@ std::ostream& operator<<(std::ostream& os, const Token& rhs) {
   return os << "Unknown token :(";
 }
 
-Lexer::Lexer(std::istream& input) : tokens_(), depth_(0) { Parse(input); }
+Lexer::Lexer(std::istream& input) { Parse(input); }
 
 const Token& Lexer::CurrentToken() const { return tokens_.front(); }
 
@@ -82,21 +82,26 @@ Token Lexer::NextToken() {
 }
 
 void Lexer::Parse(std::istream& input) {
+  size_t depth = 0;
   string line;
   while (getline(input, line, '\n')) {
-    size_t iterations = ParseLine(line);
+    string_view str = line;
+    size_t prefix_size = ParseIndent(str, depth);
+    str.remove_prefix(prefix_size);
+
+    size_t iterations = ParseLine(str);
     if (input && iterations) {
       tokens_.push(TokenType::Newline());
     }
   };
 
-  while(depth_--) {
+  while (depth--) {
     tokens_.push(TokenType::Dedent());
   }
   tokens_.push(TokenType::Eof());
 }
 
-size_t Lexer::ParseIndent(string_view str) {
+size_t Lexer::ParseIndent(string_view str, size_t& depth) {
   size_t spaces_count = 0;
   while (str[spaces_count] == ' ' && spaces_count < str.size()) {
     spaces_count++;
@@ -104,20 +109,20 @@ size_t Lexer::ParseIndent(string_view str) {
 
   size_t new_depth = spaces_count / 2;
 
-  if (depth_ == new_depth || spaces_count == str.size()) {
+  if (depth == new_depth || spaces_count == str.size()) {
     return spaces_count;
   }
 
-  if (new_depth > depth_) {
+  if (new_depth > depth) {
     tokens_.push(TokenType::Indent());
   } else {
-    size_t count = depth_ - new_depth;
+    size_t count = depth - new_depth;
     while (count--) {
       tokens_.push(TokenType::Dedent());
     }
   }
 
-  depth_ = new_depth;
+  depth = new_depth;
   return spaces_count;
 }
 
@@ -162,17 +167,16 @@ size_t Lexer::ParseWord(string_view str) {
   return prefix;
 }
 
-
 size_t Lexer::ParseNumber(string_view str) {
   size_t prefix = 0;
-  while (isdigit(str[prefix++]) && prefix < str.size());
+  while (isdigit(str[prefix++]) && prefix < str.size())
+    ;
 
   str.remove_suffix(str.size() - prefix);
   tokens_.push(TokenType::Number{atoi(str.data())});
 
   return prefix;
 }
-
 
 size_t Lexer::ParseString(string_view str) {
   auto prefix_pos = str.find(str[0], 1);
@@ -214,10 +218,8 @@ size_t Lexer::ParseSymbol(string_view str) {
 }
 
 size_t Lexer::ParseLine(string_view str) {
-  size_t prefix_size = ParseIndent(str);
-  str.remove_prefix(prefix_size);
-
   size_t iterations = 0;
+  size_t prefix_size = 0;
 
   while (str.size()) {
     iterations++;
