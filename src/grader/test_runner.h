@@ -13,12 +13,11 @@
 
 #include "profile.h"
 
-namespace TestRunnerPrivate {
-template <class Container>
-std::ostream &PrintContainer(std::ostream & os, const Container &container) {
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::vector<T> &s) {
   os << "{";
   bool first = true;
-  for (const auto &x : container) {
+  for (const auto &x : s) {
     if (!first) {
       os << ", ";
     }
@@ -27,37 +26,61 @@ std::ostream &PrintContainer(std::ostream & os, const Container &container) {
   }
   return os << "}";
 }
-}  // namespace
-
-
-template <class K, class V>
-std::ostream &operator<<(std::ostream &os, const std::pair<K, V> &p) {
-  return os << "{" << p.first << ": " << p.second << "}";
-}
-
-template <class T>
-std::ostream &operator<<(std::ostream &os, const std::vector<T> &data) {
-  return TestRunnerPrivate::PrintContainer(os, data);
-}
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const std::set<T> &s) {
-  return TestRunnerPrivate::PrintContainer(os, s);
+  os << "{";
+  bool first = true;
+  for (const auto &x : s) {
+    if (!first) {
+      os << ", ";
+    }
+    first = false;
+    os << x;
+  }
+  return os << "}";
 }
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &s) {
-  return os << TestRunnerPrivate::PrintContainer(os, s);
+  os << "{";
+  bool first = true;
+  for (const auto &x : s) {
+    if (!first) {
+      os << ", ";
+    }
+    first = false;
+    os << x;
+  }
+  return os << "}";
 }
 
 template <class K, class V>
 std::ostream &operator<<(std::ostream &os, const std::map<K, V> &m) {
-  return TestRunnerPrivate::PrintContainer(os, m);
+  os << "{";
+  bool first = true;
+  for (const auto &kv : m) {
+    if (!first) {
+      os << ", ";
+    }
+    first = false;
+    os << kv.first << ": " << kv.second;
+  }
+  return os << "}";
 }
 
 template <class K, class V>
 std::ostream &operator<<(std::ostream &os, const std::unordered_map<K, V> &m) {
-  return TestRunnerPrivate::PrintContainer(os, m);
+  os << "{";
+  bool first = true;
+  for (const auto &kv : m) {
+    if (!first) {
+      os << ", ";
+    }
+    first = false;
+    os << kv.first << ": " << kv.second;
+  }
+  return os << "}";
 }
 
 template <class T, class U>
@@ -103,54 +126,19 @@ class TestRunner {
  private:
   int fail_count = 0;
 };
-#ifndef FILE_NAME
-#define FILE_NAME __FILE__
-#endif
 
-#define ASSERT_EQUAL(x, y) {                          \
-  std::ostringstream __assert_equal_private_os;       \
-  __assert_equal_private_os                           \
-    << #x << " != " << #y << ", "                     \
-    << FILE_NAME << ":" << __LINE__;                  \
-  AssertEqual(x, y, __assert_equal_private_os.str()); \
-}
-
-#define ASSERT(x) {                           \
-  std::ostringstream __assert_private_os;     \
-  __assert_private_os << #x << " is false, "  \
-    << FILE_NAME << ":" << __LINE__;          \
-  Assert(static_cast<bool>(x), __assert_private_os.str());       \
-}
-
-#define RUN_TEST(tr, func) \
-  tr.RunTest(func, #func)
-
-#define ASSERT_THROWS(expr, expected_exception) {                                           \
-  bool __assert_private_flag = true;                                                        \
-  try {                                                                                     \
-    expr;                                                                                   \
-    __assert_private_flag = false;                                                          \
-  } catch (expected_exception&) {                                                           \
-  } catch (...) {                                                                           \
-    std::ostringstream __assert_private_os;                                                 \
-    __assert_private_os << "Expression " #expr " threw an unexpected exception"             \
-      " " FILE_NAME ":" << __LINE__;                                                        \
-    Assert(false, __assert_private_os.str());                                               \
-  }                                                                                         \
-  if (!__assert_private_flag){                                                              \
-    std::ostringstream __assert_private_os;                                                 \
-    __assert_private_os << "Expression " #expr " is expected to throw " #expected_exception \
-      " " FILE_NAME ":" << __LINE__;                                                        \
-    Assert(false, __assert_private_os.str());                                               \
-  }                                                                                         \
-}
-
-#define ASSERT_DOESNT_THROW(expr)                                           \
-  try {                                                                     \
-    expr;                                                                   \
-  } catch (...) {                                                           \
-    std::ostringstream __assert_private_os;                                 \
-    __assert_private_os << "Expression " #expr " threw an unexpected exception" \
-      " " FILE_NAME ":" << __LINE__;                                        \
-    Assert(false, __assert_private_os.str());                               \
+#define ASSERT_EQUAL(x, y)                                           \
+  {                                                                  \
+    std::ostringstream os;                                           \
+    os << #x << " != " << #y << ", " << __FILE__ << ":" << __LINE__; \
+    AssertEqual(x, y, os.str());                                     \
   }
+
+#define ASSERT(x)                                             \
+  {                                                           \
+    std::ostringstream os;                                    \
+    os << #x << " is false, " << __FILE__ << ":" << __LINE__; \
+    Assert(x, os.str());                                      \
+  }
+
+#define RUN_TEST(tr, func) tr.RunTest(func, #func)
