@@ -20,6 +20,7 @@ target_compile_options(belts PRIVATE
     -Wsign-conversion
     -Wsign-promo
 )
+target_compile_features(belts PUBLIC cxx_std_20)
 
 add_executable(belts-runner main.cpp)
 target_link_libraries(belts-runner PUBLIC belts)
