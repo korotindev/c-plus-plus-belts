@@ -138,7 +138,8 @@ public:
   }
 
 private:
-  std::queue<Token> tokens_;
+  Token current_token_;
+  size_t current_copies_;
   std::istream &input_;
   size_t depth_;
 

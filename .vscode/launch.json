@@ -29,7 +29,7 @@
             "program": "${workspaceFolder}/build/bin/belts-unit-tests",
             "args": ["1"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/tests",
+            "cwd": "${workspaceFolder}/test",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
