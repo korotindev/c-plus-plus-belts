@@ -6,6 +6,7 @@
 #include <variant>
 #include <stdexcept>
 #include <optional>
+#include <queue>
 
 class TestRunner;
 
@@ -137,6 +138,14 @@ public:
   }
 
 private:
+  std::queue<Token> tokens_;
+  std::istream &input_;
+  size_t depth_;
+
+  Token NextNumberToken(char c);
+  Token NextWordToken(char c);
+  Token NextSpaceToken(char c);
+  Token NextSymbolToken(char c);
 };
 
 void RunLexerTests(TestRunner& test_runner);
