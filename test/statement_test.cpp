@@ -1,9 +1,10 @@
-#include "statement.h"
-
-#include <test_runner.h>
+#include "statement_test.h"
 
 #include <sstream>
 #include <string>
+
+#include "statement.h"
+#include "test_runner.h"
 
 using namespace std;
 
@@ -22,14 +23,13 @@ void AssertObjectValueEqual(ObjectHolder obj, T expected, const string& msg) {
   AssertEqual(one.str(), two.str(), msg);
 }
 
-#define ASSERT_OBJECT_VALUE_EQUAL(obj, expected)                          \
-{                                                                         \
-  std::ostringstream __assert_equal_private_os;                           \
-  __assert_equal_private_os                                               \
-    << #obj << "'s value " << " != " << #expected << ", "                 \
-    << FILE_NAME << ":" << __LINE__;                                      \
-  AssertObjectValueEqual(obj, expected, __assert_equal_private_os.str()); \
-}
+#define ASSERT_OBJECT_VALUE_EQUAL(obj, expected)                                              \
+  {                                                                                           \
+    std::ostringstream __assert_equal_private_os;                                             \
+    __assert_equal_private_os << #obj << "'s value "                                          \
+                              << " != " << #expected << ", " << FILE_NAME << ":" << __LINE__; \
+    AssertObjectValueEqual(obj, expected, __assert_equal_private_os.str());                   \
+  }
 
 void TestNumericConst() {
   NumericConst num(Runtime::Number(57));
@@ -94,12 +94,8 @@ void TestFieldAssignment() {
   Runtime::Class empty("Empty", {}, nullptr);
   Runtime::ClassInstance object{empty};
 
-  FieldAssignment assign_x(
-    VariableValue{"self"}, "x", make_unique<NumericConst>(Runtime::Number(57))
-  );
-  FieldAssignment assign_y(
-    VariableValue{"self"}, "y", make_unique<NewInstance>(empty)
-  );
+  FieldAssignment assign_x(VariableValue{"self"}, "x", make_unique<NumericConst>(Runtime::Number(57)));
+  FieldAssignment assign_y(VariableValue{"self"}, "y", make_unique<NewInstance>(empty));
 
   Closure closure = {{"self", ObjectHolder::Share(object)}};
 
@@ -112,11 +108,8 @@ void TestFieldAssignment() {
   ASSERT_OBJECT_VALUE_EQUAL(object.Fields().at("x"), 57);
 
   assign_y.Execute(closure);
-  FieldAssignment assign_yz(
-    VariableValue{vector<string>{"self", "y"}}, "z", make_unique<StringConst>(
-      Runtime::String("Hello, world! Hooray! Yes-yes!!!")
-    )
-  );
+  FieldAssignment assign_yz(VariableValue{vector<string>{"self", "y"}}, "z",
+                            make_unique<StringConst>(Runtime::String("Hello, world! Hooray! Yes-yes!!!")));
   {
     ObjectHolder o = assign_yz.Execute(closure);
     ASSERT(o);
@@ -146,10 +139,7 @@ void TestPrintMultipleStatements() {
   Print::SetOutputStream(os);
 
   Runtime::String hello("hello");
-  Closure closure = {
-    {"word", ObjectHolder::Share(hello)},
-    {"empty", ObjectHolder::None()}
-  };
+  Closure closure = {{"word", ObjectHolder::Share(hello)}, {"empty", ObjectHolder::None()}};
 
   vector<unique_ptr<Statement>> args;
   args.push_back(make_unique<VariableValue>("word"));
@@ -198,20 +188,14 @@ void TestStringify() {
 }
 
 void TestNumbersAddition() {
-  Add sum(
-    make_unique<NumericConst>(23),
-    make_unique<NumericConst>(34)
-  );
+  Add sum(make_unique<NumericConst>(23), make_unique<NumericConst>(34));
 
   Closure empty;
   ASSERT_OBJECT_VALUE_EQUAL(sum.Execute(empty), 57);
 }
 
 void TestStringsAddition() {
-  Add sum(
-    make_unique<StringConst>("23"s),
-    make_unique<StringConst>("34"s)
-  );
+  Add sum(make_unique<StringConst>("23"s), make_unique<StringConst>("34"s));
 
   Closure empty;
   ASSERT_OBJECT_VALUE_EQUAL(sum.Execute(empty), "2334");
@@ -220,38 +204,22 @@ void TestStringsAddition() {
 void TestBadAddition() {
   Closure empty;
 
-  ASSERT_THROWS(
-    Add(make_unique<NumericConst>(42), make_unique<StringConst>("4"s)).Execute(empty),
-    std::runtime_error
-  );
-  ASSERT_THROWS(
-    Add(make_unique<StringConst>("4"s), make_unique<NumericConst>(42)).Execute(empty),
-    std::runtime_error
-  );
-  ASSERT_THROWS(
-    Add(make_unique<None>(), make_unique<StringConst>("4"s)).Execute(empty),
-    std::runtime_error
-  );
-  ASSERT_THROWS(
-    Add(make_unique<None>(), make_unique<None>()).Execute(empty),
-    std::runtime_error
-  );
+  ASSERT_THROWS(Add(make_unique<NumericConst>(42), make_unique<StringConst>("4"s)).Execute(empty), std::runtime_error);
+  ASSERT_THROWS(Add(make_unique<StringConst>("4"s), make_unique<NumericConst>(42)).Execute(empty), std::runtime_error);
+  ASSERT_THROWS(Add(make_unique<None>(), make_unique<StringConst>("4"s)).Execute(empty), std::runtime_error);
+  ASSERT_THROWS(Add(make_unique<None>(), make_unique<None>()).Execute(empty), std::runtime_error);
 }
 
 void TestSuccessfullClassInstanceAdd() {
   vector<Runtime::Method> methods;
-  methods.push_back({
-    "__add__",
-    {"value"},
-    make_unique<Add>(make_unique<StringConst>("hello, "s), make_unique<VariableValue>("value"))
-  });
+  methods.push_back({"__add__",
+                     {"value"},
+                     make_unique<Add>(make_unique<StringConst>("hello, "s), make_unique<VariableValue>("value"))});
 
   Runtime::Class cls("BoxedValue", std::move(methods), nullptr);
 
   Closure empty;
-  auto result = Add(
-    make_unique<NewInstance>(cls), make_unique<StringConst>("world"s)
-  ).Execute(empty);
+  auto result = Add(make_unique<NewInstance>(cls), make_unique<StringConst>("world"s)).Execute(empty);
   ASSERT_OBJECT_VALUE_EQUAL(result, "hello, world");
 }
 
@@ -259,17 +227,15 @@ void TestClassInstanceAddWithoutMethod() {
   Runtime::Class cls("BoxedValue", {}, nullptr);
 
   Closure empty;
-  Add addition(
-    make_unique<NewInstance>(cls), make_unique<StringConst>("world"s)
-  );
+  Add addition(make_unique<NewInstance>(cls), make_unique<StringConst>("world"s));
   ASSERT_THROWS(addition.Execute(empty), std::runtime_error);
 }
 
 void TestCompound() {
   Compound cpd{
-    make_unique<Assignment>("x", make_unique<StringConst>("one"s)),
-    make_unique<Assignment>("y", make_unique<NumericConst>(2)),
-    make_unique<Assignment>("z", make_unique<VariableValue>("x"s)),
+      make_unique<Assignment>("x", make_unique<StringConst>("one"s)),
+      make_unique<Assignment>("y", make_unique<NumericConst>(2)),
+      make_unique<Assignment>("z", make_unique<VariableValue>("x"s)),
   };
 
   Closure closure;

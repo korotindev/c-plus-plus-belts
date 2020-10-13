@@ -2,7 +2,6 @@
 
 #include <sstream>
 #include <string>
-#include <sstream>
 
 #include "lexer_test.h"
 #include "test_runner.h"

@@ -1,13 +1,13 @@
 #include "parse.h"
-#include "lexer.h"
-#include "statement.h"
-
-#include "parse_test.h"
 
 #include <test_runner.h>
 
-#include <string>
 #include <sstream>
+#include <string>
+
+#include "lexer.h"
+#include "parse_test.h"
+#include "statement.h"
 
 using namespace std;
 
@@ -257,9 +257,7 @@ print r, c, t1, t2
   ASSERT_EQUAL(os.str(), "Rect(10x20) Circle(52) Triangle(3, 4, 5) Wrong triangle\n");
 }
 
-
-
-}
+}  // namespace Parse
 
 void TestParseProgram(TestRunner& tr) {
   RUN_TEST(tr, Parse::TestSimpleProgram);

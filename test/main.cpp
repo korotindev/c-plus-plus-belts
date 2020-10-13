@@ -1,9 +1,3 @@
-#include "object_test.h"
-#include "object_holder_test.h"
-#include "statement_test.h"
-#include "lexer_test.h"
-#include "parse_test.h"
-
 #include <test_runner.h>
 
 #include <fstream>
@@ -14,7 +8,12 @@
 #include <unordered_map>
 #include <vector>
 
+#include "lexer_test.h"
 #include "mython.h"
+#include "object_holder_test.h"
+#include "object_test.h"
+#include "parse_test.h"
+#include "statement_test.h"
 
 using namespace std;
 

@@ -1,45 +1,32 @@
 #include "object_holder.h"
-#include "object.h"
-
-#include "object_test.h"
-
-#include "test_runner.h"
 
 #include <sstream>
+
+#include "object.h"
+#include "object_test.h"
+#include "test_runner.h"
 
 using namespace std;
 
 namespace Runtime {
 
 class Logger : public Object {
-public:
+ public:
   static int instance_count;
 
-  explicit Logger(int value = 0) : id(value) {
-    ++instance_count;
-  }
+  explicit Logger(int value = 0) : id(value) { ++instance_count; }
 
-  Logger(const Logger& rhs) : id(rhs.id)
-  {
-    ++instance_count;
-  }
+  Logger(const Logger& rhs) : id(rhs.id) { ++instance_count; }
 
-  Logger(Logger&& rhs) : id(rhs.id)
-  {
-    ++instance_count;
-  }
+  Logger(Logger&& rhs) : id(rhs.id) { ++instance_count; }
 
   int GetId() const { return id; }
 
-  ~Logger() {
-    --instance_count;
-  }
+  ~Logger() { --instance_count; }
 
-  void Print(ostream& os) override {
-    os << id;
-  }
+  void Print(ostream& os) override { os << id; }
 
-private:
+ private:
   int id;
 };
 
@@ -79,7 +66,6 @@ void TestOwning() {
   ostringstream os;
   oh->Print(os);
   ASSERT_EQUAL(os.str(), "312");
-
 }
 
 void TestMove() {
