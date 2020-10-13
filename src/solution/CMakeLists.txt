@@ -19,6 +19,9 @@ target_compile_options(belts PRIVATE
     -Wredundant-decls
     -Wsign-conversion
     -Wsign-promo
+    # FIXME
+    -Wno-unused-parameter
+    -Wno-return-type
 )
 target_compile_features(belts PUBLIC cxx_std_20)
 

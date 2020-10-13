@@ -1,1 +1,10 @@
-int main() { return 0; }
+#include <iostream>
+#include "mython.h"
+
+using namespace std;
+
+int main() {
+  RunMythonProgram(cin, cout);
+  return 0;
+}
+
