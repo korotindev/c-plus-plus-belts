@@ -46,27 +46,28 @@ namespace Runtime {
     for (auto& method : methods_) {
       vtable_[method.name] = &method;
     }
+  }
 
-    const Method* Class::GetMethod(const std::string& name) const { return vtable_.at(name); }
+  const Method* Class::GetMethod(const std::string& name) const { return vtable_.at(name); }
 
-    bool Class::HasMethod(const std::string& name, size_t argument_count) const {
-      if (vtable_.count(name)) {
-        return vtable_.at(name)->formal_params.size() == argument_count;
-      }
-
-      return false;
+  bool Class::HasMethod(const std::string& name, size_t argument_count) const {
+    if (vtable_.count(name)) {
+      return vtable_.at(name)->formal_params.size() == argument_count;
     }
 
-    void Class::Print(ostream & os) { os << GetName(); }
+    return false;
+  }
 
-    const std::string& Class::GetName() const { return name_; }
+  void Class::Print(ostream& os) { os << GetName(); }
 
-    void Bool::Print(std::ostream & os) {
-      if (GetValue()) {
-        os << "True";
-      } else {
-        os << "False";
-      }
+  const std::string& Class::GetName() const { return name_; }
+
+  void Bool::Print(std::ostream& os) {
+    if (GetValue()) {
+      os << "True";
+    } else {
+      os << "False";
     }
+  }
 
-  } /* namespace Runtime */
+} /* namespace Runtime */
