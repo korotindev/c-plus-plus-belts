@@ -1,8 +1,9 @@
-#include "lexer.h"
 #include <test_runner.h>
 
-#include <string>
 #include <sstream>
+#include <string>
+
+#include "lexer.h"
 
 using namespace std;
 

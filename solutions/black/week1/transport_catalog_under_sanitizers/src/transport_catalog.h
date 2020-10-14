@@ -13,16 +13,16 @@
 #include "utils.h"
 
 namespace Responses {
-struct Stop {
-  std::set<std::string> bus_names;
-};
+  struct Stop {
+    std::set<std::string> bus_names;
+  };
 
-struct Bus {
-  size_t stop_count = 0;
-  size_t unique_stop_count = 0;
-  int road_route_length = 0;
-  double geo_route_length = 0.0;
-};
+  struct Bus {
+    size_t stop_count = 0;
+    size_t unique_stop_count = 0;
+    int road_route_length = 0;
+    double geo_route_length = 0.0;
+  };
 }  // namespace Responses
 
 class TransportCatalog {

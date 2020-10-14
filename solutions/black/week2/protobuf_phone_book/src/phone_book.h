@@ -1,11 +1,11 @@
 #pragma once
 
+#include <algorithm>
 #include <iosfwd>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <algorithm>
 
 #include "contact.pb.h"
 #include "iterator_range.h"

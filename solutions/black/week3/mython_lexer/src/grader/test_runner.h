@@ -14,21 +14,20 @@
 #include "profile.h"
 
 namespace TestRunnerPrivate {
-template <class Container>
-std::ostream &PrintContainer(std::ostream & os, const Container &container) {
-  os << "{";
-  bool first = true;
-  for (const auto &x : container) {
-    if (!first) {
-      os << ", ";
+  template <class Container>
+  std::ostream &PrintContainer(std::ostream &os, const Container &container) {
+    os << "{";
+    bool first = true;
+    for (const auto &x : container) {
+      if (!first) {
+        os << ", ";
+      }
+      first = false;
+      os << x;
     }
-    first = false;
-    os << x;
+    return os << "}";
   }
-  return os << "}";
-}
-}  // namespace
-
+}  // namespace TestRunnerPrivate
 
 template <class K, class V>
 std::ostream &operator<<(std::ostream &os, const std::pair<K, V> &p) {
@@ -107,50 +106,53 @@ class TestRunner {
 #define FILE_NAME __FILE__
 #endif
 
-#define ASSERT_EQUAL(x, y) {                          \
-  std::ostringstream __assert_equal_private_os;       \
-  __assert_equal_private_os                           \
-    << #x << " != " << #y << ", "                     \
-    << FILE_NAME << ":" << __LINE__;                  \
-  AssertEqual(x, y, __assert_equal_private_os.str()); \
-}
+#define ASSERT_EQUAL(x, y)                                                                   \
+  {                                                                                          \
+    std::ostringstream __assert_equal_private_os;                                            \
+    __assert_equal_private_os << #x << " != " << #y << ", " << FILE_NAME << ":" << __LINE__; \
+    AssertEqual(x, y, __assert_equal_private_os.str());                                      \
+  }
 
-#define ASSERT(x) {                           \
-  std::ostringstream __assert_private_os;     \
-  __assert_private_os << #x << " is false, "  \
-    << FILE_NAME << ":" << __LINE__;          \
-  Assert(static_cast<bool>(x), __assert_private_os.str());       \
-}
+#define ASSERT(x)                                                               \
+  {                                                                             \
+    std::ostringstream __assert_private_os;                                     \
+    __assert_private_os << #x << " is false, " << FILE_NAME << ":" << __LINE__; \
+    Assert(static_cast<bool>(x), __assert_private_os.str());                    \
+  }
 
-#define RUN_TEST(tr, func) \
-  tr.RunTest(func, #func)
+#define RUN_TEST(tr, func) tr.RunTest(func, #func)
 
-#define ASSERT_THROWS(expr, expected_exception) {                                           \
-  bool __assert_private_flag = true;                                                        \
-  try {                                                                                     \
-    expr;                                                                                   \
-    __assert_private_flag = false;                                                          \
-  } catch (expected_exception&) {                                                           \
-  } catch (...) {                                                                           \
-    std::ostringstream __assert_private_os;                                                 \
-    __assert_private_os << "Expression " #expr " threw an unexpected exception"             \
-      " " FILE_NAME ":" << __LINE__;                                                        \
-    Assert(false, __assert_private_os.str());                                               \
-  }                                                                                         \
-  if (!__assert_private_flag){                                                              \
-    std::ostringstream __assert_private_os;                                                 \
-    __assert_private_os << "Expression " #expr " is expected to throw " #expected_exception \
-      " " FILE_NAME ":" << __LINE__;                                                        \
-    Assert(false, __assert_private_os.str());                                               \
-  }                                                                                         \
-}
+#define ASSERT_THROWS(expr, expected_exception)                                                                 \
+  {                                                                                                             \
+    bool __assert_private_flag = true;                                                                          \
+    try {                                                                                                       \
+      expr;                                                                                                     \
+      __assert_private_flag = false;                                                                            \
+    } catch (expected_exception &) {                                                                            \
+    } catch (...) {                                                                                             \
+      std::ostringstream __assert_private_os;                                                                   \
+      __assert_private_os << "Expression " #expr                                                                \
+                             " threw an unexpected exception"                                                   \
+                             " " FILE_NAME ":"                                                                  \
+                          << __LINE__;                                                                          \
+      Assert(false, __assert_private_os.str());                                                                 \
+    }                                                                                                           \
+    if (!__assert_private_flag) {                                                                               \
+      std::ostringstream __assert_private_os;                                                                   \
+      __assert_private_os << "Expression " #expr " is expected to throw " #expected_exception " " FILE_NAME ":" \
+                          << __LINE__;                                                                          \
+      Assert(false, __assert_private_os.str());                                                                 \
+    }                                                                                                           \
+  }
 
-#define ASSERT_DOESNT_THROW(expr)                                           \
-  try {                                                                     \
-    expr;                                                                   \
-  } catch (...) {                                                           \
-    std::ostringstream __assert_private_os;                                 \
-    __assert_private_os << "Expression " #expr " threw an unexpected exception" \
-      " " FILE_NAME ":" << __LINE__;                                        \
-    Assert(false, __assert_private_os.str());                               \
+#define ASSERT_DOESNT_THROW(expr)                           \
+  try {                                                     \
+    expr;                                                   \
+  } catch (...) {                                           \
+    std::ostringstream __assert_private_os;                 \
+    __assert_private_os << "Expression " #expr              \
+                           " threw an unexpected exception" \
+                           " " FILE_NAME ":"                \
+                        << __LINE__;                        \
+    Assert(false, __assert_private_os.str());               \
   }
