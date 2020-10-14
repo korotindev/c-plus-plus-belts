@@ -3,6 +3,5 @@
 class TestRunner;
 
 namespace Ast {
-void RunUnitTests(TestRunner& tr);
+  void RunUnitTests(TestRunner& tr);
 }
-

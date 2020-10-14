@@ -3,5 +3,5 @@
 class TestRunner;
 
 namespace Parse {
-void RunLexerTests(TestRunner& tr);
+  void RunLexerTests(TestRunner& tr);
 }

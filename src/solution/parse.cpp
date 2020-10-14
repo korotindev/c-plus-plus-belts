@@ -1,34 +1,32 @@
 #include "parse.h"
-#include "statement.h"
-#include "lexer.h" // Добавьте в проект вашу реализацию лексического анализатора языка Mython
-#include "comparators.h"
 
 #include <algorithm>
-#include <string>
 #include <cctype>
-#include <vector>
 #include <optional>
+#include <string>
+#include <vector>
+
+#include "comparators.h"
+#include "lexer.h"
+#include "statement.h"
 
 using namespace std;
 
 namespace TokenType = Parse::TokenType;
 
 namespace {
-bool operator == (const Parse::Token& token, char c) {
-  auto p = token.TryAs<TokenType::Char>();
-  return p && p->value == c;
-}
+  bool operator==(const Parse::Token& token, char c) {
+    auto p = token.TryAs<TokenType::Char>();
+    return p && p->value == c;
+  }
 
-bool operator != (const Parse::Token& token, char c) {
-  return !(token == c);
-}
+  bool operator!=(const Parse::Token& token, char c) { return !(token == c); }
 
-}
+}  // namespace
 
 class Parser {
-public:
-  explicit Parser(Parse::Lexer& lexer) : lexer(lexer) {
-  }
+ public:
+  explicit Parser(Parse::Lexer& lexer) : lexer(lexer) {}
 
   // Program -> eps
   //          | Statement \n Program
@@ -41,7 +39,7 @@ public:
     return result;
   }
 
-private:
+ private:
   Parse::Lexer& lexer;
   Runtime::Closure declared_classes;
 
@@ -119,10 +117,8 @@ private:
     lexer.Expect<TokenType::Dedent>();
     lexer.NextToken();
 
-    auto [it, inserted] = declared_classes.insert({
-      class_name,
-      ObjectHolder::Own(Runtime::Class(class_name, std::move(methods), base_class))
-    });
+    auto [it, inserted] = declared_classes.insert(
+        {class_name, ObjectHolder::Own(Runtime::Class(class_name, std::move(methods), base_class))});
 
     if (!inserted) {
       throw ParseError("Class " + class_name + " already exists");
@@ -156,9 +152,8 @@ private:
       if (id_list.empty()) {
         return make_unique<Ast::Assignment>(std::move(last_name), ParseTest());
       } else {
-        return make_unique<Ast::FieldAssignment>(
-          Ast::VariableValue{std::move(id_list)}, std::move(last_name), ParseTest()
-        );
+        return make_unique<Ast::FieldAssignment>(Ast::VariableValue{std::move(id_list)}, std::move(last_name),
+                                                 ParseTest());
       }
     } else {
       lexer.Expect<TokenType::Char>('(');
@@ -168,7 +163,6 @@ private:
         throw ParseError("Mython doesn't support functions, only methods: " + last_name);
       }
 
-
       vector<unique_ptr<Ast::Statement>> args;
       if (lexer.CurrentToken() != ')') {
         args = ParseTestList();
@@ -176,11 +170,8 @@ private:
       lexer.Expect<TokenType::Char>(')');
       lexer.NextToken();
 
-      return make_unique<Ast::MethodCall>(
-        make_unique<Ast::VariableValue>(std::move(id_list)),
-        std::move(last_name),
-        std::move(args)
-      );
+      return make_unique<Ast::MethodCall>(make_unique<Ast::VariableValue>(std::move(id_list)), std::move(last_name),
+                                          std::move(args));
     }
   }
 
@@ -234,10 +225,7 @@ private:
       return result;
     } else if (lexer.CurrentToken() == '-') {
       lexer.NextToken();
-      return make_unique<Ast::Mult>(
-        ParseMult(),
-        make_unique<Ast::NumericConst>(-1)
-      );
+      return make_unique<Ast::Mult>(ParseMult(), make_unique<Ast::NumericConst>(-1));
     } else if (auto num = lexer.CurrentToken().TryAs<TokenType::Number>()) {
       int result = num->value;
       lexer.NextToken();
@@ -271,15 +259,10 @@ private:
         names.pop_back();
 
         if (!names.empty()) {
-          return make_unique<Ast::MethodCall>(
-            make_unique<Ast::VariableValue>(std::move(names)),
-            std::move(method_name),
-            std::move(args)
-          );
+          return make_unique<Ast::MethodCall>(make_unique<Ast::VariableValue>(std::move(names)), std::move(method_name),
+                                              std::move(args));
         } else if (auto it = declared_classes.find(method_name); it != end(declared_classes)) {
-          return make_unique<Ast::NewInstance>(
-            static_cast<const Runtime::Class&>(*it->second), std::move(args)
-          );
+          return make_unique<Ast::NewInstance>(static_cast<const Runtime::Class&>(*it->second), std::move(args));
         } else if (method_name == "str") {
           if (args.size() != 1) {
             throw ParseError("Function str takes exactly one argument");
@@ -387,7 +370,7 @@ private:
     }
   }
 
-  //Statement -> SimpleStatement Newline
+  // Statement -> SimpleStatement Newline
   //           | class ClassDefinition
   //           | if Condition
   unique_ptr<Ast::Statement> ParseStatement() {
@@ -406,7 +389,7 @@ private:
     }
   }
 
-  //StatementBody -> return Expression
+  // StatementBody -> return Expression
   //               | print ExpressionList
   //               | AssignmentOrCall
   unique_ptr<Ast::Statement> ParseSimpleStatement() {
@@ -428,6 +411,4 @@ private:
   }
 };
 
-unique_ptr<Ast::Statement> ParseProgram(Parse::Lexer& lexer) {
-  return Parser{lexer}.ParseProgram();
-}
+unique_ptr<Ast::Statement> ParseProgram(Parse::Lexer& lexer) { return Parser{lexer}.ParseProgram(); }

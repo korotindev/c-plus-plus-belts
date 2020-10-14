@@ -13,14 +13,14 @@ using namespace std;
 
 namespace Parse {
 
-unique_ptr<Ast::Statement> ParseProgramFromString(const string& program) {
-  istringstream is(program);
-  Parse::Lexer lexer(is);
-  return ParseProgram(lexer);
-}
+  unique_ptr<Ast::Statement> ParseProgramFromString(const string& program) {
+    istringstream is(program);
+    Parse::Lexer lexer(is);
+    return ParseProgram(lexer);
+  }
 
-void TestSimpleProgram() {
-  const string program = R"(
+  void TestSimpleProgram() {
+    const string program = R"(
 x = 4
 y = 5
 z = "hello, "
@@ -28,18 +28,18 @@ n = "world"
 print x + y, z + n
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "9 hello, world\n");
-}
+    ASSERT_EQUAL(os.str(), "9 hello, world\n");
+  }
 
-void TestProgramWithClasses() {
-  const string program = R"(
+  void TestProgramWithClasses() {
+    const string program = R"(
 program_name = "Classes test"
 
 class Empty:
@@ -67,18 +67,18 @@ far_far_away = Point(10000, 50000)
 print program_name, origin, far_far_away, origin.SetX(1)
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "Classes test (0; 0) (10000; 50000) None\n");
-}
+    ASSERT_EQUAL(os.str(), "Classes test (0; 0) (10000; 50000) None\n");
+  }
 
-void TestProgramWithIf() {
-  const string program = R"(
+  void TestProgramWithIf() {
+    const string program = R"(
 x = 4
 y = 5
 if x > y:
@@ -94,18 +94,18 @@ else:
   print 'x <= 0'
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "x <= y\ny >= 0\n");
-}
+    ASSERT_EQUAL(os.str(), "x <= y\ny >= 0\n");
+  }
 
-void TestReturnFromIf() {
-  const string program = R"(
+  void TestReturnFromIf() {
+    const string program = R"(
 class Abs:
   def calc(n):
     if n > 0:
@@ -117,18 +117,18 @@ x = Abs()
 print x.calc(2)
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "2\n");
-}
+    ASSERT_EQUAL(os.str(), "2\n");
+  }
 
-void TestRecursion() {
-  const string program = R"(
+  void TestRecursion() {
+    const string program = R"(
 class ArithmeticProgression:
   def calc(n):
     self.result = 0
@@ -145,18 +145,18 @@ x.calc(10)
 print x.result
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "55\n");
-}
+    ASSERT_EQUAL(os.str(), "55\n");
+  }
 
-void TestRecursion2() {
-  const string program = R"(
+  void TestRecursion2() {
+    const string program = R"(
 class GCD:
   def __init__():
     self.call_count = 0
@@ -175,18 +175,18 @@ print x.calc(22, 17)
 print x.call_count
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "17\n1\n115\n");
-}
+    ASSERT_EQUAL(os.str(), "17\n1\n115\n");
+  }
 
-void TestComplexLogicalExpression() {
-  const string program = R"(
+  void TestComplexLogicalExpression() {
+    const string program = R"(
 a = 1
 b = 2
 c = 3
@@ -194,18 +194,18 @@ ok = a + b > c and a + c > b and b + c > a
 print ok
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "False\n");
-}
+    ASSERT_EQUAL(os.str(), "False\n");
+  }
 
-void TestClassicalPolymorphism() {
-  const string program = R"(
+  void TestClassicalPolymorphism() {
+    const string program = R"(
 class Shape:
   def __str__():
     return "Shape"
@@ -247,15 +247,15 @@ t2 = Triangle(125, 1, 2)
 print r, c, t1, t2
 )";
 
-  ostringstream os;
-  Ast::Print::SetOutputStream(os);
+    ostringstream os;
+    Ast::Print::SetOutputStream(os);
 
-  Runtime::Closure closure;
-  auto tree = ParseProgramFromString(program);
-  tree->Execute(closure);
+    Runtime::Closure closure;
+    auto tree = ParseProgramFromString(program);
+    tree->Execute(closure);
 
-  ASSERT_EQUAL(os.str(), "Rect(10x20) Circle(52) Triangle(3, 4, 5) Wrong triangle\n");
-}
+    ASSERT_EQUAL(os.str(), "Rect(10x20) Circle(52) Triangle(3, 4, 5) Wrong triangle\n");
+  }
 
 }  // namespace Parse
 

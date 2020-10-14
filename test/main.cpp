@@ -97,11 +97,12 @@ print y.value
 
 int main() {
   TestRunner tr;
+  TestParseProgram(tr);
+
   Runtime::RunObjectHolderTests(tr);
   Runtime::RunObjectsTests(tr);
   Ast::RunUnitTests(tr);
   Parse::RunLexerTests(tr);
-  TestParseProgram(tr);
 
   RUN_TEST(tr, TestSimplePrints);
   RUN_TEST(tr, TestAssignments);

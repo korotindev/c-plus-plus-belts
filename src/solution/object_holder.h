@@ -5,52 +5,49 @@
 
 namespace Runtime {
 
-class Object;
+  class Object;
 
-class ObjectHolder {
-public:
-  ObjectHolder() = default;
+  class ObjectHolder {
+   public:
+    ObjectHolder() = default;
 
-  template <typename T>
-  static ObjectHolder Own(T&& object) {
-    return ObjectHolder(
-      std::make_shared<T>(std::forward<T>(object))
-    );
-  }
+    template <typename T>
+    static ObjectHolder Own(T&& object) {
+      return ObjectHolder(std::make_shared<T>(std::forward<T>(object)));
+    }
 
-  static ObjectHolder Share(Object& object);
-  static ObjectHolder None();
+    static ObjectHolder Share(Object& object);
+    static ObjectHolder None();
 
-  Object& operator*();
-  const Object& operator*() const;
-  Object* operator->();
-  const Object* operator->() const;
+    Object& operator*();
+    const Object& operator*() const;
+    Object* operator->();
+    const Object* operator->() const;
 
-  Object* Get();
-  const Object* Get() const;
+    Object* Get();
+    const Object* Get() const;
 
-  template <typename T>
-  T* TryAs() {
-    return dynamic_cast<T*>(this->Get());
-  }
+    template <typename T>
+    T* TryAs() {
+      return dynamic_cast<T*>(this->Get());
+    }
 
-  template <typename T>
-  const T* TryAs() const {
-    return dynamic_cast<const T*>(this->Get());
-  }
+    template <typename T>
+    const T* TryAs() const {
+      return dynamic_cast<const T*>(this->Get());
+    }
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-private:
-  ObjectHolder(std::shared_ptr<Object> data) : data(std::move(data)) {
-  }
+   private:
+    ObjectHolder(std::shared_ptr<Object> data) : data(std::move(data)) {}
 
-  std::shared_ptr<Object> data;
-};
+    std::shared_ptr<Object> data;
+  };
 
-using Closure = std::unordered_map<std::string, ObjectHolder>;
+  using Closure = std::unordered_map<std::string, ObjectHolder>;
 
-bool IsTrue(ObjectHolder object);
+  bool IsTrue(ObjectHolder object);
 
 } /* namespace Runtime */
 

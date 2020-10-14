@@ -3,5 +3,5 @@
 class TestRunner;
 
 namespace Runtime {
-void RunObjectsTests(TestRunner& test_runner);
+  void RunObjectsTests(TestRunner& test_runner);
 }
