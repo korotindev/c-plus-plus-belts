@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "object.h"
-#include "object_test.h"
+#include "object_holder_test.h"
 #include "test_runner.h"
 
 using namespace std;

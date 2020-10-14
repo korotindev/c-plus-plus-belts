@@ -1,10 +1,10 @@
 #include "object.h"
 
-#include "test_runner.h"
-
 #include <sstream>
 
+#include "object_test.h"
 #include "statement.h"
+#include "test_runner.h"
 
 using namespace std;
 
