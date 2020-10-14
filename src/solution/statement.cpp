@@ -23,8 +23,22 @@ namespace Ast {
   VariableValue::VariableValue(std::vector<std::string> dotted_ids_) : dotted_ids(move(dotted_ids_)) {}
 
   ObjectHolder VariableValue::Execute(Closure& closure) {
-    // Цикл на доставание значений объектов из замыканий ? WAT?
-    // Или это просто как-то хитро обработать?
+    // TODO: check for overall adequacy 
+    ObjectHolder oh = closure[dotted_ids[0]];
+    for (size_t i = 1; i < dotted_ids.size(); i++) {
+      Runtime::ClassInstance* object = oh.TryAs<Runtime::ClassInstance>();
+      // TODO: Check for nullptr ?
+      auto fields_closure = object->Fields();
+      const auto& id = dotted_ids[i];
+      if (fields_closure.contains(id)) {
+        oh = fields_closure.at(id);
+      } else {
+        oh = ObjectHolder::Share(*object);
+        break;
+      }
+    }
+
+    return oh;
   }
 
   unique_ptr<Print> Print::Variable(std::string var) {}
