@@ -33,6 +33,7 @@ namespace Ast {
       if (fields_closure.contains(id)) {
         oh = fields_closure.at(id);
       } else {
+        // WRONG
         oh = ObjectHolder::Share(*object);
         break;
       }
