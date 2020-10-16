@@ -47,7 +47,7 @@ namespace Ast {
 
   Print::Print(unique_ptr<Statement> argument_) { args.emplace_back(move(argument_)); }
 
-  Print::Print(vector<unique_ptr<Statement>> args_) : args(move(args_)) {}
+  Print::Print(vector<unique_ptr<Statement>> args) : args(move(args)) {}
 
   ObjectHolder Print::Execute(Closure& closure) {
     for (auto& arg : args) {
@@ -66,9 +66,9 @@ namespace Ast {
 
   void Print::SetOutputStream(ostream& output_stream) { output = &output_stream; }
 
-  MethodCall::MethodCall(std::unique_ptr<Statement> object_, std::string method_,
-                         std::vector<std::unique_ptr<Statement>> args_)
-      : object(move(object_)), method(move(method_)), args(move(args_)) {}
+  MethodCall::MethodCall(std::unique_ptr<Statement> object, std::string method,
+                         std::vector<std::unique_ptr<Statement>> args)
+      : object(move(object)), method(move(method)), args(move(args)) {}
 
   ObjectHolder MethodCall::Execute(Closure& closure) {
     // TODO: check obj for nullptr
@@ -95,11 +95,29 @@ namespace Ast {
     }
   }
 
-  ObjectHolder Sub::Execute(Closure& closure) {}
+  ObjectHolder Sub::Execute(Closure& closure) {
+    auto lhs_oh = lhs->Execute(closure);
+    auto rhs_oh = rhs->Execute(closure);
+    auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
+    auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
+    return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() - rhs_ptr->GetValue()));
+  }
 
-  ObjectHolder Mult::Execute(Runtime::Closure& closure) {}
+  ObjectHolder Mult::Execute(Runtime::Closure& closure) {
+    auto lhs_oh = lhs->Execute(closure);
+    auto rhs_oh = rhs->Execute(closure);
+    auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
+    auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
+    return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() * rhs_ptr->GetValue()));
+  }
 
-  ObjectHolder Div::Execute(Runtime::Closure& closure) {}
+  ObjectHolder Div::Execute(Runtime::Closure& closure) {
+    auto lhs_oh = lhs->Execute(closure);
+    auto rhs_oh = rhs->Execute(closure);
+    auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
+    auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
+    return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() / rhs_ptr->GetValue()));
+  }
 
   ObjectHolder Compound::Execute(Closure& closure) {
     for (auto& statement : statements) {
@@ -120,10 +138,14 @@ namespace Ast {
 
   ObjectHolder ClassDefinition::Execute(Runtime::Closure& closure) {}
 
-  FieldAssignment::FieldAssignment(VariableValue object_, std::string field_name_, std::unique_ptr<Statement> rv_)
-      : object(std::move(object_)), field_name(std::move(field_name_)), right_value(std::move(rv_)) {}
+  FieldAssignment::FieldAssignment(VariableValue object, std::string field_name, std::unique_ptr<Statement> rv)
+      : object(std::move(object)), field_name(std::move(field_name)), right_value(std::move(rv)) {}
 
-  ObjectHolder FieldAssignment::Execute(Runtime::Closure& closure) {}
+  ObjectHolder FieldAssignment::Execute(Runtime::Closure& closure) {
+    // TODO: Check for nullptr
+    auto instance_ptr = object.Execute(closure).TryAs<Runtime::ClassInstance>();
+    instance_ptr->Fields()[field_name] = right_value->Execute(closure);
+  }
 
   IfElse::IfElse(std::unique_ptr<Statement> condition, std::unique_ptr<Statement> if_body,
                  std::unique_ptr<Statement> else_body) {}
