@@ -53,7 +53,8 @@ RUN mkdir -p /tmp/gdbgui_linux \
     && cd /tmp/gdbgui_linux \
     && wget https://github.com/cs01/gdbgui/releases/download/v${GDB_GUI_TARGET_VERSION}/gdbgui_linux.zip -O gdbgui_linux.zip \
     && unzip gdbgui_linux.zip \
-    && mv gdbgui_${GDB_GUI_TARGET_VERSION} /usr/bin \
+    && mv gdbgui_${GDB_GUI_TARGET_VERSION} /usr/bin/gdbgui \
+    && chmod +x /usr/bin/gdbgui \
     && cd ../ \
     && rm -rf gdbgui_linux
 
