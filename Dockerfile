@@ -30,7 +30,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
     && apt-get -y install --no-install-recommends build-essential autoconf automake libtool curl make g++ unzip cmake valgrind cppcheck gdb clang-format \
     # BUILD PROTOBUF
-    && cd tmp \
+    && cd /tmp \
     && wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_TARGET_VERSION}/${PROTOBUF_SOURCES_ZIP} -O ${PROTOBUF_SOURCES_ZIP} \
     && unzip ${PROTOBUF_SOURCES_ZIP} \
     && rm ${PROTOBUF_SOURCES_ZIP} \
@@ -40,12 +40,22 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     # && make check \ # Very long... :( It works with ubuntu:20.04
     && sudo make install -j $(nproc) \
     && sudo ldconfig \
-    && cd /tmp \
-    && rm -rf protopbuf-cpp \
+    && cd ../ \
+    && rm -rf ${PROTOBUF_SOURCES} \
     # CLEANING UP
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+ARG GDB_GUI_TARGET_VERSION=0.14.0.1
+
+RUN mkdir -p /tmp/gdbgui_linux \
+    && cd /tmp/gdbgui_linux \
+    && wget https://github.com/cs01/gdbgui/releases/download/v${GDB_GUI_TARGET_VERSION}/gdbgui_linux.zip -O gdbgui_linux.zip \
+    && unzip gdbgui_linux.zip \
+    && mv gdbgui_${GDB_GUI_TARGET_VERSION} /usr/bin \
+    && cd ../ \
+    && rm -rf gdbgui_linux
 
 ARG CC=gcc
 ARG CXX=g++
