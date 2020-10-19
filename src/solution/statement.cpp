@@ -120,7 +120,7 @@ namespace Ast {
     } else {
       auto lhs_ptr_str = lhs_oh.TryAs<Runtime::String>();
       auto rhs_ptr_str = rhs_oh.TryAs<Runtime::String>();
-      if (lhs_ptr_str && lhs_ptr_str) {
+      if (lhs_ptr_str && rhs_ptr_str) {
         return ObjectHolder::Own(Runtime::String(lhs_ptr_str->GetValue() + rhs_ptr_str->GetValue()));
       } else {
         throw Runtime::Error("bad addition");
@@ -221,6 +221,11 @@ namespace Ast {
     vector<ObjectHolder> computed_args;
     transform(args.begin(), args.end(), back_inserter(computed_args),
               [&closure](auto& arg) { return arg->Execute(closure); });
+    if (instance.HasMethod("__init__", computed_args.size())) {
+    } else {
+      throw Runtime::Error("class " + class_.GetName() + " doesn't have an __init__ method with " +
+                           to_string(computed_args.size()) + " argument(s)");
+    }
     instance.Call("__init__", computed_args);
     return ObjectHolder::Own(move(instance));
   }
