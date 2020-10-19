@@ -188,17 +188,19 @@ namespace Ast {
   ObjectHolder Compound::Execute(Closure& closure) {
     for (auto& statement : statements) {
       auto result_holder = statement->Execute(closure);
-      if (result_holder) {
-        if (dynamic_cast<Ast::Return*>(statement.get())) {
-          return result_holder;
-        }
+      if (result_holder && result_holder.IsReturnable()) {
+        return result_holder;
       }
     }
 
     return ObjectHolder::None();
   }
 
-  ObjectHolder Return::Execute(Closure& closure) { return statement->Execute(closure); }
+  ObjectHolder Return::Execute(Closure& closure) { 
+    auto statement_oh = statement->Execute(closure);
+    statement_oh.MakrReturnable();
+    return statement_oh;
+  }
 
   ClassDefinition::ClassDefinition(ObjectHolder class_) : class_(class_) {}
 

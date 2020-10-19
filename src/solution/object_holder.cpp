@@ -24,6 +24,7 @@ namespace Runtime {
 
   ObjectHolder::operator bool() const { return Get(); }
 
-  bool IsTrue(ObjectHolder object) {}
+  bool ObjectHolder::IsReturnable() const { return returnable; }
+  void ObjectHolder::MakrReturnable() { returnable = true; }
 
 }  // namespace Runtime

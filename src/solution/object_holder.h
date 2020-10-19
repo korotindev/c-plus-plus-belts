@@ -39,15 +39,17 @@ namespace Runtime {
 
     explicit operator bool() const;
 
+    bool IsReturnable() const;
+    void MakrReturnable();
+
    private:
-    ObjectHolder(std::shared_ptr<Object> data) : data(std::move(data)) {}
+    ObjectHolder(std::shared_ptr<Object> data) : data(std::move(data)), returnable(false) {}
 
     std::shared_ptr<Object> data;
+    bool returnable = false;
   };
 
   using Closure = std::unordered_map<std::string, ObjectHolder>;
-
-  bool IsTrue(ObjectHolder object);
 
 } /* namespace Runtime */
 
