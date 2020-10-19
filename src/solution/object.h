@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -58,6 +59,7 @@ namespace Runtime {
     explicit Class(std::string name, std::vector<Method> methods, const Class* parent);
     const Method* GetMethod(const std::string& name) const;
     bool HasMethod(const std::string& method, size_t argument_count) const;
+    bool HasSimilarMethod(const std::string& method) const;
     const std::string& GetName() const;
     void Print(std::ostream& os) override;
   };
@@ -73,9 +75,15 @@ namespace Runtime {
 
     ObjectHolder Call(const std::string& method, const std::vector<ObjectHolder>& actual_args);
     bool HasMethod(const std::string& method, size_t argument_count) const;
+    bool HasSimilarMethod(const std::string& method) const;
 
     Closure& Fields();
     const Closure& Fields() const;
+  };
+
+  class Error : public std::runtime_error {
+   public:
+    Error(std::string msg) : std::runtime_error(move(msg)) {}
   };
 
 }  // namespace Runtime

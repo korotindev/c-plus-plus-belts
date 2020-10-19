@@ -25,16 +25,24 @@ namespace Ast {
 
   ObjectHolder VariableValue::Execute(Closure& closure) {
     // TODO: check for overall adequacy
-    ObjectHolder oh = closure[dotted_ids[0]];
+    ObjectHolder oh;
+    if (auto it = closure.find(dotted_ids[0]); it != closure.end()) {
+      oh = it->second;
+    } else {
+      throw Runtime::Error("unknown literal: " + dotted_ids[0]);
+    }
+
     for (size_t i = 1; i < dotted_ids.size(); i++) {
       // TODO: Check object for nullptr
       Runtime::ClassInstance* object = oh.TryAs<Runtime::ClassInstance>();
       const auto& id = dotted_ids[i];
       if (auto it = object->Fields().find(id); it != object->Fields().end()) {
         oh = it->second;
-      } else {
+      } else if (object->HasSimilarMethod(id)) {
         oh = ObjectHolder::Share(*object);
         break;
+      } else {
+        throw Runtime::Error("unknown literal: " + id);
       }
     }
 
@@ -145,7 +153,7 @@ namespace Ast {
     // TODO: Check for nullptr
     auto instance_ptr = object.Execute(closure).TryAs<Runtime::ClassInstance>();
     instance_ptr->Fields()[field_name] = right_value->Execute(closure);
-    // FIXME: What should I return ? 
+    // FIXME: What should I return ?
     return ObjectHolder::None();
   }
 

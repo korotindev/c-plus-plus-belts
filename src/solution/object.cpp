@@ -15,6 +15,8 @@ namespace Runtime {
     return cls_.HasMethod(method, argument_count);
   }
 
+  bool ClassInstance::HasSimilarMethod(const std::string& method) const { return cls_.HasSimilarMethod(method); }
+
   const Closure& ClassInstance::Fields() const { return closure_; }
 
   Closure& ClassInstance::Fields() { return closure_; }
@@ -57,6 +59,8 @@ namespace Runtime {
 
     return false;
   }
+
+  bool Class::HasSimilarMethod(const std::string& name) const { return vtable_.contains(name); }
 
   void Class::Print(ostream& os) { os << GetName(); }
 
