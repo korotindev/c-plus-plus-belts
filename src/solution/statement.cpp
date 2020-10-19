@@ -145,6 +145,8 @@ namespace Ast {
     // TODO: Check for nullptr
     auto instance_ptr = object.Execute(closure).TryAs<Runtime::ClassInstance>();
     instance_ptr->Fields()[field_name] = right_value->Execute(closure);
+    // FIXME: What should I return ? 
+    return ObjectHolder::None();
   }
 
   IfElse::IfElse(std::unique_ptr<Statement> condition, std::unique_ptr<Statement> if_body,
