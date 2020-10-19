@@ -190,7 +190,7 @@ namespace Ast {
     ObjectHolder Execute(Runtime::Closure& closure) override;
 
    private:
-    ObjectHolder cls;
+    ObjectHolder class_;
     // FIXME
     // const std::string& class_name;
   };

@@ -53,6 +53,8 @@ namespace Ast {
     return make_unique<Print>(make_unique<Ast::VariableValue>(var));
   }
 
+  ostream* Print::output = &cout;
+
   Print::Print(unique_ptr<Statement> argument_) { args.emplace_back(move(argument_)); }
 
   Print::Print(vector<unique_ptr<Statement>> args) : args(move(args)) {}
@@ -75,7 +77,6 @@ namespace Ast {
     return ObjectHolder::None();
   }
 
-  ostream* Print::output = &cout;
 
   void Print::SetOutputStream(ostream& output_stream) { output = &output_stream; }
 
@@ -93,7 +94,12 @@ namespace Ast {
     return obj->Call(method, computed_args);
   }
 
-  ObjectHolder Stringify::Execute(Closure& closure) {}
+  ObjectHolder Stringify::Execute(Closure& closure) {
+    auto arg_oh = argument->Execute(closure);
+    ostringstream res;
+    arg_oh->Print(res);
+    return ObjectHolder::Own(Runtime::String(res.str()));
+  }
 
   ObjectHolder Add::Execute(Closure& closure) {
     auto lhs_oh = lhs->Execute(closure);
@@ -147,9 +153,11 @@ namespace Ast {
 
   ObjectHolder Return::Execute(Closure& closure) { return statement->Execute(closure); }
 
-  ClassDefinition::ClassDefinition(ObjectHolder class_) {}
+  ClassDefinition::ClassDefinition(ObjectHolder class_) : class_(class_) {}
 
-  ObjectHolder ClassDefinition::Execute(Runtime::Closure& closure) {}
+  ObjectHolder ClassDefinition::Execute(Runtime::Closure& closure) {
+
+  }
 
   FieldAssignment::FieldAssignment(VariableValue object, std::string field_name, std::unique_ptr<Statement> rv)
       : object(std::move(object)), field_name(std::move(field_name)), right_value(std::move(rv)) {}
@@ -181,6 +189,14 @@ namespace Ast {
 
   NewInstance::NewInstance(const Runtime::Class& class_) : NewInstance(class_, {}) {}
 
-  ObjectHolder NewInstance::Execute(Runtime::Closure& closure) {}
+  ObjectHolder NewInstance::Execute(Runtime::Closure& closure) {
+    auto instance = Runtime::ClassInstance(class_);
+    vector<ObjectHolder> computed_args;
+    transform(args.begin(), args.end(), back_inserter(computed_args), [&closure](auto &arg){
+      return arg->Execute(closure);
+    });
+    instance.Call("__init__", computed_args);
+    return ObjectHolder::Own(move(instance));
+  }
 
 } /* namespace Ast */
