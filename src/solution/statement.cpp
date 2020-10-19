@@ -221,12 +221,13 @@ namespace Ast {
     vector<ObjectHolder> computed_args;
     transform(args.begin(), args.end(), back_inserter(computed_args),
               [&closure](auto& arg) { return arg->Execute(closure); });
+    
     if (instance.HasMethod("__init__", computed_args.size())) {
-    } else {
+      instance.Call("__init__", computed_args);
+    } else if (!computed_args.empty()) {
       throw Runtime::Error("class " + class_.GetName() + " doesn't have an __init__ method with " +
                            to_string(computed_args.size()) + " argument(s)");
     }
-    instance.Call("__init__", computed_args);
     return ObjectHolder::Own(move(instance));
   }
 
