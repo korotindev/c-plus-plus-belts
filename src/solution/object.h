@@ -59,7 +59,6 @@ namespace Runtime {
     explicit Class(std::string name, std::vector<Method> methods, const Class* parent);
     const Method* GetMethod(const std::string& name) const;
     bool HasMethod(const std::string& method, size_t argument_count) const;
-    bool HasSimilarMethod(const std::string& method) const;
     const std::string& GetName() const;
     void Print(std::ostream& os) override;
   };

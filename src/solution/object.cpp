@@ -9,13 +9,19 @@ using namespace std;
 
 namespace Runtime {
 
-  void ClassInstance::Print(std::ostream& os) {}
+  void ClassInstance::Print(std::ostream& os) {
+    if (HasMethod("__str__", 0)) {
+      Call("__str__", {});
+    } else {
+      os << this;
+    }
+  }
 
   bool ClassInstance::HasMethod(const std::string& method, size_t argument_count) const {
     return cls_.HasMethod(method, argument_count);
   }
 
-  bool ClassInstance::HasSimilarMethod(const std::string& method) const { return cls_.HasSimilarMethod(method); }
+  bool ClassInstance::HasSimilarMethod(const std::string& method) const { return cls_.GetMethod(method); }
 
   const Closure& ClassInstance::Fields() const { return closure_; }
 
@@ -50,7 +56,13 @@ namespace Runtime {
     }
   }
 
-  const Method* Class::GetMethod(const std::string& name) const { return vtable_.at(name); }
+  const Method* Class::GetMethod(const std::string& name) const { 
+    if (const auto it = vtable_.find(name); it != vtable_.cend()) {
+      return it->second;
+    }
+
+    return nullptr;
+  }
 
   bool Class::HasMethod(const std::string& name, size_t argument_count) const {
     if (vtable_.count(name)) {
@@ -59,8 +71,6 @@ namespace Runtime {
 
     return false;
   }
-
-  bool Class::HasSimilarMethod(const std::string& name) const { return vtable_.contains(name); }
 
   void Class::Print(ostream& os) { os << GetName(); }
 
