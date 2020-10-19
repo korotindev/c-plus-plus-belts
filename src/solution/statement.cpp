@@ -9,6 +9,20 @@ using namespace std;
 
 namespace Ast {
 
+  bool transform_object_holder_to_bool(ObjectHolder oh) {
+    if (auto res_ptr = oh.TryAs<Runtime::Bool>()) {
+      return res_ptr->GetValue();
+    } else if (auto res_ptr = oh.TryAs<Runtime::Number>()) {
+      return res_ptr->GetValue() != 0;
+    } else if (auto res_ptr = oh.TryAs<Runtime::String>()) {
+      return !(res_ptr->GetValue().empty());
+    } else if (oh.TryAs<Runtime::ClassInstance>()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   using Runtime::Closure;
 
   ObjectHolder Assignment::Execute(Closure& closure) {
@@ -201,19 +215,51 @@ namespace Ast {
   }
 
   IfElse::IfElse(std::unique_ptr<Statement> condition, std::unique_ptr<Statement> if_body,
-                 std::unique_ptr<Statement> else_body) {}
+                 std::unique_ptr<Statement> else_body)
+      : condition(move(condition)), if_body(move(if_body)), else_body(move(else_body)) {}
 
-  ObjectHolder IfElse::Execute(Runtime::Closure& closure) {}
+  ObjectHolder IfElse::Execute(Runtime::Closure& closure) {
+    auto condition_result_oh = condition->Execute(closure);
 
-  ObjectHolder Or::Execute(Runtime::Closure& closure) {}
+    if (transform_object_holder_to_bool(condition_result_oh)) {
+      return if_body->Execute(closure);
+    } else if (else_body) {
+      return else_body->Execute(closure);
+    }
 
-  ObjectHolder And::Execute(Runtime::Closure& closure) {}
+    return ObjectHolder::None();
+  }
 
-  ObjectHolder Not::Execute(Runtime::Closure& closure) {}
+  ObjectHolder Or::Execute(Runtime::Closure& closure) {
+    auto lhs_oh = lhs->Execute(closure);
+    auto rhs_oh = rhs->Execute(closure);
+    auto lhs_bool = transform_object_holder_to_bool(lhs_oh);
+    auto rhs_bool = transform_object_holder_to_bool(rhs_oh);
+    return ObjectHolder::Own(Runtime::Bool(lhs_bool || rhs_bool));
+  }
 
-  Comparison::Comparison(Comparator cmp, unique_ptr<Statement> lhs, unique_ptr<Statement> rhs) {}
+  ObjectHolder And::Execute(Runtime::Closure& closure) {
+    auto lhs_oh = lhs->Execute(closure);
+    auto rhs_oh = rhs->Execute(closure);
+    auto lhs_bool = transform_object_holder_to_bool(lhs_oh);
+    auto rhs_bool = transform_object_holder_to_bool(rhs_oh);
+    return ObjectHolder::Own(Runtime::Bool(lhs_bool && rhs_bool));
+  }
 
-  ObjectHolder Comparison::Execute(Runtime::Closure& closure) {}
+  ObjectHolder Not::Execute(Runtime::Closure& closure) {
+    auto arg_oh = argument->Execute(closure);
+    auto arg_bool = transform_object_holder_to_bool(arg_oh);
+    return ObjectHolder::Own(Runtime::Bool(!arg_bool));
+  }
+
+  Comparison::Comparison(Comparator cmp, unique_ptr<Statement> lhs, unique_ptr<Statement> rhs)
+      : comparator(move(cmp)), left(move(lhs)), right(move(rhs)) {}
+
+  ObjectHolder Comparison::Execute(Runtime::Closure& closure) {
+    auto left_oh = left->Execute(closure);
+    auto right_oh = right->Execute(closure);
+    return ObjectHolder::Own(Runtime::Bool(comparator(left_oh, right_oh)));
+  }
 
   NewInstance::NewInstance(const Runtime::Class& class_, std::vector<std::unique_ptr<Statement>> args)
       : class_(class_), args(std::move(args)) {}
