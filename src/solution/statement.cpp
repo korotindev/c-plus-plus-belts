@@ -110,21 +110,25 @@ namespace Ast {
   ObjectHolder Add::Execute(Closure& closure) {
     auto lhs_oh = lhs->Execute(closure);
     auto rhs_oh = rhs->Execute(closure);
+
     if (auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>()) {
       auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
       if (lhs_ptr && rhs_ptr) {
         return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
       } else {
-        throw Runtime::Error("bad addition");
+        throw Runtime::Error("bad numbers addition");
       }
-    } else {
-      auto lhs_ptr_str = lhs_oh.TryAs<Runtime::String>();
-      auto rhs_ptr_str = rhs_oh.TryAs<Runtime::String>();
-      if (lhs_ptr_str && rhs_ptr_str) {
-        return ObjectHolder::Own(Runtime::String(lhs_ptr_str->GetValue() + rhs_ptr_str->GetValue()));
+    } else if (auto lhs_ptr = lhs_oh.TryAs<Runtime::String>()) {
+      auto rhs_ptr = rhs_oh.TryAs<Runtime::String>();
+      if (lhs_ptr && rhs_ptr) {
+        return ObjectHolder::Own(Runtime::String(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
       } else {
-        throw Runtime::Error("bad addition");
+        throw Runtime::Error("bad strings addition");
       }
+    } else if (auto lhs_ptr = lhs_oh.TryAs<Runtime::ClassInstance>()) {
+      return lhs_ptr->Call("__add__", {rhs_oh});
+    } else {
+      throw Runtime::Error("bad arguments in add");
     }
   }
 
@@ -221,7 +225,7 @@ namespace Ast {
     vector<ObjectHolder> computed_args;
     transform(args.begin(), args.end(), back_inserter(computed_args),
               [&closure](auto& arg) { return arg->Execute(closure); });
-    
+
     if (instance.HasMethod("__init__", computed_args.size())) {
       instance.Call("__init__", computed_args);
     } else if (!computed_args.empty()) {

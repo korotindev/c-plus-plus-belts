@@ -33,6 +33,13 @@ namespace Runtime {
     // TODO: Process unknown method call ?
     const auto method_ptr = cls_.GetMethod(method);
 
+    if (!method_ptr) {
+      ostringstream os;
+      os << "unknown method \"" << method << "\" called for ";
+      this->Print(os);
+      throw Runtime::Error(os.str());
+    }
+
     Closure method_closure;
     method_closure["self"] = ObjectHolder::Share(*this);
 
