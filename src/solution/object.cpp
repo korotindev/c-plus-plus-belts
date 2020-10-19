@@ -11,7 +11,7 @@ namespace Runtime {
 
   void ClassInstance::Print(std::ostream& os) {
     if (HasMethod("__str__", 0)) {
-      Call("__str__", {});
+      Call("__str__", {})->Print(os);
     } else {
       os << this;
     }
@@ -56,7 +56,7 @@ namespace Runtime {
     }
   }
 
-  const Method* Class::GetMethod(const std::string& name) const { 
+  const Method* Class::GetMethod(const std::string& name) const {
     if (const auto it = vtable_.find(name); it != vtable_.cend()) {
       return it->second;
     }
