@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package YellowPages;
+
+message Company { string name = 1; }
