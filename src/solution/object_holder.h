@@ -9,7 +9,7 @@ namespace Runtime {
 
   class ObjectHolder {
    public:
-    ObjectHolder() = default;
+    ObjectHolder() : data({}), returnable(false) {}
 
     template <typename T>
     static ObjectHolder Own(T&& object) {

@@ -204,7 +204,10 @@ namespace Ast {
 
   ClassDefinition::ClassDefinition(ObjectHolder class_) : class_(class_) {}
 
-  ObjectHolder ClassDefinition::Execute(Runtime::Closure& closure) {}
+  ObjectHolder ClassDefinition::Execute(Runtime::Closure&) {
+    // FIXME: Do something here? Or not? 
+    return ObjectHolder::None();
+  }
 
   FieldAssignment::FieldAssignment(VariableValue object, std::string field_name, std::unique_ptr<Statement> rv)
       : object(std::move(object)), field_name(std::move(field_name)), right_value(std::move(rv)) {}
