@@ -6,7 +6,7 @@
 // Serialization
 
 template <typename T>
-void Serialize(const T &pod, std::ostream& out);
+void Serialize(const T& pod, std::ostream& out);
 
 void Serialize(const std::string& str, std::ostream& out);
 
@@ -15,7 +15,6 @@ void Serialize(const std::vector<T>& data, std::ostream& out);
 
 template <typename T1, typename T2>
 void Serialize(const std::map<T1, T2>& data, std::ostream& out);
-
 
 // Deserialization
 
@@ -29,7 +28,6 @@ void Deserialize(std::istream& in, std::vector<T>& data);
 
 template <typename T1, typename T2>
 void Deserialize(std::istream& in, std::map<T1, T2>& data);
-
 
 template <typename T>
 void Serialize(const T& pod, std::ostream& out) {
@@ -74,7 +72,6 @@ void Deserialize(std::istream& in, std::string& str) {
   str.resize(size);
   in.read(str.data(), str.size());
 }
-
 
 template <typename T1, typename T2>
 void Deserialize(std::istream& in, std::map<T1, T2>& data) {

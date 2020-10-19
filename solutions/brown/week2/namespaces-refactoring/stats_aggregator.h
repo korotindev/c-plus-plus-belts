@@ -17,78 +17,78 @@ struct StatsAggregator {
 
 namespace StatsAggregators {
 
-class Sum : public StatsAggregator {
- public:
-  void Process(int value) override;
+  class Sum : public StatsAggregator {
+   public:
+    void Process(int value) override;
 
-  void PrintValue(std::ostream &out) const override;
+    void PrintValue(std::ostream &out) const override;
 
- private:
-  int sum = 0;
-};
+   private:
+    int sum = 0;
+  };
 
-class Min : public StatsAggregator {
- public:
-  void Process(int value) override;
+  class Min : public StatsAggregator {
+   public:
+    void Process(int value) override;
 
-  void PrintValue(std::ostream &out) const override;
+    void PrintValue(std::ostream &out) const override;
 
- private:
-  // Ранее мы не рассматривали шаблон std::optional. О нём можно почитать в
-  // документации https://en.cppreference.com/w/cpp/utility/optional. Кроме
-  // того, ему будет уделено внимание в разделе про функции
-  std::optional<int> current_min;
-};
+   private:
+    // Ранее мы не рассматривали шаблон std::optional. О нём можно почитать в
+    // документации https://en.cppreference.com/w/cpp/utility/optional. Кроме
+    // того, ему будет уделено внимание в разделе про функции
+    std::optional<int> current_min;
+  };
 
-class Max : public StatsAggregator {
- public:
-  void Process(int value) override;
+  class Max : public StatsAggregator {
+   public:
+    void Process(int value) override;
 
-  void PrintValue(std::ostream &out) const override;
+    void PrintValue(std::ostream &out) const override;
 
- private:
-  std::optional<int> current_max;
-};
+   private:
+    std::optional<int> current_max;
+  };
 
-class Average : public StatsAggregator {
- public:
-  void Process(int value) override;
+  class Average : public StatsAggregator {
+   public:
+    void Process(int value) override;
 
-  void PrintValue(std::ostream &out) const override;
+    void PrintValue(std::ostream &out) const override;
 
- private:
-  int sum = 0;
-  int total = 0;
-};
+   private:
+    int sum = 0;
+    int total = 0;
+  };
 
-class Mode : public StatsAggregator {
- public:
-  void Process(int value) override;
+  class Mode : public StatsAggregator {
+   public:
+    void Process(int value) override;
 
-  void PrintValue(std::ostream &out) const override;
+    void PrintValue(std::ostream &out) const override;
 
- private:
-  std::unordered_map<int, int> count;
-  std::optional<int> mode;
-};
+   private:
+    std::unordered_map<int, int> count;
+    std::optional<int> mode;
+  };
 
-class Composite : public StatsAggregator {
- public:
-  void Process(int value) override;
+  class Composite : public StatsAggregator {
+   public:
+    void Process(int value) override;
 
-  void PrintValue(std::ostream &output) const override;
+    void PrintValue(std::ostream &output) const override;
 
-  void Add(std::unique_ptr<StatsAggregator> aggr);
+    void Add(std::unique_ptr<StatsAggregator> aggr);
 
- private:
-  std::vector<std::unique_ptr<StatsAggregator>> aggregators;
-};
+   private:
+    std::vector<std::unique_ptr<StatsAggregator>> aggregators;
+  };
 
-void TestSum();
-void TestMin();
-void TestMax();
-void TestAverage();
-void TestMode();
-void TestComposite();
+  void TestSum();
+  void TestMin();
+  void TestMax();
+  void TestAverage();
+  void TestMode();
+  void TestComposite();
 
 }  // namespace StatsAggregators

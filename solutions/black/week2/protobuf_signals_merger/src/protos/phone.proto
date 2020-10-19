@@ -4,10 +4,7 @@ package YellowPages;
 
 message Phone {
   string formatted = 1;
-  enum Type {
-    PHONE = 0;
-    FAX = 1;
-  }
+  enum Type { PHONE = 0; FAX = 1; }
   Type type = 2;
   string country_code = 3;
   string local_code = 4;

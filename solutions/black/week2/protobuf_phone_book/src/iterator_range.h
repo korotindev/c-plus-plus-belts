@@ -4,23 +4,16 @@
 
 template <typename It>
 class IteratorRange {
-public:
-  IteratorRange(It first, It last) : first(first), last(last) {
-  }
+ public:
+  IteratorRange(It first, It last) : first(first), last(last) {}
 
-  It begin() const {
-    return first;
-  }
+  It begin() const { return first; }
 
-  It end() const {
-    return last;
-  }
+  It end() const { return last; }
 
-  size_t size() const {
-    return last - first;
-  }
+  size_t size() const { return last - first; }
 
-private:
+ private:
   It first, last;
 };
 

@@ -1,9 +1,7 @@
 #include "nucleotide.h"
 #include "test_runner.h"
 
-void TestSize() {
-  ASSERT(sizeof(CompactNucleotide) <= 8);
-}
+void TestSize() { ASSERT(sizeof(CompactNucleotide) <= 8); }
 
 void TestCompressDecompress() {
   Nucleotide source;

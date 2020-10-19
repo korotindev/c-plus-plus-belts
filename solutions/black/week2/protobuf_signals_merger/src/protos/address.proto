@@ -4,13 +4,7 @@ package YellowPages;
 
 message AddressComponent {
   string value = 1;
-  enum Type {
-    COUNTRY = 0;
-    REGION = 1;
-    CITY = 2;
-    STREET = 3;
-    HOUSE = 4;
-  }
+  enum Type { COUNTRY = 0; REGION = 1; CITY = 2; STREET = 3; HOUSE = 4; }
 }
 
 message Coords {

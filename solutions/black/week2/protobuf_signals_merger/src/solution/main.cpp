@@ -1,16 +1,15 @@
-#include "yellow_pages.h"
-
-#include "test_runner.h"
-
 #include <algorithm>
 #include <utility>
+
+#include "test_runner.h"
+#include "yellow_pages.h"
 
 using namespace YellowPages;
 using namespace std;
 
 Signals GenerateSignals() {
   Signals signals;
-  { // Сигнал №1 с адресом, названием и двумя телефонами
+  {  // Сигнал №1 с адресом, названием и двумя телефонами
     Signal signal;
     signal.set_provider_id(31415);
     auto& company = *signal.mutable_company();
@@ -45,11 +44,11 @@ Signals GenerateSignals() {
     signals.push_back(move(signal));
   }
 
-  { // Сигнал №2 с названием, двумя телефонами и временем работы
+  {  // Сигнал №2 с названием, двумя телефонами и временем работы
     Signal signal;
-    signal.set_provider_id(271828); // у этого поставщика будет такой же приоритет, как и в первом сигнале
+    signal.set_provider_id(271828);  // у этого поставщика будет такой же приоритет, как и в первом сигнале
     auto& company = *signal.mutable_company();
-    { // такое же название, как в первом сигнале
+    {  // такое же название, как в первом сигнале
       auto& name = *company.add_names();
       name.set_value("Рога и копыта");
       name.set_type(Name::MAIN);
@@ -63,7 +62,7 @@ Signals GenerateSignals() {
       phone.set_number("4444444");
       phone.set_extension("44");
     }
-    { // этот телефон такой же, как в первом сигнале
+    {  // этот телефон такой же, как в первом сигнале
       auto& phone = *company.add_phones();
       phone.set_formatted("+7 (555) 765-43-21");
       phone.set_type(Phone::FAX);
@@ -88,7 +87,7 @@ Signals GenerateSignals() {
     signals.push_back(move(signal));
   }
 
-  { // Сигнал №3 с адресом, названием и двумя сайтами
+  {  // Сигнал №3 с адресом, названием и двумя сайтами
     Signal signal;
     signal.set_provider_id(100500);  // этот поставщик будет менее приоритетным, чем два предыдущих
     auto& company = *signal.mutable_company();
@@ -108,16 +107,13 @@ Signals GenerateSignals() {
 }
 
 template <typename Message>
-bool operator == (const Message& m1, const Message& m2) {
+bool operator==(const Message& m1, const Message& m2) {
   return m1.SerializeAsString() == m2.SerializeAsString();
 }
 
 template <typename Messages, typename Message>
 bool Contains(const Messages& ms, const Message& m) {
-  auto it = find_if(
-    ms.begin(), ms.end(),
-    [&m](const auto& item) { return item == m; }
-  );
+  auto it = find_if(ms.begin(), ms.end(), [&m](const auto& item) { return item == m; });
   return it != ms.end();
 }
 

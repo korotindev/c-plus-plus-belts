@@ -2,6 +2,4 @@ syntax = "proto3";
 
 package YellowPages;
 
-message Company {
-  string name = 1;
-}
+message Company { string name = 1; }
