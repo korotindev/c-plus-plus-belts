@@ -77,7 +77,6 @@ namespace Ast {
     return ObjectHolder::None();
   }
 
-
   void Print::SetOutputStream(ostream& output_stream) { output = &output_stream; }
 
   MethodCall::MethodCall(std::unique_ptr<Statement> object, std::string method,
@@ -86,12 +85,19 @@ namespace Ast {
 
   ObjectHolder MethodCall::Execute(Closure& closure) {
     // TODO: check obj for nullptr
-    auto obj = object->Execute(closure).TryAs<Runtime::ClassInstance>();
+    auto obj_oh = object->Execute(closure);
+    auto obj_ptr = obj_oh.TryAs<Runtime::ClassInstance>();
+    if (!obj_ptr) {
+      ostringstream err_msg;
+      obj_oh->Print(err_msg);
+      err_msg << " is not an object";
+      throw Runtime::Error(err_msg.str());
+    }
     vector<Runtime::ObjectHolder> computed_args;
     transform(args.begin(), args.end(), back_inserter(computed_args),
               [&closure](unique_ptr<Statement>& arg) { return arg->Execute(closure); });
 
-    return obj->Call(method, computed_args);
+    return obj_ptr->Call(method, computed_args);
   }
 
   ObjectHolder Stringify::Execute(Closure& closure) {
@@ -106,11 +112,19 @@ namespace Ast {
     auto rhs_oh = rhs->Execute(closure);
     if (auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>()) {
       auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
-      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+      if (lhs_ptr && rhs_ptr) {
+        return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+      } else {
+        throw Runtime::Error("bad addition");
+      }
     } else {
       auto lhs_ptr_str = lhs_oh.TryAs<Runtime::String>();
       auto rhs_ptr_str = rhs_oh.TryAs<Runtime::String>();
-      return ObjectHolder::Own(Runtime::String(lhs_ptr_str->GetValue() + rhs_ptr_str->GetValue()));
+      if (lhs_ptr_str && lhs_ptr_str) {
+        return ObjectHolder::Own(Runtime::String(lhs_ptr_str->GetValue() + rhs_ptr_str->GetValue()));
+      } else {
+        throw Runtime::Error("bad addition");
+      }
     }
   }
 
@@ -119,6 +133,11 @@ namespace Ast {
     auto rhs_oh = rhs->Execute(closure);
     auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
     auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
+    if (lhs_ptr && rhs_ptr) {
+      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+    } else {
+      throw Runtime::Error("bad addition");
+    }
     return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() - rhs_ptr->GetValue()));
   }
 
@@ -127,6 +146,11 @@ namespace Ast {
     auto rhs_oh = rhs->Execute(closure);
     auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
     auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
+    if (lhs_ptr && rhs_ptr) {
+      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+    } else {
+      throw Runtime::Error("bad addition");
+    }
     return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() * rhs_ptr->GetValue()));
   }
 
@@ -135,6 +159,11 @@ namespace Ast {
     auto rhs_oh = rhs->Execute(closure);
     auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
     auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
+    if (lhs_ptr && rhs_ptr) {
+      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+    } else {
+      throw Runtime::Error("bad addition");
+    }
     return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() / rhs_ptr->GetValue()));
   }
 
@@ -155,9 +184,7 @@ namespace Ast {
 
   ClassDefinition::ClassDefinition(ObjectHolder class_) : class_(class_) {}
 
-  ObjectHolder ClassDefinition::Execute(Runtime::Closure& closure) {
-
-  }
+  ObjectHolder ClassDefinition::Execute(Runtime::Closure& closure) {}
 
   FieldAssignment::FieldAssignment(VariableValue object, std::string field_name, std::unique_ptr<Statement> rv)
       : object(std::move(object)), field_name(std::move(field_name)), right_value(std::move(rv)) {}
@@ -192,9 +219,8 @@ namespace Ast {
   ObjectHolder NewInstance::Execute(Runtime::Closure& closure) {
     auto instance = Runtime::ClassInstance(class_);
     vector<ObjectHolder> computed_args;
-    transform(args.begin(), args.end(), back_inserter(computed_args), [&closure](auto &arg){
-      return arg->Execute(closure);
-    });
+    transform(args.begin(), args.end(), back_inserter(computed_args),
+              [&closure](auto& arg) { return arg->Execute(closure); });
     instance.Call("__init__", computed_args);
     return ObjectHolder::Own(move(instance));
   }
