@@ -175,7 +175,7 @@ namespace Ast {
     for (auto& statement : statements) {
       auto result_holder = statement->Execute(closure);
       if (result_holder) {
-        if (typeid(statement.get()) == typeid(Ast::Return*)) {
+        if (dynamic_cast<Ast::Return*>(statement.get())) {
           return result_holder;
         }
       }

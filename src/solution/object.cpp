@@ -11,7 +11,10 @@ namespace Runtime {
 
   void ClassInstance::Print(std::ostream& os) {
     if (HasMethod("__str__", 0)) {
-      Call("__str__", {})->Print(os);
+      auto res_oh = Call("__str__", {});
+      if (res_oh) {
+        res_oh->Print(os);
+      }
     } else {
       os << this;
     }
