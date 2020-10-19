@@ -152,7 +152,7 @@ namespace Ast {
     auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
     auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
     if (lhs_ptr && rhs_ptr) {
-      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() - rhs_ptr->GetValue()));
     } else {
       throw Runtime::Error("bad addition");
     }
@@ -165,7 +165,7 @@ namespace Ast {
     auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
     auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
     if (lhs_ptr && rhs_ptr) {
-      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() * rhs_ptr->GetValue()));
     } else {
       throw Runtime::Error("bad addition");
     }
@@ -178,7 +178,7 @@ namespace Ast {
     auto lhs_ptr = lhs_oh.TryAs<Runtime::Number>();
     auto rhs_ptr = rhs_oh.TryAs<Runtime::Number>();
     if (lhs_ptr && rhs_ptr) {
-      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() + rhs_ptr->GetValue()));
+      return ObjectHolder::Own(Runtime::Number(lhs_ptr->GetValue() / rhs_ptr->GetValue()));
     } else {
       throw Runtime::Error("bad addition");
     }
