@@ -58,15 +58,20 @@ namespace Ast {
   Print::Print(vector<unique_ptr<Statement>> args) : args(move(args)) {}
 
   ObjectHolder Print::Execute(Closure& closure) {
+    bool first = true;
     for (auto& arg : args) {
+      if (!first) {
+        *output << " ";
+      }
       ObjectHolder oh = arg->Execute(closure);
       if (oh) {
         oh->Print(*output);
       } else {
         *output << "None";
       }
-      *output << " ";
+      first = false;
     }
+    *output << '\n';
     return ObjectHolder::None();
   }
 
@@ -153,8 +158,7 @@ namespace Ast {
     // TODO: Check for nullptr
     auto instance_ptr = object.Execute(closure).TryAs<Runtime::ClassInstance>();
     instance_ptr->Fields()[field_name] = right_value->Execute(closure);
-    // FIXME: What should I return ?
-    return ObjectHolder::None();
+    return instance_ptr->Fields()[field_name];
   }
 
   IfElse::IfElse(std::unique_ptr<Statement> condition, std::unique_ptr<Statement> if_body,
