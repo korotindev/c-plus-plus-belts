@@ -9,12 +9,9 @@ mkdir -p ./build
 cd ./build
 cmake ..
 cmake --build . -j $(nproc)
-ctest
 ```
 
-build/bin/executor_runner - app runner
-build/lib/libexecutor.a - static lib for tests
-build/bin/tests_runner - tests runner
+take a look at `./app/build/bin folder`
 
 # Notes 
 For VSCode you can take a look at `.vscode` and `.devcontainer` folders`
