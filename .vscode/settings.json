@@ -66,7 +66,7 @@
         "charconv": "cpp"
     },
     "search.exclude": {
-        "**/solutions": true,
+        "solutions/**": true,
     },
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 500,

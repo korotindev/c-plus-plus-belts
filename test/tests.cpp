@@ -16,9 +16,9 @@
 
 using namespace std;
 
-void TestIntegrationGenerator(const string &testDataFolderName) {
-  auto input = ifstream("samples/" + testDataFolderName + "/input.json");
-  auto expectedOutput = ifstream("samples/" + testDataFolderName + "/expected_output.json");
+void TestIntegration(const string &testDataFolderName) {
+  auto input = ifstream(testDataFolderName + "/input.json");
+  auto expectedOutput = ifstream(testDataFolderName + "/expected_output.json");
 
   const auto input_doc = Json::Load(input);
   const auto &input_map = input_doc.GetRoot().AsMap();
@@ -30,15 +30,7 @@ void TestIntegrationGenerator(const string &testDataFolderName) {
 
   cout << output.str();
 
-  // Json::Document resultDocument = Json::Load(output);
-  // Json::Document expectedDocument = Json::Load(expectedOutput);
-  // ASSERT_EQUAL(resultDocument, expectedDocument);
+  Json::Document resultDocument = Json::Load(output);
+  Json::Document expectedDocument = Json::Load(expectedOutput);
+  ASSERT_EQUAL(resultDocument, expectedDocument);
 }
-
-void TestIntegrationTest1() { TestIntegrationGenerator("test1"); }
-
-void TestIntegrationTest2() { TestIntegrationGenerator("test2"); }
-
-void TestIntegrationTest3() { TestIntegrationGenerator("test3"); }
-
-void TestIntegrationTest4() { TestIntegrationGenerator("test4"); }

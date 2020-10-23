@@ -17,7 +17,7 @@ add_subdirectory(./test)
 include (cmake/clang-format.cmake)
 
 
-# if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
-#   add_compile_options(-g -fsanitize=address,undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls)
-#   add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC _GLIBCXX_ASSERTIONS _GLIBCXX_SANITIZE_VECTOR)
-# endif (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+  add_compile_options(-g -fsanitize=address,undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+  add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC _GLIBCXX_ASSERTIONS _GLIBCXX_SANITIZE_VECTOR)
+endif (CMAKE_BUILD_TYPE EQUAL "DEBUG")
