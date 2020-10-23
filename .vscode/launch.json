@@ -43,5 +43,26 @@
             "preLaunchTask": "Build",
             "envFile": "${workspaceFolder}/debug.env"
         },
+        {
+            "name": "(gdb) Launch Playground",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/playground",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/bin",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build",
+            "envFile": "${workspaceFolder}/debug.env"
+        },
     ]
 }
