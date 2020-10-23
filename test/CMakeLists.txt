@@ -1,3 +1,5 @@
+enable_testing()
+
 file(GLOB_RECURSE TEST_SRCS "*.h" "*.cpp")
 
 add_executable(belts-unit-tests ${TEST_SRCS})
