@@ -20,6 +20,7 @@ namespace Descriptions {
   };
 
   int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
+  bool IsStopsCollide(const Stop& lhs, const Stop& rhs);
 
   struct Bus {
     std::string name;

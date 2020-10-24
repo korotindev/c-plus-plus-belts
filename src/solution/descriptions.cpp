@@ -44,6 +44,10 @@ namespace Descriptions {
     }
   }
 
+  bool IsStopsCollide(const Stop& lhs, const Stop& rhs) {
+    return lhs.distances.contains(rhs.name) || rhs.distances.contains(lhs.name);
+  }
+
   Bus Bus::ParseFrom(const Json::Dict& attrs) {
     const auto& name = attrs.at("name").AsString();
     const auto& stops = attrs.at("stops").AsArray();

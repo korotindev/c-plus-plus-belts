@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "descriptions.h"
 #include "sphere.h"
 #include "svg.h"
 #include "utils.h"
@@ -14,7 +15,7 @@ namespace Sphere {
 
   class Projector {
    public:
-    Projector(std::vector<Point> &points, double max_width, double max_height, double padding);
+    Projector(const Descriptions::StopsDict& stops_dict, double max_width, double max_height, double padding);
 
     Svg::Point operator()(Point point) const;
 
@@ -23,7 +24,7 @@ namespace Sphere {
     double x_step;
     double y_step;
     double max_height;
-    std::unordered_map<double, double> longitude_to_idx;
-    std::unordered_map<double, double> latitude_to_idx;
+    std::unordered_map<double, size_t> longitude_to_group_id;
+    std::unordered_map<double, size_t> latitude_to_group_id;
   };
 }  // namespace Sphere
