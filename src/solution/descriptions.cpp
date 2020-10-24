@@ -45,7 +45,7 @@ namespace Descriptions {
   }
 
   bool IsStopsCollide(const Stop& lhs, const Stop& rhs) {
-    return lhs.distances.contains(rhs.name) || rhs.distances.contains(lhs.name);
+    return lhs.distances.count(rhs.name) || rhs.distances.count(lhs.name);
   }
 
   Bus Bus::ParseFrom(const Json::Dict& attrs) {
