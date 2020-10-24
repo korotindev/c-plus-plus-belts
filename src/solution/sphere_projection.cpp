@@ -29,7 +29,7 @@ namespace Sphere {
 
       for (size_t i = 1; i < stops.size(); i++) {
         const Descriptions::Stop *stop = stops[i];
-        if (!HasShortPath(stop, group)) {
+        if (HasShortPath(stop, group)) {
           SaveCollidedGroup(group, group_idx++, saver);
           group.clear();
         }
