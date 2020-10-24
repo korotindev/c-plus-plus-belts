@@ -5,7 +5,7 @@
     },
     "render_settings": {
         "width": 1200,
-        "height": 1200,
+        "height": 500,
         "padding": 50,
         "stop_radius": 5,
         "line_width": 14,
@@ -14,7 +14,7 @@
             7,
             15
         ],
-        "stop_label_font_size": 20,
+        "stop_label_font_size": 18,
         "stop_label_offset": [
             7,
             -3
@@ -34,6 +34,12 @@
                 0
             ],
             "red"
+        ],
+        "layers": [
+            "bus_lines",
+            "bus_labels",
+            "stop_points",
+            "stop_labels"
         ]
     },
     "base_requests": [

@@ -72,7 +72,7 @@ static map<string, Svg::Point> ComputeStopsCoords(const Descriptions::StopsDict&
   const double max_height = render_settings.max_height;
   const double padding = render_settings.padding;
 
-  const Sphere::Projector projector(begin(points), end(points), max_width, max_height, padding);
+  const Sphere::Projector projector(points, max_width, max_height, padding);
 
   map<string, Svg::Point> stops_coords;
   for (const auto& [stop_name, stop_ptr] : stops_dict) {
