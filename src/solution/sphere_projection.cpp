@@ -8,10 +8,15 @@ namespace Sphere {
       return;
     }
 
-    double distances_count = static_cast<double>(points.size() - 1);
+    if (points.size() > 1) {
+      const size_t distances_count = static_cast<double>(points.size() - 1);
 
-    x_step = (max_width - 2 * padding) / distances_count;
-    y_step = (max_height - 2 * padding) / distances_count;
+      x_step = (max_width - 2 * padding) / static_cast<double>(distances_count);
+      y_step = (max_height - 2 * padding) / static_cast<double>(distances_count);
+    } else {
+      x_step = 0;
+      y_step = 0;
+    }
 
     sort(points.begin(), points.end(),
          [](const Point &lhs, const Point &rhs) { return lhs.longitude < rhs.longitude; });
@@ -34,10 +39,8 @@ namespace Sphere {
   }
 
   Svg::Point Projector::operator()(Point point) const {
-    return {
-        longitude_to_idx.at(point.longitude) * x_step + padding_,
-        max_height - padding_ -latitude_to_idx.at(point.latitude) * y_step
-    };
+    return {longitude_to_idx.at(point.longitude) * x_step + padding_,
+            max_height - padding_ - latitude_to_idx.at(point.latitude) * y_step};
   }
 
 }  // namespace Sphere
