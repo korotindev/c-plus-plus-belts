@@ -80,8 +80,8 @@ namespace Sphere {
   }
 
   Svg::Point Projector::operator()(Point point) const {
-    double x_zoom = static_cast<double>(longitude_to_group_id.at(point.longitude));
-    double y_zoom = static_cast<double>(latitude_to_group_id.at(point.latitude));
+    const double x_zoom = static_cast<double>(longitude_to_group_id.at(point.longitude));
+    const double y_zoom = static_cast<double>(latitude_to_group_id.at(point.latitude));
     return {x_zoom * x_step + padding_, max_height - padding_ - y_zoom * y_step};
   }
 
