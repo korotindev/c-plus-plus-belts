@@ -51,7 +51,20 @@ namespace Json {
 
   Node LoadString(istream& input) {
     string line;
-    getline(input, line, '"');
+    string part;
+    getline(input, part, '"');
+
+    if (part.back() != '\\') {
+      line = move(part);
+    } else {
+      while (input && part.back() == '\\') {
+        part.back() = '"';
+        line += part;
+        getline(input, part, '"');
+      }
+      line += part;
+    }
+
     return Node(move(line));
   }
 
@@ -145,18 +158,17 @@ namespace Json {
 
   void Print(const Document& document, ostream& output) { PrintNode(document.GetRoot(), output); }
 
-
-   template <>
-  void PrintValue<Document>(const Document &doc, std::ostream &output) {
+  template <>
+  void PrintValue<Document>(const Document& doc, std::ostream& output) {
     PrintNode(doc.GetRoot(), output);
   }
 
-  std::ostream &operator<<(std::ostream &output, const Document &rhs) {
+  std::ostream& operator<<(std::ostream& output, const Document& rhs) {
     PrintValue(rhs, output);
     return output;
   }
 
-  bool operator==(const Document &lhs, const Document &rhs) {
+  bool operator==(const Document& lhs, const Document& rhs) {
     stringstream output_lhs, output_rhs;
     PrintValue(lhs, output_lhs);
     PrintValue(rhs, output_rhs);
