@@ -1,4 +1,4 @@
-#include "tests.h"
+#include "integration_tests.h"
 
 #include <fstream>
 #include <iostream>

@@ -211,6 +211,7 @@ namespace RenderingTests {
       assert_projector_mapping(projector, stops[2], Svg::Point{.x = 1, .y = 1});
       assert_projector_mapping(projector, stops[3], Svg::Point{.x = 0, .y = 0});
       assert_projector_mapping(projector, stops[4], Svg::Point{.x = 2, .y = 0});
+      // all of points now forms a square with point in the middle
     }
   }  // namespace HasCollissions
 
