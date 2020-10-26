@@ -6,6 +6,7 @@
 #include <optional>
 #include <sstream>
 #include <unordered_map>
+#include <iomanip>
 
 #include "map_renderer.h"
 #include "utils.h"

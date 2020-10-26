@@ -2,9 +2,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "tests.h"
-#include "test_runner.h"
+#include "integration_tests.h"
 #include "rendering_tests.h"
+#include "test_runner.h"
 
 using namespace std;
 

@@ -17,6 +17,11 @@
         ],
         "width": 1500,
         "stop_label_font_size": 13,
+        "bus_label_font_size": 18,
+        "bus_label_offset": [
+            7,
+            15
+        ],
         "padding": 50,
         "color_palette": [
             "red",
@@ -29,26 +34,32 @@
             7,
             -3
         ],
-        "line_width": 10
+        "line_width": 10,
+        "layers": [
+            "bus_lines",
+            "bus_labels",
+            "stop_points",
+            "stop_labels"
+        ]
     },
     "base_requests": [
         {
             "stops": [
-                "Sanatorij Saljut",
-                "Sanatornaja ulica",
-                "Pansionat Neva",
-                "Sanatorij Raduga",
-                "Sanatorij Rodina",
-                "Sportivnaja",
-                "Park Riv'era",
-                "Morskoj vokzal",
-                "Organnyj zal",
-                "Teatral'naja",
-                "Pansionat Svetlana",
-                "Cirk",
-                "Stadion",
-                "Sanatorij Metallurg",
-                "Ulica Bytha"
+                "Санаторий Салют",
+                "Санаторная улица",
+                "Пансионат Нева",
+                "Санаторий Радуга",
+                "Санаторий Родина",
+                "Спортивная",
+                "Парк Ривьера",
+                "Морской вокзал",
+                "Органный зал",
+                "Театральная",
+                "Пансионат Светлана",
+                "Цирк",
+                "Стадион",
+                "Санаторий Металлург",
+                "Улица Бытха"
             ],
             "name": "23",
             "type": "Bus",
@@ -56,10 +67,10 @@
         },
         {
             "stops": [
-                "Ulica Lizy Chajkinoj",
-                "Pionerskaja ulica, 111",
-                "Sadovaja",
-                "Teatral'naja"
+                "Улица Лизы Чайкиной",
+                "Пионерская улица, 111",
+                "Садовая",
+                "Театральная"
             ],
             "name": "13",
             "type": "Bus",
@@ -67,18 +78,18 @@
         },
         {
             "stops": [
-                "Morskoj vokzal",
-                "Sberbank",
-                "Avtovokzal",
-                "Otel' Zvjozdnyj",
-                "Magazin Byt",
-                "Hlebozavod",
-                "Kinoteatr Jubilejnyj",
-                "Novaja Zarja",
-                "Derevoobr. kombinat",
-                "Celinnaja ulica, 5",
-                "Celinnaja ulica, 57",
-                "Celinnaja ulica"
+                "Морской вокзал",
+                "Сбербанк",
+                "Автовокзал",
+                "Отель Звёздный",
+                "Магазин Быт",
+                "Хлебозавод",
+                "Кинотеатр Юбилейный",
+                "Новая Заря",
+                "Деревообр. комбинат",
+                "Целинная улица, 5",
+                "Целинная улица, 57",
+                "Целинная улица"
             ],
             "name": "36",
             "type": "Bus",
@@ -86,355 +97,355 @@
         },
         {
             "stops": [
-                "Pansionat Svetlana",
-                "Ulica Lysaja Gora",
-                "Ulica V. Lysaja Gora"
+                "Пансионат Светлана",
+                "Улица Лысая Гора",
+                "Улица В. Лысая Гора"
             ],
-            "name": "44k",
+            "name": "44к",
             "type": "Bus",
             "is_roundtrip": false
         },
         {
             "stops": [
-                "Kraevo-Grecheskaja ulica",
-                "Ulica Bytha",
-                "Sanatorij im. Voroshilova",
-                "Sanatorij Primor'e",
-                "Sanatorij Zarja",
-                "Macesta",
-                "Macestinskaja dolina"
+                "Краево-Греческая улица",
+                "Улица Бытха",
+                "Санаторий им. Ворошилова",
+                "Санаторий Приморье",
+                "Санаторий Заря",
+                "Мацеста",
+                "Мацестинская долина"
             ],
             "name": "90",
             "type": "Bus",
             "is_roundtrip": false
         },
         {
-            "name": "Kraevo-Grecheskaja ulica",
+            "name": "Краево-Греческая улица",
             "latitude": 43.565551,
             "type": "Stop",
             "longitude": 39.776858,
             "road_distances": {
-                "Ulica Bytha": 1780
+                "Улица Бытха": 1780
             }
         },
         {
-            "name": "Sanatorij im. Voroshilova",
+            "name": "Санаторий им. Ворошилова",
             "latitude": 43.557935,
             "type": "Stop",
             "longitude": 39.764452,
             "road_distances": {
-                "Sanatorij Primor'e": 950
+                "Санаторий Приморье": 950
             }
         },
         {
-            "name": "Sanatorij Primor'e",
+            "name": "Санаторий Приморье",
             "latitude": 43.554202,
             "type": "Stop",
             "longitude": 39.77256,
             "road_distances": {
-                "Sanatorij Zarja": 2350
+                "Санаторий Заря": 2350
             }
         },
         {
-            "name": "Sanatorij Zarja",
+            "name": "Санаторий Заря",
             "latitude": 43.549618,
             "type": "Stop",
             "longitude": 39.780908,
             "road_distances": {
-                "Macesta": 800
+                "Мацеста": 800
             }
         },
         {
-            "name": "Macesta",
+            "name": "Мацеста",
             "latitude": 43.545509,
             "type": "Stop",
             "longitude": 39.788993,
             "road_distances": {
-                "Macestinskaja dolina": 2350
+                "Мацестинская долина": 2350
             }
         },
         {
-            "name": "Macestinskaja dolina",
+            "name": "Мацестинская долина",
             "latitude": 43.560422,
             "type": "Stop",
             "longitude": 39.798219,
             "road_distances": {}
         },
         {
-            "name": "Ulica Lysaja Gora",
+            "name": "Улица Лысая Гора",
             "latitude": 43.577997,
             "type": "Stop",
             "longitude": 39.741685,
             "road_distances": {
-                "Ulica V. Lysaja Gora": 640
+                "Улица В. Лысая Гора": 640
             }
         },
         {
-            "name": "Ulica V. Lysaja Gora",
+            "name": "Улица В. Лысая Гора",
             "latitude": 43.58092,
             "type": "Stop",
             "longitude": 39.744749,
             "road_distances": {}
         },
         {
-            "name": "Morskoj vokzal",
+            "name": "Морской вокзал",
             "latitude": 43.581969,
             "type": "Stop",
             "longitude": 39.719848,
             "road_distances": {
-                "Sberbank": 870,
-                "Organnyj zal": 570
+                "Сбербанк": 870,
+                "Органный зал": 570
             }
         },
         {
-            "name": "Sberbank",
+            "name": "Сбербанк",
             "latitude": 43.585969,
             "type": "Stop",
             "longitude": 39.725175,
             "road_distances": {
-                "Avtovokzal": 870
+                "Автовокзал": 870
             }
         },
         {
-            "name": "Avtovokzal",
+            "name": "Автовокзал",
             "latitude": 43.592956,
             "type": "Stop",
             "longitude": 39.727798,
             "road_distances": {
-                "Otel' Zvjozdnyj": 700
+                "Отель Звёздный": 700
             }
         },
         {
-            "name": "Otel' Zvjozdnyj",
+            "name": "Отель Звёздный",
             "latitude": 43.596585,
             "type": "Stop",
             "longitude": 39.721151,
             "road_distances": {
-                "Magazin Byt": 1000
+                "Магазин Быт": 1000
             }
         },
         {
-            "name": "Magazin Byt",
+            "name": "Магазин Быт",
             "latitude": 43.604025,
             "type": "Stop",
             "longitude": 39.724492,
             "road_distances": {
-                "Hlebozavod": 420
+                "Хлебозавод": 420
             }
         },
         {
-            "name": "Hlebozavod",
+            "name": "Хлебозавод",
             "latitude": 43.607364,
             "type": "Stop",
             "longitude": 39.726643,
             "road_distances": {
-                "Kinoteatr Jubilejnyj": 2110
+                "Кинотеатр Юбилейный": 2110
             }
         },
         {
-            "name": "Kinoteatr Jubilejnyj",
+            "name": "Кинотеатр Юбилейный",
             "latitude": 43.623382,
             "type": "Stop",
             "longitude": 39.720626,
             "road_distances": {
-                "Novaja Zarja": 450
+                "Новая Заря": 450
             }
         },
         {
-            "name": "Novaja Zarja",
+            "name": "Новая Заря",
             "latitude": 43.626842,
             "type": "Stop",
             "longitude": 39.717802,
             "road_distances": {
-                "Derevoobr. kombinat": 530
+                "Деревообр. комбинат": 530
             }
         },
         {
-            "name": "Derevoobr. kombinat",
+            "name": "Деревообр. комбинат",
             "latitude": 43.631035,
             "type": "Stop",
             "longitude": 39.714624,
             "road_distances": {
-                "Celinnaja ulica, 5": 840
+                "Целинная улица, 5": 840
             }
         },
         {
-            "name": "Celinnaja ulica, 5",
+            "name": "Целинная улица, 5",
             "latitude": 43.633353,
             "type": "Stop",
             "longitude": 39.710257,
             "road_distances": {
-                "Celinnaja ulica, 57": 1270
+                "Целинная улица, 57": 1270
             }
         },
         {
-            "name": "Celinnaja ulica, 57",
+            "name": "Целинная улица, 57",
             "latitude": 43.640536,
             "type": "Stop",
             "longitude": 39.713253,
             "road_distances": {
-                "Celinnaja ulica": 1050
+                "Целинная улица": 1050
             }
         },
         {
-            "name": "Celinnaja ulica",
+            "name": "Целинная улица",
             "latitude": 43.647968,
             "type": "Stop",
             "longitude": 39.717733,
             "road_distances": {}
         },
         {
-            "name": "Sanatorij Saljut",
+            "name": "Санаторий Салют",
             "latitude": 43.623238,
             "type": "Stop",
             "longitude": 39.704646,
             "road_distances": {
-                "Sanatornaja ulica": 1500
+                "Санаторная улица": 1500
             }
         },
         {
-            "name": "Sanatornaja ulica",
+            "name": "Санаторная улица",
             "latitude": 43.620766,
             "type": "Stop",
             "longitude": 39.719058,
             "road_distances": {
-                "Pansionat Neva": 670
+                "Пансионат Нева": 670
             }
         },
         {
-            "name": "Pansionat Neva",
+            "name": "Пансионат Нева",
             "latitude": 43.614288,
             "type": "Stop",
             "longitude": 39.718674,
             "road_distances": {
-                "Sanatorij Raduga": 520
+                "Санаторий Радуга": 520
             }
         },
         {
-            "name": "Sanatorij Raduga",
+            "name": "Санаторий Радуга",
             "latitude": 43.609951,
             "type": "Stop",
             "longitude": 39.72143,
             "road_distances": {
-                "Sanatorij Rodina": 1190
+                "Санаторий Родина": 1190
             }
         },
         {
-            "name": "Sanatorij Rodina",
+            "name": "Санаторий Родина",
             "latitude": 43.601202,
             "type": "Stop",
             "longitude": 39.715498,
             "road_distances": {
-                "Sportivnaja": 1100
+                "Спортивная": 1100
             }
         },
         {
-            "name": "Sportivnaja",
+            "name": "Спортивная",
             "latitude": 43.593689,
             "type": "Stop",
             "longitude": 39.717642,
             "road_distances": {
-                "Park Riv'era": 640
+                "Парк Ривьера": 640
             }
         },
         {
-            "name": "Park Riv'era",
+            "name": "Парк Ривьера",
             "latitude": 43.588296,
             "type": "Stop",
             "longitude": 39.715956,
             "road_distances": {
-                "Morskoj vokzal": 730
+                "Морской вокзал": 730
             }
         },
         {
-            "name": "Organnyj zal",
+            "name": "Органный зал",
             "latitude": 43.57926,
             "type": "Stop",
             "longitude": 39.725574,
             "road_distances": {
-                "Teatral'naja": 770
+                "Театральная": 770
             }
         },
         {
-            "name": "Pansionat Svetlana",
+            "name": "Пансионат Светлана",
             "latitude": 43.571807,
             "type": "Stop",
             "longitude": 39.735866,
             "road_distances": {
-                "Cirk": 520,
-                "Ulica Lysaja Gora": 1070
+                "Цирк": 520,
+                "Улица Лысая Гора": 1070
             }
         },
         {
-            "name": "Cirk",
+            "name": "Цирк",
             "latitude": 43.569207,
             "type": "Stop",
             "longitude": 39.739869,
             "road_distances": {
-                "Stadion": 860
+                "Стадион": 860
             }
         },
         {
-            "name": "Stadion",
+            "name": "Стадион",
             "latitude": 43.565301,
             "type": "Stop",
             "longitude": 39.749485,
             "road_distances": {
-                "Sanatorij Metallurg": 950
+                "Санаторий Металлург": 950
             }
         },
         {
-            "name": "Sanatorij Metallurg",
+            "name": "Санаторий Металлург",
             "latitude": 43.561005,
             "type": "Stop",
             "longitude": 39.760511,
             "road_distances": {
-                "Ulica Bytha": 900
+                "Улица Бытха": 900
             }
         },
         {
-            "name": "Ulica Bytha",
+            "name": "Улица Бытха",
             "latitude": 43.566135,
             "type": "Stop",
             "longitude": 39.762109,
             "road_distances": {
-                "Sanatorij im. Voroshilova": 1160
+                "Санаторий им. Ворошилова": 1160
             }
         },
         {
-            "name": "Ulica Lizy Chajkinoj",
+            "name": "Улица Лизы Чайкиной",
             "latitude": 43.590317,
             "type": "Stop",
             "longitude": 39.746833,
             "road_distances": {
-                "Pionerskaja ulica, 111": 950
+                "Пионерская улица, 111": 950
             }
         },
         {
-            "name": "Pionerskaja ulica, 111",
+            "name": "Пионерская улица, 111",
             "latitude": 43.587257,
             "type": "Stop",
             "longitude": 39.740325,
             "road_distances": {
-                "Sadovaja": 520
+                "Садовая": 520
             }
         },
         {
-            "name": "Sadovaja",
+            "name": "Садовая",
             "latitude": 43.58395,
             "type": "Stop",
             "longitude": 39.736938,
             "road_distances": {
-                "Teatral'naja": 1300
+                "Театральная": 1300
             }
         },
         {
-            "name": "Teatral'naja",
+            "name": "Театральная",
             "latitude": 43.57471,
             "type": "Stop",
             "longitude": 39.731954,
             "road_distances": {
-                "Pansionat Svetlana": 390
+                "Пансионат Светлана": 390
             }
         }
     ],
