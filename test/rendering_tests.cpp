@@ -159,23 +159,58 @@ namespace RenderingTests {
       const double padding = 0;
       auto projector = build_projector(stops, max_width, max_height, padding);
       assert_projector_mapping(projector, stops[0], Svg::Point{.x = 0, .y = max_height});
-      assert_projector_mapping(projector, stops[1], Svg::Point{.x = 0, .y = max_height}); // collide !
+      assert_projector_mapping(projector, stops[1], Svg::Point{.x = 0, .y = max_height});  // collide !
     }
 
-    void TestStopInOneLine() {
+    void TestTwoStopsInOneGroupInOneLine() {
+      {
+        vector<Descriptions::Stop> stops;
+        stops.emplace_back(Descriptions::Stop{.name = "1", .position = Sphere::Point{1, 1}, .distances = {{"2", 1}}});
+        stops.emplace_back(Descriptions::Stop{.name = "2", .position = Sphere::Point{2, 2}, .distances = {{"3", 1}}});
+        stops.emplace_back(Descriptions::Stop{.name = "3", .position = Sphere::Point{3, 3}, .distances = {{"4", 1}}});
+        stops.emplace_back(Descriptions::Stop{.name = "4", .position = Sphere::Point{4, 2.5}, .distances = {}});
+        const double max_height = 3;
+        const double max_width = 2;
+        const double padding = 0;
+        auto projector = build_projector(stops, max_width, max_height, padding);
+        assert_projector_mapping(projector, stops[0], Svg::Point{.x = 0, .y = max_height});
+        assert_projector_mapping(projector, stops[1], Svg::Point{.x = 1, .y = max_height - 1});
+        assert_projector_mapping(projector, stops[2], Svg::Point{.x = 2, .y = max_height - 2});
+        assert_projector_mapping(projector, stops[3], Svg::Point{.x = 1, .y = max_height - 3});  // collide on x!
+      }
+      {
+        vector<Descriptions::Stop> stops;
+        stops.emplace_back(Descriptions::Stop{.name = "1", .position = Sphere::Point{1, 1}, .distances = {{"2", 1}}});
+        stops.emplace_back(Descriptions::Stop{.name = "2", .position = Sphere::Point{2, 2}, .distances = {{"3", 1}}});
+        stops.emplace_back(Descriptions::Stop{.name = "3", .position = Sphere::Point{3, 3}, .distances = {{"4", 1}}});
+        stops.emplace_back(Descriptions::Stop{.name = "4", .position = Sphere::Point{2, 4}, .distances = {}});
+        const double max_height = 2;
+        const double max_width = 3;
+        const double padding = 0;
+        auto projector = build_projector(stops, max_width, max_height, padding);
+        assert_projector_mapping(projector, stops[0], Svg::Point{.x = 0, .y = max_height});
+        assert_projector_mapping(projector, stops[1], Svg::Point{.x = 1, .y = max_height - 1});
+        assert_projector_mapping(projector, stops[2], Svg::Point{.x = 2, .y = max_height - 2});
+        assert_projector_mapping(projector, stops[3], Svg::Point{.x = 3, .y = max_height - 1});  // collide on y!
+      }
+    }
+
+    void TestTwoCrossedLinesWithStopInTheMiddle() {
       vector<Descriptions::Stop> stops;
-      stops.emplace_back(Descriptions::Stop{.name = "1", .position = Sphere::Point{1, 1}, .distances = {{"2", 1}}});
-      stops.emplace_back(Descriptions::Stop{.name = "2", .position = Sphere::Point{2, 2}, .distances = {{"3", 1}}});
-      stops.emplace_back(Descriptions::Stop{.name = "3", .position = Sphere::Point{3, 3}, .distances = {{"4", 1}}});
-      stops.emplace_back(Descriptions::Stop{.name = "4", .position = Sphere::Point{4, 2.5}, .distances = {}});
-      const double max_width = 3;
-      const double max_height = 2; // smaller then lat
+      stops.emplace_back(Descriptions::Stop{.name = "left down", .position = Sphere::Point{1, 1}, .distances = {{"mid", 1}}});
+      stops.emplace_back(Descriptions::Stop{.name = "right down", .position = Sphere::Point{0, 7}, .distances = {{"mid", 1}}});
+      stops.emplace_back(Descriptions::Stop{.name = "mid", .position = Sphere::Point{3, 3}, .distances = {{"left up", 1}, {"right up", 1}}});
+      stops.emplace_back(Descriptions::Stop{.name = "left up", .position = Sphere::Point{5, 0}, .distances = {}});
+      stops.emplace_back(Descriptions::Stop{.name = "right up", .position = Sphere::Point{7, 5}, .distances = {}});
+      const double max_height = 2;
+      const double max_width = 2;
       const double padding = 0;
       auto projector = build_projector(stops, max_width, max_height, padding);
-      assert_projector_mapping(projector, stops[0], Svg::Point{.x = 0, .y = max_height});
-      assert_projector_mapping(projector, stops[1], Svg::Point{.x = 1, .y = max_height-1});
-      assert_projector_mapping(projector, stops[2], Svg::Point{.x = 2, .y = max_height-2});
-      assert_projector_mapping(projector, stops[3], Svg::Point{.x = 3, .y = max_height-1}); // collide !
+      assert_projector_mapping(projector, stops[0], Svg::Point{.x = 0, .y = 2});
+      assert_projector_mapping(projector, stops[1], Svg::Point{.x = 2, .y = 2});
+      assert_projector_mapping(projector, stops[2], Svg::Point{.x = 1, .y = 1});
+      assert_projector_mapping(projector, stops[3], Svg::Point{.x = 0, .y = 0});
+      assert_projector_mapping(projector, stops[4], Svg::Point{.x = 2, .y = 0});
     }
   }  // namespace HasCollissions
 
@@ -184,7 +219,11 @@ namespace RenderingTests {
     RUN_TEST(tr, NoCollissions::TestOneStop);
   }
 
-  void TestHasColissions(TestRunner &tr) { RUN_TEST(tr, HasCollissions::TestTwoSimpleStops); }
+  void TestHasColissions(TestRunner &tr) {
+    RUN_TEST(tr, HasCollissions::TestTwoSimpleStops);
+    RUN_TEST(tr, HasCollissions::TestTwoStopsInOneGroupInOneLine);
+    RUN_TEST(tr, HasCollissions::TestTwoCrossedLinesWithStopInTheMiddle);
+  }
 
   void TestProjector(TestRunner &tr) {
     TestNoColissions(tr);
