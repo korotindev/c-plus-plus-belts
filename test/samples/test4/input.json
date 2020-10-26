@@ -4,33 +4,42 @@
     "bus_wait_time": 490
   },
   "render_settings": {
-    "width": 1200,
-    "height": 1200,
-    "padding": 50,
-    "stop_radius": 5,
-    "line_width": 14,
-    "stop_label_font_size": 20,
-    "stop_label_offset": [
-      7,
-      -3
-    ],
-    "underlayer_color": [
-      255,
-      255,
-      255,
-      0.85
-    ],
     "underlayer_width": 3,
-    "color_palette": [
-      "green",
-      [
+    "height": 950,
+    "stop_radius": 3,
+    "underlayer_color": [
         255,
-        160,
-        0
-      ],
-      "red"
+        255,
+        255,
+        0.85
+    ],
+    "width": 1500,
+    "stop_label_font_size": 13,
+    "bus_label_font_size": 18,
+    "bus_label_offset": [
+        7,
+        15
+    ],
+    "padding": 50,
+    "color_palette": [
+        "red",
+        "green",
+        "blue",
+        "brown",
+        "orange"
+    ],
+    "stop_label_offset": [
+        7,
+        -3
+    ],
+    "line_width": 10,
+    "layers": [
+        "bus_lines",
+        "bus_labels",
+        "stop_points",
+        "stop_labels"
     ]
-  },
+},
   "base_requests": [
     {
       "type": "Stop",
@@ -5130,14 +5139,6 @@
     }
   ],
   "stat_requests": [
-    {
-      "id": 1218663236,
-      "type": "Map"
-    },
-    {
-      "id": 1218663237,
-      "type": "Map"
-    },
     {
       "type": "Route",
       "id": 1607592307,
