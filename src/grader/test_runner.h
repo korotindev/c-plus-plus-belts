@@ -71,6 +71,22 @@ void AssertEqual(const T &t, const U &u, const std::string &hint = {}) {
   }
 }
 
+template <class T, class U, class DiffT>
+void AssertCompare(const T &t, const U &u, const DiffT &diff, const std::string &hint = {}) {
+  auto res = t - u;
+  if (res < 0) {
+    res *= -1;
+  }
+  if (res > diff) {
+    std::ostringstream os;
+    os << "\n  Assertion failed: \n    abs(" << t << " - " << u << ") = " << res << " > " << diff << "\n";
+    if (!hint.empty()) {
+      os << " hint: " << hint;
+    }
+    throw std::runtime_error(os.str());
+  }
+}
+
 inline void Assert(bool b, const std::string &hint) { AssertEqual(b, true, hint); }
 
 class TestRunner {
@@ -111,6 +127,20 @@ class TestRunner {
     std::ostringstream __assert_equal_private_os;                                            \
     __assert_equal_private_os << #x << " != " << #y << ", " << FILE_NAME << ":" << __LINE__; \
     AssertEqual(x, y, __assert_equal_private_os.str());                                      \
+  }
+
+#define ASSERT_COMPARE(x, y, diff)                                                           \
+  {                                                                                          \
+    std::ostringstream __assert_equal_private_os;                                            \
+    __assert_equal_private_os << #x << " != " << #y << ", " << FILE_NAME << ":" << __LINE__; \
+    AssertCompare(x, y, diff, __assert_equal_private_os.str());                              \
+  }
+
+#define ASSERT_COMPARE_INFO(x, y, diff, hint)                                                                                \
+  {                                                                                                                          \
+    std::ostringstream __assert_equal_private_os;                                                                            \
+    __assert_equal_private_os << #x << " != " << #y << ", " << FILE_NAME << ":" << __LINE__ << " additional info: " << hint; \
+    AssertCompare(x, y, diff, __assert_equal_private_os.str());                                                              \
   }
 
 #define ASSERT(x)                                                               \

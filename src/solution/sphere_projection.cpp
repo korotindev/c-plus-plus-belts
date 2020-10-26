@@ -54,35 +54,38 @@ namespace Sphere {
       stops.push_back(stop_ptr);
     }
 
-    size_t longitude_groups_count = CollideNonClosestStops(
-        stops,
-        [this](const Descriptions::Stop *lhs, const Descriptions::Stop *rhs) {
-          return lhs->position.longitude < rhs->position.longitude;
-        },
-        [this](const Descriptions::Stop *stop, size_t group_id) {
-          this->longitude_to_group_id[stop->position.longitude] = group_id;
-        });
-
-    x_step =
-        longitude_groups_count > 1 ? (max_width - 2 * padding_) / static_cast<double>(longitude_groups_count - 1) : 0;
-
     size_t latitude_groups_count = CollideNonClosestStops(
         stops,
         [this](const Descriptions::Stop *lhs, const Descriptions::Stop *rhs) {
           return lhs->position.latitude < rhs->position.latitude;
         },
         [this](const Descriptions::Stop *stop, size_t group_id) {
-          this->latitude_to_group_id[stop->position.latitude] = group_id;
+          this->stop_groups[stop->name].latitude_group = group_id;
         });
 
     y_step =
         latitude_groups_count > 1 ? (max_height - 2 * padding_) / static_cast<double>(latitude_groups_count - 1) : 0;
+
+    size_t longitude_groups_count = CollideNonClosestStops(
+        stops,
+        [this](const Descriptions::Stop *lhs, const Descriptions::Stop *rhs) {
+          return lhs->position.longitude < rhs->position.longitude;
+        },
+        [this](const Descriptions::Stop *stop, size_t group_id) {
+          this->stop_groups[stop->name].longitude_group = group_id;
+        });
+
+    x_step =
+        longitude_groups_count > 1 ? (max_width - 2 * padding_) / static_cast<double>(longitude_groups_count - 1) : 0;
   }
 
-  Svg::Point Projector::operator()(Point point) const {
-    const double x_zoom = static_cast<double>(longitude_to_group_id.at(point.longitude));
-    const double y_zoom = static_cast<double>(latitude_to_group_id.at(point.latitude));
-    return {x_zoom * x_step + padding_, max_height - padding_ - y_zoom * y_step};
+  Svg::Point Projector::operator()(const Descriptions::Stop *stop) const {
+    const double y_zoom = static_cast<double>(stop_groups.at(stop->name).latitude_group);
+    const double x_zoom = static_cast<double>(stop_groups.at(stop->name).longitude_group);
+    return {
+        .x = x_zoom * x_step + padding_,
+        .y = max_height - padding_ - y_zoom * y_step,
+    };
   }
 
 }  // namespace Sphere

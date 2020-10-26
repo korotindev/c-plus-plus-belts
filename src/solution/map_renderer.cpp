@@ -70,7 +70,7 @@ static map<string, Svg::Point> ComputeStopsCoords(const Descriptions::StopsDict&
 
   map<string, Svg::Point> stops_coords;
   for (const auto& [stop_name, stop_ptr] : stops_dict) {
-    stops_coords[stop_name] = projector(stop_ptr->position);
+    stops_coords[stop_name] = projector(stop_ptr);
   }
 
   return stops_coords;
