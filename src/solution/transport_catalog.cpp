@@ -14,7 +14,8 @@
 using namespace std;
 
 TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
-                                   const Json::Dict& render_settings_json) {
+                                   const Json::Dict& render_settings_json)
+    : transport_info_(make_shared<TransportInfo>()) {
   auto stops_end =
       partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
 
