@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -17,7 +18,7 @@ namespace Sphere {
   class Projector {
    public:
     using StopsCollider =
-        std::function<bool(const Descriptions::Stop* stop_ptr, const std::vector<const Descriptions::Stop*> &group)>;
+        std::function<bool(const Descriptions::Stop* stop_ptr, const std::vector<const Descriptions::Stop*>& group)>;
 
     Projector(const Descriptions::StopsDict& stops_dict, const StopsCollider& collider, double max_width,
               double max_height, double padding);
