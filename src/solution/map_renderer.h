@@ -4,11 +4,13 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #include "descriptions.h"
 #include "json.h"
 #include "sphere_projection.h"
 #include "svg.h"
+#include "transport_info.h"
 
 struct RenderSettings {
   double max_width;
@@ -28,14 +30,17 @@ struct RenderSettings {
 
 class MapRenderer {
  public:
-  MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-              const Json::Dict& render_settings_json, const Sphere::Projector::StopsCollider& collider);
+  MapRenderer(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json);
 
   Svg::Document Render() const;
 
  private:
+  struct StopContainer {
+    const Descriptions::Stop* description_ptr;
+    std::vector<std::string> bus_names;
+  };
   RenderSettings render_settings_;
-  const Descriptions::BusesDict& buses_dict_;
+  std::shared_ptr<const TransportInfo> transport_info_;
   std::map<std::string, Svg::Point> stops_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;
 

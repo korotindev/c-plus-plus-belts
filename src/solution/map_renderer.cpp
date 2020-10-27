@@ -60,44 +60,79 @@ RenderSettings ParseRenderSettings(const Json::Dict& json) {
   return result;
 }
 
-static map<string, Svg::Point> ComputeStopsCoords(const Descriptions::StopsDict& stops_dict,
-                                                  const RenderSettings& render_settings,
-                                                  const Sphere::Projector::StopsCollider& collider) {
+static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo> transport_info,
+                                                  const RenderSettings& render_settings) {
   const double max_width = render_settings.max_width;
   const double max_height = render_settings.max_height;
   const double padding = render_settings.padding;
 
-  const Sphere::Projector projector(stops_dict, collider, max_width, max_height, padding);
+  vector<Sphere::Projector::PointObject> point_objects;
+  point_objects.reserve(transport_info->StopsCount());
+  for (const auto& [name, stop] : transport_info->GetStopsRange()) {
+    point_objects.push_back({name, stop.position});
+  }
+
+  auto stops_collider = [&transport_info](const Sphere::Projector::PointObject& stop_po,
+                                          const vector<const Sphere::Projector::PointObject*>& group) {
+    const TransportInfo::Stop* stop_ptr = transport_info->GetStop(stop_po.id);
+    const auto& bus_names = stop_ptr->bus_names;
+
+    for (const auto other_stop_po : group) {
+      const TransportInfo::Stop* other_stop_ptr = transport_info->GetStop(other_stop_po->id);
+
+      bool has_short_path_forward = stop_ptr->distances.count(other_stop_ptr->name) > 0;
+      bool has_short_path_backward = other_stop_ptr->distances.count(stop_ptr->name) > 0;
+
+      if (has_short_path_forward || has_short_path_backward) {
+        const auto& other_stop_buses = transport_info->GetStop(other_stop_ptr->name)->bus_names;
+
+        for (const auto& bus_name : bus_names) {
+          if (auto it = other_stop_buses.find(bus_name); it != other_stop_buses.cend()) {
+            const auto& stops = transport_info->GetBus(bus_name)->stops;
+
+            for (size_t i = 1; i < stops.size(); ++i) {
+              if ((stops[i] == stop_ptr->name && stops[i - 1] == other_stop_ptr->name) ||
+                  (stops[i] == other_stop_ptr->name && stops[i - 1] == stop_ptr->name)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  const Sphere::Projector projector(point_objects, stops_collider, max_width, max_height, padding);
 
   map<string, Svg::Point> stops_coords;
-  for (const auto& [stop_name, stop_ptr] : stops_dict) {
-    stops_coords[stop_name] = projector(stop_ptr);
+  for (const auto& [name, _] : transport_info->GetStopsRange()) {
+    stops_coords[name] = projector(name);
   }
 
   return stops_coords;
 }
 
-static unordered_map<string, Svg::Color> ChooseBusColors(const Descriptions::BusesDict& buses_dict,
+static unordered_map<string, Svg::Color> ChooseBusColors(shared_ptr<const TransportInfo> transport_info,
                                                          const RenderSettings& render_settings) {
   const auto& palette = render_settings.palette;
   unordered_map<string, Svg::Color> bus_colors;
   size_t idx = 0;
-  for (const auto& [bus_name, bus_ptr] : buses_dict) {
+  for (const auto& [bus_name, bus_ptr] : transport_info->GetBusesRange()) {
     bus_colors[bus_name] = palette[idx++ % palette.size()];
   }
   return bus_colors;
 }
 
-MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-                         const Json::Dict& render_settings_json, const Sphere::Projector::StopsCollider& collider)
+MapRenderer::MapRenderer(shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json)
     : render_settings_(ParseRenderSettings(render_settings_json)),
-      buses_dict_(buses_dict),
-      stops_coords_(ComputeStopsCoords(stops_dict, render_settings_, collider)),
-      bus_colors_(ChooseBusColors(buses_dict, render_settings_)) {}
+      transport_info_(transport_info),
+      stops_coords_(ComputeStopsCoords(transport_info_, render_settings_)),
+      bus_colors_(ChooseBusColors(transport_info_, render_settings_)) {}
 
 void MapRenderer::RenderBusLines(Svg::Document& svg) const {
-  for (const auto& [bus_name, bus_ptr] : buses_dict_) {
-    const auto& stops = bus_ptr->stops;
+  for (const auto& [bus_name, bus] : transport_info_->GetBusesRange()) {
+    const auto& stops = bus.stops;
     if (stops.empty()) {
       continue;
     }
@@ -114,11 +149,11 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
 }
 
 void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
-  for (const auto& [bus_name, bus_ptr] : buses_dict_) {
-    const auto& stops = bus_ptr->stops;
+  for (const auto& [bus_name, bus_ptr] : transport_info_->GetBusesRange()) {
+    const auto& stops = bus_ptr.stops;
     if (!stops.empty()) {
       const auto& color = bus_colors_.at(bus_name);
-      for (const string& endpoint : bus_ptr->endpoints) {
+      for (const string& endpoint : bus_ptr.endpoints) {
         const auto point = stops_coords_.at(endpoint);
         const auto base_text = Svg::Text{}
                                    .SetPoint(point)

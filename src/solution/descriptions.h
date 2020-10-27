@@ -19,8 +19,6 @@ namespace Descriptions {
     static Stop ParseFrom(const Json::Dict& attrs);
   };
 
-  int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
-
   struct Bus {
     std::string name;
     std::vector<std::string> stops;

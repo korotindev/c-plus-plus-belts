@@ -38,6 +38,15 @@ const V* GetValuePointer(const std::unordered_map<K, V>& map, const K& key) {
   }
 }
 
+template <typename K, typename V>
+V* GetValuePointer(std::unordered_map<K, V>& map, const K& key) {
+  if (auto it = map.find(key); it != end(map)) {
+    return &it->second;
+  } else {
+    return nullptr;
+  }
+}
+
 std::string_view Strip(std::string_view line);
 
 bool IsZero(double x);

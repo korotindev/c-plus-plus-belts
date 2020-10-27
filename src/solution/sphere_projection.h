@@ -17,13 +17,18 @@ namespace Sphere {
 
   class Projector {
    public:
-    using StopsCollider =
-        std::function<bool(const Descriptions::Stop* stop_ptr, const std::vector<const Descriptions::Stop*>& group)>;
+    struct PointObject {
+      const std::string id;
+      const Sphere::Point position;
+    };
 
-    Projector(const Descriptions::StopsDict& stops_dict, const StopsCollider& collider, double max_width,
+    using PointObjectsCollider =
+        std::function<bool(const PointObject& object, const std::vector<const PointObject*>& group)>;
+
+    Projector(std::vector<PointObject>& points, const PointObjectsCollider& collider, double max_width,
               double max_height, double padding);
 
-    Svg::Point operator()(const Descriptions::Stop* stop) const;
+    Svg::Point operator()(const std::string& name) const;
 
    private:
     const double padding_;
@@ -31,11 +36,11 @@ namespace Sphere {
     double y_step;
     double max_height;
 
-    struct StopGroup {
+    struct ObjectGroup {
       size_t latitude_group;
       size_t longitude_group;
     };
 
-    std::unordered_map<std::string, StopGroup> stop_groups;
+    std::unordered_map<std::string, ObjectGroup> object_groups;
   };
 }  // namespace Sphere

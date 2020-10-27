@@ -18,39 +18,26 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
   auto stops_end =
       partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
 
-  Descriptions::StopsDict stops_dict;
   for (const auto& item : Range{begin(data), stops_end}) {
     const auto& stop = get<Descriptions::Stop>(item);
-    stops_dict[stop.name] = &stop;
-    stops_.insert({stop.name, {}});
+    transport_info_->AddStop(stop);
   }
 
-  Descriptions::BusesDict buses_dict;
   for (const auto& item : Range{stops_end, end(data)}) {
     const auto& bus = get<Descriptions::Bus>(item);
-
-    buses_dict[bus.name] = &bus;
-    buses_[bus.name] =
-        Bus{bus.stops.size(), ComputeUniqueItemsCount(AsRange(bus.stops)),
-            ComputeRoadRouteLength(bus.stops, stops_dict), ComputeGeoRouteDistance(bus.stops, stops_dict)};
-
-    for (const string& stop_name : bus.stops) {
-      stops_.at(stop_name).bus_names.insert(bus.name);
-    }
+    transport_info_->AddBus(bus);
   }
 
-  router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
+  router_ = make_unique<TransportRouter>(transport_info_, routing_settings_json);
 
-  map_ = BuildMap(stops_dict, buses_dict, render_settings_json);
+  map_ = MapRenderer(transport_info_, render_settings_json).Render();
 }
 
-const TransportCatalog::Stop* TransportCatalog::GetStop(const string& name) const {
-  return GetValuePointer(stops_, name);
+const TransportInfo::Stop* TransportCatalog::GetStop(const string& name) const {
+  return transport_info_->GetStop(name);
 }
 
-const TransportCatalog::Bus* TransportCatalog::GetBus(const string& name) const {
-  return GetValuePointer(buses_, name);
-}
+const TransportInfo::Bus* TransportCatalog::GetBus(const string& name) const { return transport_info_->GetBus(name); }
 
 optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
   return router_->FindRoute(stop_from, stop_to);
@@ -63,55 +50,35 @@ string TransportCatalog::RenderMap() const {
   return out.str();
 }
 
-int TransportCatalog::ComputeRoadRouteLength(const vector<string>& stops, const Descriptions::StopsDict& stops_dict) {
-  int result = 0;
-  for (size_t i = 1; i < stops.size(); ++i) {
-    result += Descriptions::ComputeStopsDistance(*stops_dict.at(stops[i - 1]), *stops_dict.at(stops[i]));
-  }
-  return result;
-}
+// Svg::Document TransportCatalog::BuildMap(shared_ptr<TransportInfo> transport_info_ptr,
+//                                          const Json::Dict& render_settings_json) {
+//   if (stops_dict.empty()) {
+//     return {};
+//   }
 
-double TransportCatalog::ComputeGeoRouteDistance(const vector<string>& stops,
-                                                 const Descriptions::StopsDict& stops_dict) {
-  double result = 0;
-  for (size_t i = 1; i < stops.size(); ++i) {
-    result += Sphere::Distance(stops_dict.at(stops[i - 1])->position, stops_dict.at(stops[i])->position);
-  }
-  return result;
-}
+//   auto stops_collider = [this, &buses_dict](const Descriptions::Stop* stop_ptr,
+//                                             const vector<const Descriptions::Stop*>& group) {
+//     const auto& bus_names = this->GetStop(stop_ptr->name)->bus_names;
 
-Svg::Document TransportCatalog::BuildMap(const Descriptions::StopsDict& stops_dict,
-                                         const Descriptions::BusesDict& buses_dict,
-                                         const Json::Dict& render_settings_json) {
-  if (stops_dict.empty()) {
-    return {};
-  }
+//     for (const auto other_stop_ptr : group) {
+//       bool has_short_path_forward = stop_ptr->distances.count(other_stop_ptr->name) > 0;
+//       bool has_short_path_backward = other_stop_ptr->distances.count(stop_ptr->name) > 0;
 
-  auto stops_collider = [this, &buses_dict](const Descriptions::Stop* stop_ptr,
-                                            const vector<const Descriptions::Stop*>& group) {
-    const auto& bus_names = this->GetStop(stop_ptr->name)->bus_names;
-
-    for (const auto other_stop_ptr : group) {
-      bool has_short_path_forward = stop_ptr->distances.count(other_stop_ptr->name) > 0;
-      bool has_short_path_backward = other_stop_ptr->distances.count(stop_ptr->name) > 0;
-
-      if (has_short_path_forward || has_short_path_backward) {
-        const auto& other_stop_buses = this->GetStop(other_stop_ptr->name)->bus_names;
-        for (const auto& bus_name : bus_names) {
-          if (auto it = other_stop_buses.find(bus_name); it != other_stop_buses.cend()) {
-            const auto& stops = buses_dict.at(bus_name)->stops;
-            for (size_t i = 1; i < stops.size(); ++i) {
-              if ((stops[i] == stop_ptr->name && stops[i - 1] == other_stop_ptr->name) ||
-                  (stops[i] == other_stop_ptr->name && stops[i - 1] == stop_ptr->name)) {
-                return true;
-              }
-            }
-          }
-        }
-      }
-    }
-    return false;
-  };
-
-  return MapRenderer(stops_dict, buses_dict, render_settings_json, stops_collider).Render();
-}
+//       if (has_short_path_forward || has_short_path_backward) {
+//         const auto& other_stop_buses = this->GetStop(other_stop_ptr->name)->bus_names;
+//         for (const auto& bus_name : bus_names) {
+//           if (auto it = other_stop_buses.find(bus_name); it != other_stop_buses.cend()) {
+//             const auto& stops = buses_dict.at(bus_name)->stops;
+//             for (size_t i = 1; i < stops.size(); ++i) {
+//               if ((stops[i] == stop_ptr->name && stops[i - 1] == other_stop_ptr->name) ||
+//                   (stops[i] == other_stop_ptr->name && stops[i - 1] == stop_ptr->name)) {
+//                 return true;
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//     return false;
+//   };
+// }

@@ -2,15 +2,15 @@
 
 using namespace std;
 
-TransportRouter::TransportRouter(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+TransportRouter::TransportRouter(shared_ptr<const TransportInfo> transport_info,
                                  const Json::Dict& routing_settings_json)
     : routing_settings_(MakeRoutingSettings(routing_settings_json)) {
-  const size_t vertex_count = stops_dict.size() * 2;
+  const size_t vertex_count = transport_info->StopsCount() * 2;
   vertices_info_.resize(vertex_count);
   graph_ = BusGraph(vertex_count);
 
-  FillGraphWithStops(stops_dict);
-  FillGraphWithBuses(stops_dict, buses_dict);
+  FillGraphWithStops(transport_info);
+  FillGraphWithBuses(transport_info);
 
   router_ = std::make_unique<Router>(graph_);
 }
@@ -22,10 +22,10 @@ TransportRouter::RoutingSettings TransportRouter::MakeRoutingSettings(const Json
   };
 }
 
-void TransportRouter::FillGraphWithStops(const Descriptions::StopsDict& stops_dict) {
+void TransportRouter::FillGraphWithStops(shared_ptr<const TransportInfo> transport_info) {
   Graph::VertexId vertex_id = 0;
 
-  for (const auto& [stop_name, _] : stops_dict) {
+  for (const auto& [stop_name, _] : transport_info->GetStopsRange()) {
     auto& vertex_ids = stops_vertex_ids_[stop_name];
     vertex_ids.in = vertex_id++;
     vertex_ids.out = vertex_id++;
@@ -41,17 +41,14 @@ void TransportRouter::FillGraphWithStops(const Descriptions::StopsDict& stops_di
   assert(vertex_id == graph_.GetVertexCount());
 }
 
-void TransportRouter::FillGraphWithBuses(const Descriptions::StopsDict& stops_dict,
-                                         const Descriptions::BusesDict& buses_dict) {
-  for (const auto& [_, bus_item] : buses_dict) {
-    const auto& bus = *bus_item;
+void TransportRouter::FillGraphWithBuses(shared_ptr<const TransportInfo> transport_info) {
+  for (const auto& [_, bus] : transport_info->GetBusesRange()) {
     const size_t stop_count = bus.stops.size();
     if (stop_count <= 1) {
       continue;
     }
-    auto compute_distance_from = [&stops_dict, &bus](size_t lhs_idx) {
-      return Descriptions::ComputeStopsDistance(*stops_dict.at(bus.stops[lhs_idx]),
-                                                *stops_dict.at(bus.stops[lhs_idx + 1]));
+    auto compute_distance_from = [&transport_info, &bus](size_t lhs_idx) {
+      return transport_info->ComputeStopsDistance((bus.stops[lhs_idx]), bus.stops[lhs_idx + 1]);
     };
     for (size_t start_stop_idx = 0; start_stop_idx + 1 < stop_count; ++start_stop_idx) {
       const Graph::VertexId start_vertex = stops_vertex_ids_[bus.stops[start_stop_idx]].in;
