@@ -18,8 +18,8 @@ namespace Sphere {
   class Projector {
    public:
     struct PointObject {
-      const std::string id;
-      const Sphere::Point position;
+      std::string id;
+      Sphere::Point position;
     };
 
     using PointObjectsCollider =
@@ -28,7 +28,7 @@ namespace Sphere {
     Projector(std::vector<PointObject>& points, const PointObjectsCollider& collider, double max_width,
               double max_height, double padding);
 
-    Svg::Point operator()(const std::string& name) const;
+    Svg::Point operator()(const std::string &id) const;
 
    private:
     const double padding_;
