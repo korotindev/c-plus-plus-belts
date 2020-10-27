@@ -58,6 +58,7 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
 
 string TransportCatalog::RenderMap() const {
   ostringstream out;
+  out.precision(6);
   map_.Render(out);
   return out.str();
 }
