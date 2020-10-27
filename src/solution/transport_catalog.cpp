@@ -1,12 +1,12 @@
 #include "transport_catalog.h"
 
 #include <algorithm>
+#include <iomanip>
 #include <iterator>
 #include <map>
 #include <optional>
 #include <sstream>
 #include <unordered_map>
-#include <iomanip>
 
 #include "map_renderer.h"
 #include "utils.h"
@@ -86,5 +86,32 @@ Svg::Document TransportCatalog::BuildMap(const Descriptions::StopsDict& stops_di
   if (stops_dict.empty()) {
     return {};
   }
-  return MapRenderer(stops_dict, buses_dict, render_settings_json).Render();
+
+  auto stops_collider = [this, &buses_dict](const Descriptions::Stop* stop_ptr,
+                                            const vector<const Descriptions::Stop*>& group) {
+    const auto& bus_names = this->GetStop(stop_ptr->name)->bus_names;
+
+    for (const auto other_stop_ptr : group) {
+      bool has_short_path_forward = stop_ptr->distances.count(other_stop_ptr->name) > 0;
+      bool has_short_path_backward = other_stop_ptr->distances.count(stop_ptr->name) > 0;
+
+      if (has_short_path_forward || has_short_path_backward) {
+        const auto& other_stop_buses = this->GetStop(other_stop_ptr->name)->bus_names;
+        for (const auto& bus_name : bus_names) {
+          if (auto it = other_stop_buses.find(bus_name); it != other_stop_buses.cend()) {
+            const auto& stops = buses_dict.at(bus_name)->stops;
+            for (size_t i = 1; i < stops.size(); ++i) {
+              if ((stops[i] == stop_ptr->name && stops[i - 1] == other_stop_ptr->name) ||
+                  (stops[i] == other_stop_ptr->name && stops[i - 1] == stop_ptr->name)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  return MapRenderer(stops_dict, buses_dict, render_settings_json, stops_collider).Render();
 }

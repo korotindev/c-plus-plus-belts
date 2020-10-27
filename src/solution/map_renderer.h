@@ -7,6 +7,7 @@
 
 #include "descriptions.h"
 #include "json.h"
+#include "sphere_projection.h"
 #include "svg.h"
 
 struct RenderSettings {
@@ -28,7 +29,7 @@ struct RenderSettings {
 class MapRenderer {
  public:
   MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-              const Json::Dict& render_settings_json);
+              const Json::Dict& render_settings_json, const Sphere::Projector::StopsCollider& collider);
 
   Svg::Document Render() const;
 

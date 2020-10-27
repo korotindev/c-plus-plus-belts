@@ -61,12 +61,13 @@ RenderSettings ParseRenderSettings(const Json::Dict& json) {
 }
 
 static map<string, Svg::Point> ComputeStopsCoords(const Descriptions::StopsDict& stops_dict,
-                                                  const RenderSettings& render_settings) {
+                                                  const RenderSettings& render_settings,
+                                                  const Sphere::Projector::StopsCollider& collider) {
   const double max_width = render_settings.max_width;
   const double max_height = render_settings.max_height;
   const double padding = render_settings.padding;
 
-  const Sphere::Projector projector(stops_dict, max_width, max_height, padding);
+  const Sphere::Projector projector(stops_dict, collider, max_width, max_height, padding);
 
   map<string, Svg::Point> stops_coords;
   for (const auto& [stop_name, stop_ptr] : stops_dict) {
@@ -88,10 +89,10 @@ static unordered_map<string, Svg::Color> ChooseBusColors(const Descriptions::Bus
 }
 
 MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-                         const Json::Dict& render_settings_json)
+                         const Json::Dict& render_settings_json, const Sphere::Projector::StopsCollider& collider)
     : render_settings_(ParseRenderSettings(render_settings_json)),
       buses_dict_(buses_dict),
-      stops_coords_(ComputeStopsCoords(stops_dict, render_settings_)),
+      stops_coords_(ComputeStopsCoords(stops_dict, render_settings_, collider)),
       bus_colors_(ChooseBusColors(buses_dict, render_settings_)) {}
 
 void MapRenderer::RenderBusLines(Svg::Document& svg) const {

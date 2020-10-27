@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <cmath>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
 
 #include "descriptions.h"
 #include "sphere.h"
@@ -16,9 +16,13 @@ namespace Sphere {
 
   class Projector {
    public:
-    Projector(const Descriptions::StopsDict& stops_dict, double max_width, double max_height, double padding);
+    using StopsCollider =
+        std::function<bool(const Descriptions::Stop* stop_ptr, const std::vector<const Descriptions::Stop*> &group)>;
 
-    Svg::Point operator()(const Descriptions::Stop *stop) const;
+    Projector(const Descriptions::StopsDict& stops_dict, const StopsCollider& collider, double max_width,
+              double max_height, double padding);
+
+    Svg::Point operator()(const Descriptions::Stop* stop) const;
 
    private:
     const double padding_;

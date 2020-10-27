@@ -48,8 +48,8 @@ class TransportCatalog {
   static double ComputeGeoRouteDistance(const std::vector<std::string>& stops,
                                         const Descriptions::StopsDict& stops_dict);
 
-  static Svg::Document BuildMap(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-                                const Json::Dict& render_settings_json);
+  Svg::Document BuildMap(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+                         const Json::Dict& render_settings_json);
 
   std::unordered_map<std::string, Stop> stops_;
   std::unordered_map<std::string, Bus> buses_;
