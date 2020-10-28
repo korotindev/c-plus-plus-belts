@@ -19,10 +19,16 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
   auto stops_end =
       partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
 
+  sort(begin(data), stops_end,
+       [](auto lhs, auto rhs) { return get<Descriptions::Stop>(lhs).name < get<Descriptions::Stop>(rhs).name; });
+
   for (auto& item : Range{begin(data), stops_end}) {
     auto& stop = get<Descriptions::Stop>(item);
     transport_info_->AddStop(move(stop));
   }
+
+  sort(stops_end, end(data),
+       [](auto lhs, auto rhs) { return get<Descriptions::Bus>(lhs).name < get<Descriptions::Bus>(rhs).name; });
 
   for (auto& item : Range{stops_end, end(data)}) {
     auto& bus = get<Descriptions::Bus>(item);

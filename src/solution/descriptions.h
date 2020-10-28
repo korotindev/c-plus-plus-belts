@@ -30,10 +30,4 @@ namespace Descriptions {
   using InputQuery = std::variant<Stop, Bus>;
 
   std::vector<InputQuery> ReadDescriptions(const Json::Array& nodes);
-
-  template <typename Object>
-  using Dict = std::map<std::string, const Object*>;
-
-  using StopsDict = Dict<Stop>;
-  using BusesDict = Dict<Bus>;
 }  // namespace Descriptions
