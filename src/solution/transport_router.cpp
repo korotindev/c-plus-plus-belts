@@ -47,14 +47,13 @@ void TransportRouter::FillGraphWithBuses(shared_ptr<const TransportInfo> transpo
     if (stop_count <= 1) {
       continue;
     }
-    auto compute_distance_from = [&transport_info, &bus](size_t lhs_idx) {
-      return transport_info->ComputeStopsDistance((bus.stops[lhs_idx]), bus.stops[lhs_idx + 1]);
-    };
+
     for (size_t start_stop_idx = 0; start_stop_idx + 1 < stop_count; ++start_stop_idx) {
       const Graph::VertexId start_vertex = stops_vertex_ids_[bus.stops[start_stop_idx]].in;
       int total_distance = 0;
       for (size_t finish_stop_idx = start_stop_idx + 1; finish_stop_idx < stop_count; ++finish_stop_idx) {
-        total_distance += compute_distance_from(finish_stop_idx - 1);
+        total_distance +=
+            transport_info->ComputeStopsDistance(bus.stops[finish_stop_idx - 1], bus.stops[finish_stop_idx]);
         edges_info_.push_back(BusEdgeInfo{
             .bus_name = bus.name,
             .span_count = finish_stop_idx - start_stop_idx,
