@@ -3,12 +3,20 @@
 using namespace std;
 
 shared_ptr<const TransportInfo::Stop> TransportInfo::GetStop(const string& name) const {
-  return indexed_stops_.at(name);
+  return GetSharedValue(indexed_stops_, name);
 }
-shared_ptr<const TransportInfo::Bus> TransportInfo::GetBus(const string& name) const { return indexed_buses_.at(name); }
 
-shared_ptr<TransportInfo::Stop> TransportInfo::GetStop(const string& name) { return indexed_stops_.at(name); }
-shared_ptr<TransportInfo::Bus> TransportInfo::GetBus(const string& name) { return indexed_buses_.at(name); }
+shared_ptr<const TransportInfo::Bus> TransportInfo::GetBus(const string& name) const {
+  return GetSharedValue(indexed_buses_, name);
+}
+
+shared_ptr<TransportInfo::Stop> TransportInfo::GetStop(const string& name) {
+  return GetSharedValue(indexed_stops_, name);
+}
+
+shared_ptr<TransportInfo::Bus> TransportInfo::GetBus(const string& name) {
+  return GetSharedValue(indexed_buses_, name);
+}
 
 void TransportInfo::AddStop(Descriptions::Stop&& stop_desc) {
   auto stop = make_shared<Stop>();
