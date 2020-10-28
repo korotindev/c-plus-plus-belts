@@ -8,6 +8,7 @@
 #include "graph.h"
 #include "json.h"
 #include "router.h"
+#include "transport_info.h"
 
 class TransportRouter {
  private:
@@ -15,8 +16,7 @@ class TransportRouter {
   using Router = Graph::Router<double>;
 
  public:
-  TransportRouter(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-                  const Json::Dict& routing_settings_json);
+  TransportRouter(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& routing_settings_json);
 
   struct RouteInfo {
     double total_time;
@@ -45,9 +45,9 @@ class TransportRouter {
 
   static RoutingSettings MakeRoutingSettings(const Json::Dict& json);
 
-  void FillGraphWithStops(const Descriptions::StopsDict& stops_dict);
+  void FillGraphWithStops(std::shared_ptr<const TransportInfo> transport_info);
 
-  void FillGraphWithBuses(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict);
+  void FillGraphWithBuses(std::shared_ptr<const TransportInfo> transport_info);
 
   struct StopVertexIds {
     Graph::VertexId in;
@@ -66,7 +66,6 @@ class TransportRouter {
 
   RoutingSettings routing_settings_;
   BusGraph graph_;
-  // TODO: Tell about this unique_ptr usage case
   std::unique_ptr<Router> router_;
   std::unordered_map<std::string, StopVertexIds> stops_vertex_ids_;
   std::vector<VertexInfo> vertices_info_;

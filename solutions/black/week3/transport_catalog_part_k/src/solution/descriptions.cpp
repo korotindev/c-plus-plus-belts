@@ -36,14 +36,6 @@ namespace Descriptions {
     return stops;
   }
 
-  int ComputeStopsDistance(const Stop& lhs, const Stop& rhs) {
-    if (auto it = lhs.distances.find(rhs.name); it != lhs.distances.end()) {
-      return it->second;
-    } else {
-      return rhs.distances.at(lhs.name);
-    }
-  }
-
   Bus Bus::ParseFrom(const Json::Dict& attrs) {
     const auto& name = attrs.at("name").AsString();
     const auto& stops = attrs.at("stops").AsArray();
