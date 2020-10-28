@@ -35,10 +35,6 @@ class MapRenderer {
   Svg::Document Render() const;
 
  private:
-  struct StopContainer {
-    const Descriptions::Stop* description_ptr;
-    std::vector<std::string> bus_names;
-  };
   RenderSettings render_settings_;
   std::shared_ptr<const TransportInfo> transport_info_;
   std::map<std::string, Svg::Point> stops_coords_;

@@ -25,12 +25,12 @@ TransportRouter::RoutingSettings TransportRouter::MakeRoutingSettings(const Json
 void TransportRouter::FillGraphWithStops(shared_ptr<const TransportInfo> transport_info) {
   Graph::VertexId vertex_id = 0;
 
-  for (const auto& [stop_name, _] : transport_info->GetStopsRange()) {
-    auto& vertex_ids = stops_vertex_ids_[stop_name];
+  for (const auto stop_ptr : transport_info->GetStopsRange()) {
+    auto& vertex_ids = stops_vertex_ids_[stop_ptr->name];
     vertex_ids.in = vertex_id++;
     vertex_ids.out = vertex_id++;
-    vertices_info_[vertex_ids.in] = {stop_name};
-    vertices_info_[vertex_ids.out] = {stop_name};
+    vertices_info_[vertex_ids.in] = {stop_ptr->name};
+    vertices_info_[vertex_ids.out] = {stop_ptr->name};
 
     edges_info_.push_back(WaitEdgeInfo{});
     const Graph::EdgeId edge_id =
@@ -42,24 +42,24 @@ void TransportRouter::FillGraphWithStops(shared_ptr<const TransportInfo> transpo
 }
 
 void TransportRouter::FillGraphWithBuses(shared_ptr<const TransportInfo> transport_info) {
-  for (const auto& [_, bus] : transport_info->GetBusesRange()) {
-    const size_t stop_count = bus.stops.size();
+  for (const auto bus_ptr : transport_info->GetBusesRange()) {
+    const size_t stop_count = bus_ptr->stops.size();
     if (stop_count <= 1) {
       continue;
     }
 
     for (size_t start_stop_idx = 0; start_stop_idx + 1 < stop_count; ++start_stop_idx) {
-      const Graph::VertexId start_vertex = stops_vertex_ids_[bus.stops[start_stop_idx]].in;
+      const Graph::VertexId start_vertex = stops_vertex_ids_[bus_ptr->stops[start_stop_idx]].in;
       int total_distance = 0;
       for (size_t finish_stop_idx = start_stop_idx + 1; finish_stop_idx < stop_count; ++finish_stop_idx) {
         total_distance +=
-            transport_info->ComputeStopsDistance(bus.stops[finish_stop_idx - 1], bus.stops[finish_stop_idx]);
+            transport_info->ComputeStopsDistance(bus_ptr->stops[finish_stop_idx - 1], bus_ptr->stops[finish_stop_idx]);
         edges_info_.push_back(BusEdgeInfo{
-            .bus_name = bus.name,
+            .bus_name = bus_ptr->name,
             .span_count = finish_stop_idx - start_stop_idx,
         });
         const Graph::EdgeId edge_id = graph_.AddEdge({
-            start_vertex, stops_vertex_ids_[bus.stops[finish_stop_idx]].out,
+            start_vertex, stops_vertex_ids_[bus_ptr->stops[finish_stop_idx]].out,
             total_distance * 1.0 / (routing_settings_.bus_velocity * 1000.0 / 60)  // m / (km/h * 1000 / 60) = min
         });
         assert(edge_id == edges_info_.size() - 1);

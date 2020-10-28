@@ -1,12 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
-#include <memory>
 
 #include "descriptions.h"
 #include "json.h"
@@ -20,8 +20,8 @@ class TransportCatalog {
   TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
                    const Json::Dict& render_settings_json);
 
-  const TransportInfo::Stop* GetStop(const std::string& name) const;
-  const TransportInfo::Bus* GetBus(const std::string& name) const;
+  std::shared_ptr<const TransportInfo::Stop> GetStop(const std::string& name) const;
+  std::shared_ptr<const TransportInfo::Bus> GetBus(const std::string& name) const;
 
   std::optional<TransportRouter::RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
 

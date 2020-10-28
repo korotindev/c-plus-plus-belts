@@ -19,14 +19,14 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
   auto stops_end =
       partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
 
-  for (const auto& item : Range{begin(data), stops_end}) {
-    const auto& stop = get<Descriptions::Stop>(item);
-    transport_info_->AddStop(stop);
+  for (auto& item : Range{begin(data), stops_end}) {
+    auto& stop = get<Descriptions::Stop>(item);
+    transport_info_->AddStop(move(stop));
   }
 
-  for (const auto& item : Range{stops_end, end(data)}) {
-    const auto& bus = get<Descriptions::Bus>(item);
-    transport_info_->AddBus(bus);
+  for (auto& item : Range{stops_end, end(data)}) {
+    auto& bus = get<Descriptions::Bus>(item);
+    transport_info_->AddBus(move(bus));
   }
 
   router_ = make_unique<TransportRouter>(transport_info_, routing_settings_json);
@@ -34,11 +34,13 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
   map_ = MapRenderer(transport_info_, render_settings_json).Render();
 }
 
-const TransportInfo::Stop* TransportCatalog::GetStop(const string& name) const {
+shared_ptr<const TransportInfo::Stop> TransportCatalog::GetStop(const string& name) const {
   return transport_info_->GetStop(name);
 }
 
-const TransportInfo::Bus* TransportCatalog::GetBus(const string& name) const { return transport_info_->GetBus(name); }
+shared_ptr<const TransportInfo::Bus> TransportCatalog::GetBus(const string& name) const {
+  return transport_info_->GetBus(name);
+}
 
 optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
   return router_->FindRoute(stop_from, stop_to);

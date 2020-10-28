@@ -68,17 +68,17 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
 
   vector<Sphere::Projector::PointObject> point_objects;
   point_objects.reserve(transport_info->StopsCount());
-  for (const auto& [name, stop] : transport_info->GetStopsRange()) {
-    point_objects.push_back({name, stop.position});
+  for (const auto stop_ptr : transport_info->GetStopsRange()) {
+    point_objects.push_back({stop_ptr->name, stop_ptr->position});
   }
 
   auto stops_collider = [&transport_info](const Sphere::Projector::PointObject& stop_po,
                                           const vector<const Sphere::Projector::PointObject*>& group) {
-    const TransportInfo::Stop* stop_ptr = transport_info->GetStop(stop_po.id);
+    const auto stop_ptr = transport_info->GetStop(stop_po.id);
     const auto& bus_names = stop_ptr->bus_names;
 
     for (const auto other_stop_po : group) {
-      const TransportInfo::Stop* other_stop_ptr = transport_info->GetStop(other_stop_po->id);
+      const auto other_stop_ptr = transport_info->GetStop(other_stop_po->id);
 
       bool has_short_path_forward = stop_ptr->distances.count(other_stop_ptr->name) > 0;
       bool has_short_path_backward = other_stop_ptr->distances.count(stop_ptr->name) > 0;
@@ -106,8 +106,8 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
   const Sphere::Projector projector(point_objects, stops_collider, max_width, max_height, padding);
 
   map<string, Svg::Point> stops_coords;
-  for (const auto& [name, _] : transport_info->GetStopsRange()) {
-    stops_coords[name] = projector(name);
+  for (const auto bus_ptr  : transport_info->GetStopsRange()) {
+    stops_coords[bus_ptr->name] = projector(bus_ptr->name);
   }
 
   return stops_coords;
@@ -117,9 +117,8 @@ static unordered_map<string, Svg::Color> ChooseBusColors(shared_ptr<const Transp
                                                          const RenderSettings& render_settings) {
   const auto& palette = render_settings.palette;
   unordered_map<string, Svg::Color> bus_colors;
-  size_t idx = 0;
-  for (const auto& [bus_name, bus_ptr] : transport_info->GetBusesRange()) {
-    bus_colors[bus_name] = palette[idx++ % palette.size()];
+  for (const auto bus_ptr : transport_info->GetBusesRange()) {
+    bus_colors[bus_ptr->name] = palette[bus_ptr->id % palette.size()];
   }
   return bus_colors;
 }
@@ -131,13 +130,13 @@ MapRenderer::MapRenderer(shared_ptr<const TransportInfo> transport_info, const J
       bus_colors_(ChooseBusColors(transport_info_, render_settings_)) {}
 
 void MapRenderer::RenderBusLines(Svg::Document& svg) const {
-  for (const auto& [bus_name, bus] : transport_info_->GetBusesRange()) {
-    const auto& stops = bus.stops;
+  for (const auto bus_ptr : transport_info_->GetBusesRange()) {
+    const auto& stops = bus_ptr->stops;
     if (stops.empty()) {
       continue;
     }
     Svg::Polyline line;
-    line.SetStrokeColor(bus_colors_.at(bus_name))
+    line.SetStrokeColor(bus_colors_.at(bus_ptr->name))
         .SetStrokeWidth(render_settings_.line_width)
         .SetStrokeLineCap("round")
         .SetStrokeLineJoin("round");
@@ -149,11 +148,11 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
 }
 
 void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
-  for (const auto& [bus_name, bus_ptr] : transport_info_->GetBusesRange()) {
-    const auto& stops = bus_ptr.stops;
+  for (const auto bus_ptr : transport_info_->GetBusesRange()) {
+    const auto& stops = bus_ptr->stops;
     if (!stops.empty()) {
-      const auto& color = bus_colors_.at(bus_name);
-      for (const string& endpoint : bus_ptr.endpoints) {
+      const auto& color = bus_colors_.at(bus_ptr->name);
+      for (const string& endpoint : bus_ptr->endpoints) {
         const auto point = stops_coords_.at(endpoint);
         const auto base_text = Svg::Text{}
                                    .SetPoint(point)
@@ -161,7 +160,7 @@ void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
                                    .SetFontSize(static_cast<uint32_t>(render_settings_.bus_label_font_size))
                                    .SetFontFamily("Verdana")
                                    .SetFontWeight("bold")
-                                   .SetData(bus_name);
+                                   .SetData(bus_ptr->name);
         svg.Add(Svg::Text(base_text)
                     .SetFillColor(render_settings_.underlayer_color)
                     .SetStrokeColor(render_settings_.underlayer_color)

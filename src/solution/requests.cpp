@@ -9,7 +9,7 @@ using namespace std;
 namespace Requests {
 
   Json::Dict Stop::Process(const TransportCatalog& db) const {
-    const auto* stop = db.GetStop(name);
+    const auto stop = db.GetStop(name);
     Json::Dict dict;
     if (!stop) {
       dict["error_message"] = Json::Node("not found"s);
@@ -25,7 +25,7 @@ namespace Requests {
   }
 
   Json::Dict Bus::Process(const TransportCatalog& db) const {
-    const auto* bus = db.GetBus(name);
+    const auto bus = db.GetBus(name);
     Json::Dict dict;
     if (!bus) {
       dict["error_message"] = Json::Node("not found"s);

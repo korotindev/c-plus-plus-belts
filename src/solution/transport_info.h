@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #include "descriptions.h"
 #include "sphere.h"
@@ -12,6 +13,7 @@
 class TransportInfo {
  public:
   struct Stop {
+    size_t id;
     std::string name;
     Sphere::Point position;
     std::unordered_map<std::string, int> distances;
@@ -19,6 +21,7 @@ class TransportInfo {
   };
 
   struct Bus {
+    size_t id;
     std::string name;
     std::vector<std::string> stops;
     std::vector<std::string> endpoints;
@@ -27,30 +30,32 @@ class TransportInfo {
     double geo_route_length = 0.0;
   };
 
-  using StopsDict = std::unordered_map<std::string, Stop>;
-  using BusesDict = std::unordered_map<std::string, Bus>;
+  std::shared_ptr<const Stop> GetStop(const std::string& name) const;
+  std::shared_ptr<const Bus> GetBus(const std::string& name) const;
+  std::shared_ptr<Stop> GetStop(const std::string& name);
+  std::shared_ptr<Bus> GetBus(const std::string& name);
 
-  const Stop* GetStop(const std::string& name) const;
-  const Bus* GetBus(const std::string& name) const;
-  Stop* GetStop(const std::string& name);
-  Bus* GetBus(const std::string& name);
+  void AddStop(Descriptions::Stop&& stop_desc);
+  void AddBus(Descriptions::Bus&& bus_desc);
 
-  void AddStop(const Descriptions::Stop& stop);
-  void AddBus(const Descriptions::Bus& bus);
+  using StopsVector = std::vector<std::shared_ptr<Stop>>;
+  using BusesVector = std::vector<std::shared_ptr<Bus>>;
 
-  Range<StopsDict::const_iterator> GetStopsRange() const;
-  Range<BusesDict::const_iterator> GetBusesRange() const;
+  Range<StopsVector::const_iterator> GetStopsRange() const;
+  Range<BusesVector::const_iterator> GetBusesRange() const;
 
   size_t StopsCount() const;
   size_t BusesCount() const;
 
-  int ComputeStopsDistance(const Stop* lhs, const Stop* rhs) const;
+  int ComputeStopsDistance(std::shared_ptr<const Stop> lhs, std::shared_ptr<const Stop> rhs) const;
   int ComputeStopsDistance(const std::string &lhs, const std::string &rhs) const;
 
  private:
   int ComputeRoadRouteLength(const std::vector<std::string>& stops);
   double ComputeGeoRouteDistance(const std::vector<std::string>& stops);
-
-  StopsDict stops_;
-  BusesDict buses_;
+  
+  StopsVector stops_;
+  BusesVector buses_;
+  std::unordered_map<std::string, std::shared_ptr<Stop>> indexed_stops_;
+  std::unordered_map<std::string, std::shared_ptr<Bus>> indexed_buses_;
 };

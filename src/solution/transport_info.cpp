@@ -2,31 +2,44 @@
 
 using namespace std;
 
-const TransportInfo::Stop* TransportInfo::GetStop(const string& name) const { return GetValuePointer(stops_, name); }
-const TransportInfo::Bus* TransportInfo::GetBus(const string& name) const { return GetValuePointer(buses_, name); }
+shared_ptr<const TransportInfo::Stop> TransportInfo::GetStop(const string& name) const {
+  return indexed_stops_.at(name);
+}
+shared_ptr<const TransportInfo::Bus> TransportInfo::GetBus(const string& name) const { return indexed_buses_.at(name); }
 
-TransportInfo::Stop* TransportInfo::GetStop(const string& name) { return GetValuePointer(stops_, name); }
-TransportInfo::Bus* TransportInfo::GetBus(const string& name) { return GetValuePointer(buses_, name); }
+shared_ptr<TransportInfo::Stop> TransportInfo::GetStop(const string& name) { return indexed_stops_.at(name); }
+shared_ptr<TransportInfo::Bus> TransportInfo::GetBus(const string& name) { return indexed_buses_.at(name); }
 
-void TransportInfo::AddStop(const Descriptions::Stop& stop) {
-  stops_[stop.name] =
-      TransportInfo::Stop{.name = stop.name, .position = stop.position, .distances = stop.distances, .bus_names = {}};
+void TransportInfo::AddStop(Descriptions::Stop&& stop_desc) {
+  auto stop = make_shared<Stop>();
+  stop->id = stops_.size();
+  stop->name = move(stop_desc.name);
+  stop->position = move(stop_desc.position);
+  stop->distances = move(stop_desc.distances);
+
+  stops_.push_back(stop);
+  indexed_stops_[stop->name] = stop;
 }
 
-void TransportInfo::AddBus(const Descriptions::Bus& bus) {
-  buses_[bus.name] = Bus{.name = bus.name,
-                         .stops = bus.stops,
-                         .endpoints = bus.endpoints,
-                         .unique_stop_count = ComputeUniqueItemsCount(AsRange(bus.stops)),
-                         .road_route_length = ComputeRoadRouteLength(bus.stops),
-                         .geo_route_length = ComputeGeoRouteDistance(bus.stops)};
+void TransportInfo::AddBus(Descriptions::Bus&& bus_desc) {
+  auto bus = make_shared<Bus>();
+  bus->id = buses_.size();
+  bus->name = move(bus_desc.name);
+  bus->stops = move(bus_desc.stops);
+  bus->endpoints = move(bus_desc.endpoints);
+  bus->unique_stop_count = ComputeUniqueItemsCount(AsRange(bus->stops));
+  bus->road_route_length = ComputeRoadRouteLength(bus->stops);
+  bus->geo_route_length = ComputeGeoRouteDistance(bus->stops);
 
-  for (const string& stop_name : bus.stops) {
-    GetStop(stop_name)->bus_names.insert(bus.name);
+  for (const string& stop_name : bus->stops) {
+    GetStop(stop_name)->bus_names.insert(bus->name);
   }
+
+  buses_.push_back(bus);
+  indexed_buses_[bus->name] = bus;
 }
 
-int TransportInfo::ComputeStopsDistance(const Stop* lhs, const Stop* rhs) const {
+int TransportInfo::ComputeStopsDistance(std::shared_ptr<const Stop> lhs, std::shared_ptr<const Stop> rhs) const {
   if (auto it = lhs->distances.find(rhs->name); it != lhs->distances.end()) {
     return it->second;
   } else {
@@ -54,8 +67,8 @@ double TransportInfo::ComputeGeoRouteDistance(const vector<string>& stops) {
   return result;
 }
 
-Range<TransportInfo::StopsDict::const_iterator> TransportInfo::GetStopsRange() const { return AsRange(this->stops_); }
-Range<TransportInfo::BusesDict::const_iterator> TransportInfo::GetBusesRange() const { return AsRange(this->buses_); }
+Range<TransportInfo::StopsVector::const_iterator> TransportInfo::GetStopsRange() const { return AsRange(this->stops_); }
+Range<TransportInfo::BusesVector::const_iterator> TransportInfo::GetBusesRange() const { return AsRange(this->buses_); }
 
 size_t TransportInfo::StopsCount() const { return this->stops_.size(); }
 size_t TransportInfo::BusesCount() const { return this->buses_.size(); }
