@@ -23,7 +23,7 @@ class ConstSharedPtrsVectorIterator {
   void operator++() { it++; }
 
  private:
-  underlaying_vector::const_iterator it;
+  typename underlaying_vector::const_iterator it;
 };
 
 template <typename It>
