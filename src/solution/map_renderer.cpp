@@ -67,13 +67,13 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
   const double max_height = render_settings.max_height;
   const double padding = render_settings.padding;
 
-  //MapStopsDistributor distributor(transport_info);
+  MapStopsDistributor distributor(transport_info);
 
   vector<Sphere::Projector::PointObject> point_objects;
   point_objects.reserve(transport_info->StopsCount());
   for (const auto stop_ptr : transport_info->GetStopsRange()) {
-    point_objects.push_back({stop_ptr->name, stop_ptr->position});
-    //point_objects.push_back({stop_ptr->name, distributor(stop_ptr->id)});
+    // point_objects.push_back({stop_ptr->name, stop_ptr->position});
+    point_objects.push_back({stop_ptr->name, distributor(stop_ptr->id)});
   }
 
   auto stops_collider = [&transport_info](const Sphere::Projector::PointObject& stop_po,
