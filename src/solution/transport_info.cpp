@@ -2,19 +2,11 @@
 
 using namespace std;
 
-shared_ptr<const TransportInfo::Stop> TransportInfo::GetStop(const string& name) const {
+TransportInfo::ConstStopPtr TransportInfo::GetStop(const string& name) const {
   return GetSharedValue(indexed_stops_, name);
 }
 
-shared_ptr<const TransportInfo::Bus> TransportInfo::GetBus(const string& name) const {
-  return GetSharedValue(indexed_buses_, name);
-}
-
-shared_ptr<TransportInfo::Stop> TransportInfo::GetStop(const string& name) {
-  return GetSharedValue(indexed_stops_, name);
-}
-
-shared_ptr<TransportInfo::Bus> TransportInfo::GetBus(const string& name) {
+TransportInfo::ConstBusPtr TransportInfo::GetBus(const string& name) const {
   return GetSharedValue(indexed_buses_, name);
 }
 
@@ -40,14 +32,14 @@ void TransportInfo::AddBus(Descriptions::Bus&& bus_desc) {
   bus->geo_route_length = ComputeGeoRouteDistance(bus->stops);
 
   for (const string& stop_name : bus->stops) {
-    GetStop(stop_name)->bus_names.insert(bus->name);
+    GetSharedValue(indexed_stops_, stop_name)->bus_names.insert(bus->name);
   }
 
   buses_.push_back(bus);
   indexed_buses_[bus->name] = bus;
 }
 
-int TransportInfo::ComputeStopsDistance(std::shared_ptr<const Stop> lhs, std::shared_ptr<const Stop> rhs) const {
+int TransportInfo::ComputeStopsDistance(TransportInfo::ConstStopPtr lhs, TransportInfo::ConstStopPtr rhs) const {
   if (auto it = lhs->distances.find(rhs->name); it != lhs->distances.end()) {
     return it->second;
   } else {
@@ -75,8 +67,12 @@ double TransportInfo::ComputeGeoRouteDistance(const vector<string>& stops) {
   return result;
 }
 
-Range<TransportInfo::StopsVector::const_iterator> TransportInfo::GetStopsRange() const { return AsRange(this->stops_); }
-Range<TransportInfo::BusesVector::const_iterator> TransportInfo::GetBusesRange() const { return AsRange(this->buses_); }
+Range<ConstSharedPtrsVectorIterator<TransportInfo::Stop>> TransportInfo::GetStopsRange() const {
+  return AsRange(this->stops_);
+}
+Range<ConstSharedPtrsVectorIterator<TransportInfo::Bus>> TransportInfo::GetBusesRange() const {
+   return AsRange(this->buses_);
+}
 
 size_t TransportInfo::StopsCount() const { return this->stops_.size(); }
 size_t TransportInfo::BusesCount() const { return this->buses_.size(); }

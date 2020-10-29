@@ -1,10 +1,11 @@
-#pragma once 
+#pragma once
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <memory>
+#include <iterator>
 
 #include "descriptions.h"
 #include "sphere.h"
@@ -30,32 +31,36 @@ class TransportInfo {
     double geo_route_length = 0.0;
   };
 
-  std::shared_ptr<const Stop> GetStop(const std::string& name) const;
-  std::shared_ptr<const Bus> GetBus(const std::string& name) const;
-  std::shared_ptr<Stop> GetStop(const std::string& name);
-  std::shared_ptr<Bus> GetBus(const std::string& name);
+  using StopPtr = std::shared_ptr<Stop>;
+  using BusPtr = std::shared_ptr<Bus>;
+  using ConstStopPtr = std::shared_ptr<const Stop>;
+  using ConstBusPtr = std::shared_ptr<const Bus>;
+
+  ConstStopPtr GetStop(const std::string& name) const;
+  ConstBusPtr GetBus(const std::string& name) const;
 
   void AddStop(Descriptions::Stop&& stop_desc);
   void AddBus(Descriptions::Bus&& bus_desc);
 
-  using StopsVector = std::vector<std::shared_ptr<Stop>>;
-  using BusesVector = std::vector<std::shared_ptr<Bus>>;
+  using StopsVector = std::vector<StopPtr>;
+  using BusesVector = std::vector<BusPtr>;
 
-  Range<StopsVector::const_iterator> GetStopsRange() const;
-  Range<BusesVector::const_iterator> GetBusesRange() const;
+
+  Range<ConstSharedPtrsVectorIterator<Stop>> GetStopsRange() const;
+  Range<ConstSharedPtrsVectorIterator<Bus>> GetBusesRange() const;
 
   size_t StopsCount() const;
   size_t BusesCount() const;
 
-  int ComputeStopsDistance(std::shared_ptr<const Stop> lhs, std::shared_ptr<const Stop> rhs) const;
-  int ComputeStopsDistance(const std::string &lhs, const std::string &rhs) const;
+  int ComputeStopsDistance(ConstStopPtr lhs, ConstStopPtr rhs) const;
+  int ComputeStopsDistance(const std::string& lhs, const std::string& rhs) const;
 
  private:
   int ComputeRoadRouteLength(const std::vector<std::string>& stops);
   double ComputeGeoRouteDistance(const std::vector<std::string>& stops);
-  
+
   StopsVector stops_;
   BusesVector buses_;
-  std::unordered_map<std::string, std::shared_ptr<Stop>> indexed_stops_;
-  std::unordered_map<std::string, std::shared_ptr<Bus>> indexed_buses_;
+  std::unordered_map<std::string, StopPtr> indexed_stops_;
+  std::unordered_map<std::string, BusPtr> indexed_buses_;
 };
