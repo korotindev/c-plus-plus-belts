@@ -14,6 +14,7 @@
 #include "test_runner.h"
 #include "transport_catalog.h"
 #include "utils.h"
+#include "map_renderers/real/real.h"
 
 using namespace std;
 
@@ -42,17 +43,26 @@ void TestMapRenderingIntegration(const Json::Document &input_doc, ostream &out) 
   out << endl;
 }
 
-void TestIntegration(const string &testDataFolderName) {
-  auto input = ifstream(testDataFolderName + "/input.json");
-  auto expectedOutput = ifstream(testDataFolderName + "/expected_output.json");
+template <typename ConcreteMapRenderer>
+void PrintOtherRendererResult(const Json::Document &input_doc, const string &filename) {
+  stringstream stream;
+  TestMapRenderingIntegration<ConcreteMapRenderer>(input_doc, stream);
+  auto result_doc = Json::Load(stream);
+  FindAndPrintSvg(result_doc, filename);
+}
+
+void TestIntegration(const string &test_data_folder_name) {
+  auto input = ifstream(test_data_folder_name + "/input.json");
+  auto expectedOutput = ifstream(test_data_folder_name + "/expected_output.json");
 
   const auto input_doc = Json::Load(input);
   stringstream output;
   TestMapRenderingIntegration<DefaultMapRenderer>(input_doc, output);
+  PrintOtherRendererResult<MapRenderers::Real::RealMapRenderer>(input_doc, "real_renderer.svg");
 
-  Json::Document resultDocument = Json::Load(output);
-  Json::Document expectedDocument = Json::Load(expectedOutput);
-  FindAndPrintSvg(resultDocument, "test_result.svg");
-  FindAndPrintSvg(expectedDocument, "test_expected.svg");
-  ASSERT_EQUAL(resultDocument, expectedDocument);
+  Json::Document result_doc = Json::Load(output);
+  Json::Document expected_doc = Json::Load(expectedOutput);
+  FindAndPrintSvg(result_doc, "test_result.svg");
+  FindAndPrintSvg(expected_doc, "test_expected.svg");
+  ASSERT_EQUAL(result_doc, expected_doc);
 }
