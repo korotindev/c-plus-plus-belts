@@ -3,11 +3,19 @@
 using namespace std;
 
 TransportInfo::ConstStopPtr TransportInfo::GetStop(const string& name) const {
-  return GetSharedValue(indexed_stops_, name);
+  return GetSharedValue(name_indexed_stops_, name);
 }
 
 TransportInfo::ConstBusPtr TransportInfo::GetBus(const string& name) const {
-  return GetSharedValue(indexed_buses_, name);
+  return GetSharedValue(name_indexed_buses_, name);
+}
+
+TransportInfo::ConstStopPtr TransportInfo::GetStop(const size_t id) const {
+  return GetSharedValue(id_indexed_stops_, id);
+}
+
+TransportInfo::ConstBusPtr TransportInfo::GetBus(const size_t id) const {
+  return GetSharedValue(id_indexed_buses_, id);
 }
 
 void TransportInfo::AddStop(Descriptions::Stop&& stop_desc) {
@@ -18,7 +26,8 @@ void TransportInfo::AddStop(Descriptions::Stop&& stop_desc) {
   stop->distances = move(stop_desc.distances);
 
   stops_.push_back(stop);
-  indexed_stops_[stop->name] = stop;
+  name_indexed_stops_[stop->name] = stop;
+  id_indexed_stops_[stop->id] = stop;
 }
 
 void TransportInfo::AddBus(Descriptions::Bus&& bus_desc) {
@@ -32,11 +41,14 @@ void TransportInfo::AddBus(Descriptions::Bus&& bus_desc) {
   bus->geo_route_length = ComputeGeoRouteDistance(bus->stops);
 
   for (const string& stop_name : bus->stops) {
-    GetSharedValue(indexed_stops_, stop_name)->bus_names.insert(bus->name);
+    auto stop_ptr = GetSharedValue(name_indexed_stops_, stop_name);
+    stop_ptr->bus_names.insert(bus->name);
+    stop_ptr->buses_stat[bus->id]++;
   }
 
   buses_.push_back(bus);
-  indexed_buses_[bus->name] = bus;
+  name_indexed_buses_[bus->name] = bus;
+  id_indexed_buses_[bus->id] = bus;
 }
 
 int TransportInfo::ComputeStopsDistance(TransportInfo::ConstStopPtr lhs, TransportInfo::ConstStopPtr rhs) const {
@@ -71,7 +83,7 @@ Range<ConstSharedPtrsVectorIterator<TransportInfo::Stop>> TransportInfo::GetStop
   return AsRange(this->stops_);
 }
 Range<ConstSharedPtrsVectorIterator<TransportInfo::Bus>> TransportInfo::GetBusesRange() const {
-   return AsRange(this->buses_);
+  return AsRange(this->buses_);
 }
 
 size_t TransportInfo::StopsCount() const { return this->stops_.size(); }

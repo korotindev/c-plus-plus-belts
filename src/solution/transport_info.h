@@ -1,11 +1,11 @@
 #pragma once
 
+#include <iterator>
 #include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <iterator>
 
 #include "descriptions.h"
 #include "sphere.h"
@@ -18,7 +18,8 @@ class TransportInfo {
     std::string name;
     Sphere::Point position;
     std::unordered_map<std::string, int> distances;
-    std::set<std::string> bus_names;
+    std::set<std::string, size_t> bus_names;
+    std::unordered_map<size_t, size_t> buses_stat;
   };
 
   struct Bus {
@@ -39,12 +40,14 @@ class TransportInfo {
   ConstStopPtr GetStop(const std::string& name) const;
   ConstBusPtr GetBus(const std::string& name) const;
 
+  ConstStopPtr GetStop(const size_t id) const;
+  ConstBusPtr GetBus(const size_t id) const;
+
   void AddStop(Descriptions::Stop&& stop_desc);
   void AddBus(Descriptions::Bus&& bus_desc);
 
   using StopsVector = std::vector<StopPtr>;
   using BusesVector = std::vector<BusPtr>;
-
 
   Range<ConstSharedPtrsVectorIterator<Stop>> GetStopsRange() const;
   Range<ConstSharedPtrsVectorIterator<Bus>> GetBusesRange() const;
@@ -61,6 +64,9 @@ class TransportInfo {
 
   StopsVector stops_;
   BusesVector buses_;
-  std::unordered_map<std::string, StopPtr> indexed_stops_;
-  std::unordered_map<std::string, BusPtr> indexed_buses_;
+  std::unordered_map<std::string, StopPtr> name_indexed_stops_;
+  std::unordered_map<size_t, StopPtr> id_indexed_stops_;
+
+  std::unordered_map<std::string, BusPtr> name_indexed_buses_;
+  std::unordered_map<size_t, BusPtr> id_indexed_buses_;
 };
