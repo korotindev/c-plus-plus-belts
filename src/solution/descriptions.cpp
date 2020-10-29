@@ -41,10 +41,9 @@ namespace Descriptions {
     const auto& stops = attrs.at("stops").AsArray();
     const bool is_roundtrip = attrs.at("is_roundtrip").AsBool();
     if (stops.empty()) {
-      return Bus{.name = name, .is_roundtrip = is_roundtrip, .stops = {}, .endpoints = {}};
+      return Bus{.name = name, .stops = {}, .endpoints = {}};
     } else {
       Bus bus{.name = name,
-              .is_roundtrip = is_roundtrip,
               .stops = ParseStops(stops, is_roundtrip),
               .endpoints = {stops.front().AsString(), stops.back().AsString()}};
       if (bus.endpoints.back() == bus.endpoints.front()) {

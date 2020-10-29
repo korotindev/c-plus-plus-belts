@@ -24,7 +24,6 @@ class TransportInfo {
   struct Bus {
     size_t id;
     std::string name;
-    bool is_roundtrip;
     std::vector<std::string> stops;
     std::vector<std::string> endpoints;
     size_t unique_stop_count = 0;

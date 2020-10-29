@@ -11,8 +11,18 @@ MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transpo
   };
 
   for (const auto stop_ptr : transport_info->GetStopsRange()) {
-    if (size_t size = stop_ptr->bus_names.size(); size > 1 || size == 0) {
+    if (size_t size = stop_ptr->bus_names.size(); size != 1) {
       mark_stop_as_support(stop_ptr);
+    } else {
+      const auto bus_ptr = transport_info->GetBus(*stop_ptr->bus_names.begin());
+      unordered_map<size_t, size_t> stops_stat;
+      for (const auto &route_stop_name : bus_ptr->stops) {
+        const auto route_stop_ptr = transport_info->GetStop(route_stop_name);
+        const auto route_stop_visits_count = ++stops_stat[route_stop_ptr->id];
+        if (route_stop_visits_count > 2) {
+          mark_stop_as_support(route_stop_ptr);
+        }
+      }
     }
   }
 
@@ -35,13 +45,11 @@ MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transpo
 
   for (const auto bus_ptr : transport_info->GetBusesRange()) {
     const auto &stops = bus_ptr->stops;
-    unordered_map<size_t, size_t> stops_stat; // TODO: Use this to find support stops in this for loop.
     size_t prev_support_id = 0;
     vector<size_t> collected;
 
-    mark_stop_as_support(transport_info->GetStop(stops[0]));
-    if (!bus_ptr->is_roundtrip) {
-      mark_stop_as_support(transport_info->GetStop(stops[stops.size() / 2]));
+    for (const auto &stop_name : bus_ptr->endpoints) {
+      mark_stop_as_support(transport_info->GetStop(stop_name));
     }
 
     for (size_t i = 1; i < stops.size(); i++) {
