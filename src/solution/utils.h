@@ -17,7 +17,7 @@ class ConstSharedPtrsVectorIterator {
   typedef std::shared_ptr<const T>& reference;
   using underlaying_vector = std::vector<std::shared_ptr<T>>;
 
-  explicit ConstSharedPtrsVectorIterator(underlaying_vector::const_iterator it) : it(it) {}
+  explicit ConstSharedPtrsVectorIterator(typename underlaying_vector::const_iterator it) : it(it) {}
   bool operator!=(const ConstSharedPtrsVectorIterator<T>& other) { return it != other.it; }
   value_type operator*() { return *it; }
   void operator++() { it++; }
