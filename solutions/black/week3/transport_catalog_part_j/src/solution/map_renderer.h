@@ -25,9 +25,9 @@ struct RenderSettings {
   std::vector<std::string> layers;
 };
 
-class MapRenderer {
+class DefaultMapRenderer {
  public:
-  MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+  DefaultMapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
               const Json::Dict& render_settings_json);
 
   Svg::Document Render() const;
@@ -43,5 +43,5 @@ class MapRenderer {
   void RenderStopPoints(Svg::Document& svg) const;
   void RenderStopLabels(Svg::Document& svg) const;
 
-  static const std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
+  static const std::unordered_map<std::string, void (DefaultMapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
 };

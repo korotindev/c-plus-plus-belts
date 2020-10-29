@@ -2,9 +2,9 @@
 
 #include <cassert>
 
+#include "map_stops_distributor.h"
 #include "sphere.h"
 #include "sphere_projection.h"
-#include "map_stops_distributor.h"
 #include "utils.h"
 
 using namespace std;
@@ -110,7 +110,7 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
   const Sphere::Projector projector(point_objects, stops_collider, max_width, max_height, padding);
 
   map<string, Svg::Point> stops_coords;
-  for (const auto bus_ptr  : transport_info->GetStopsRange()) {
+  for (const auto bus_ptr : transport_info->GetStopsRange()) {
     stops_coords[bus_ptr->name] = projector(bus_ptr->name);
   }
 
@@ -127,13 +127,14 @@ static unordered_map<string, Svg::Color> ChooseBusColors(shared_ptr<const Transp
   return bus_colors;
 }
 
-MapRenderer::MapRenderer(shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json)
-    : render_settings_(ParseRenderSettings(render_settings_json)),
-      transport_info_(transport_info),
-      stops_coords_(ComputeStopsCoords(transport_info_, render_settings_)),
-      bus_colors_(ChooseBusColors(transport_info_, render_settings_)) {}
+void DefaultMapRenderer::Prepare(shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json) {
+  transport_info_ = move(transport_info);
+  render_settings_ = ParseRenderSettings(render_settings_json);
+  stops_coords_ = ComputeStopsCoords(transport_info_, render_settings_);
+  bus_colors_ = ChooseBusColors(transport_info_, render_settings_);
+}
 
-void MapRenderer::RenderBusLines(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderBusLines(Svg::Document& svg) const {
   for (const auto bus_ptr : transport_info_->GetBusesRange()) {
     const auto& stops = bus_ptr->stops;
     if (stops.empty()) {
@@ -151,7 +152,7 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
   }
 }
 
-void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderBusLabels(Svg::Document& svg) const {
   for (const auto bus_ptr : transport_info_->GetBusesRange()) {
     const auto& stops = bus_ptr->stops;
     if (!stops.empty()) {
@@ -177,13 +178,13 @@ void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
   }
 }
 
-void MapRenderer::RenderStopPoints(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderStopPoints(Svg::Document& svg) const {
   for (const auto& [stop_name, stop_point] : stops_coords_) {
     svg.Add(Svg::Circle{}.SetCenter(stop_point).SetRadius(render_settings_.stop_radius).SetFillColor("white"));
   }
 }
 
-void MapRenderer::RenderStopLabels(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderStopLabels(Svg::Document& svg) const {
   for (const auto& [stop_name, stop_point] : stops_coords_) {
     const auto base_text = Svg::Text{}
                                .SetPoint(stop_point)
@@ -201,14 +202,14 @@ void MapRenderer::RenderStopLabels(Svg::Document& svg) const {
   }
 }
 
-const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::LAYER_ACTIONS = {
-    {"bus_lines", &MapRenderer::RenderBusLines},
-    {"bus_labels", &MapRenderer::RenderBusLabels},
-    {"stop_points", &MapRenderer::RenderStopPoints},
-    {"stop_labels", &MapRenderer::RenderStopLabels},
+const unordered_map<string, void (DefaultMapRenderer::*)(Svg::Document&) const> DefaultMapRenderer::LAYER_ACTIONS = {
+    {"bus_lines", &DefaultMapRenderer::RenderBusLines},
+    {"bus_labels", &DefaultMapRenderer::RenderBusLabels},
+    {"stop_points", &DefaultMapRenderer::RenderStopPoints},
+    {"stop_labels", &DefaultMapRenderer::RenderStopLabels},
 };
 
-Svg::Document MapRenderer::Render() const {
+Svg::Document DefaultMapRenderer::Render() const {
   Svg::Document svg;
 
   for (const auto& layer : render_settings_.layers) {

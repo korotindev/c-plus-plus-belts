@@ -93,14 +93,14 @@ static unordered_map<string, Svg::Color> ChooseBusColors(const Descriptions::Bus
   return bus_colors;
 }
 
-MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+DefaultMapRenderer::DefaultMapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
                          const Json::Dict& render_settings_json)
     : render_settings_(ParseRenderSettings(render_settings_json)),
       buses_dict_(buses_dict),
       stops_coords_(ComputeStopsCoords(stops_dict, render_settings_)),
       bus_colors_(ChooseBusColors(buses_dict, render_settings_)) {}
 
-void MapRenderer::RenderBusLines(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderBusLines(Svg::Document& svg) const {
   for (const auto& [bus_name, bus_ptr] : buses_dict_) {
     const auto& stops = bus_ptr->stops;
     if (stops.empty()) {
@@ -118,7 +118,7 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
   }
 }
 
-void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderBusLabels(Svg::Document& svg) const {
   for (const auto& [bus_name, bus_ptr] : buses_dict_) {
     const auto& stops = bus_ptr->stops;
     if (!stops.empty()) {
@@ -144,13 +144,13 @@ void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
   }
 }
 
-void MapRenderer::RenderStopPoints(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderStopPoints(Svg::Document& svg) const {
   for (const auto& [stop_name, stop_point] : stops_coords_) {
     svg.Add(Svg::Circle{}.SetCenter(stop_point).SetRadius(render_settings_.stop_radius).SetFillColor("white"));
   }
 }
 
-void MapRenderer::RenderStopLabels(Svg::Document& svg) const {
+void DefaultMapRenderer::RenderStopLabels(Svg::Document& svg) const {
   for (const auto& [stop_name, stop_point] : stops_coords_) {
     const auto base_text = Svg::Text{}
                                .SetPoint(stop_point)
@@ -168,14 +168,14 @@ void MapRenderer::RenderStopLabels(Svg::Document& svg) const {
   }
 }
 
-const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::LAYER_ACTIONS = {
-    {"bus_lines", &MapRenderer::RenderBusLines},
-    {"bus_labels", &MapRenderer::RenderBusLabels},
-    {"stop_points", &MapRenderer::RenderStopPoints},
-    {"stop_labels", &MapRenderer::RenderStopLabels},
+const unordered_map<string, void (DefaultMapRenderer::*)(Svg::Document&) const> DefaultMapRenderer::LAYER_ACTIONS = {
+    {"bus_lines", &DefaultMapRenderer::RenderBusLines},
+    {"bus_labels", &DefaultMapRenderer::RenderBusLabels},
+    {"stop_points", &DefaultMapRenderer::RenderStopPoints},
+    {"stop_labels", &DefaultMapRenderer::RenderStopLabels},
 };
 
-Svg::Document MapRenderer::Render() const {
+Svg::Document DefaultMapRenderer::Render() const {
   Svg::Document svg;
 
   for (const auto& layer : render_settings_.layers) {

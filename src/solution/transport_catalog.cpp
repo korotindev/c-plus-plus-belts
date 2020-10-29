@@ -8,13 +8,10 @@
 #include <sstream>
 #include <unordered_map>
 
-#include "map_renderer.h"
-#include "utils.h"
-
 using namespace std;
 
 TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
-                                   const Json::Dict& render_settings_json)
+                                   const Json::Dict& render_settings_json, unique_ptr<IMapRenderer> renderer)
     : transport_info_(make_shared<TransportInfo>()) {
   auto stops_end =
       partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
@@ -37,7 +34,8 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
 
   router_ = make_unique<TransportRouter>(transport_info_, routing_settings_json);
 
-  map_ = MapRenderer(transport_info_, render_settings_json).Render();
+  renderer->Prepare(transport_info_, render_settings_json);
+  map_ = renderer->Render();
 }
 
 shared_ptr<const TransportInfo::Stop> TransportCatalog::GetStop(const string& name) const {

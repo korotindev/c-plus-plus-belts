@@ -1,10 +1,10 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <memory>
 
 #include "descriptions.h"
 #include "json.h"
@@ -28,15 +28,23 @@ struct RenderSettings {
   std::vector<std::string> layers;
 };
 
-class MapRenderer {
+class IMapRenderer {
  public:
-  MapRenderer(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json);
+  virtual void Prepare(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json) = 0;
+  virtual Svg::Document Render() const = 0;
+  virtual ~IMapRenderer() {}
 
-  Svg::Document Render() const;
+ protected:
+  std::shared_ptr<const TransportInfo> transport_info_;
+  RenderSettings render_settings_;
+};
+
+class DefaultMapRenderer : public IMapRenderer {
+ public:
+  void Prepare(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json) override;
+  Svg::Document Render() const override;
 
  private:
-  RenderSettings render_settings_;
-  std::shared_ptr<const TransportInfo> transport_info_;
   std::map<std::string, Svg::Point> stops_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;
 
@@ -45,5 +53,5 @@ class MapRenderer {
   void RenderStopPoints(Svg::Document& svg) const;
   void RenderStopLabels(Svg::Document& svg) const;
 
-  static const std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
+  static const std::unordered_map<std::string, void (DefaultMapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
 };
