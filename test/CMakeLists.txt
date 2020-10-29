@@ -1,6 +1,6 @@
 enable_testing()
 
-file(GLOB_RECURSE TEST_SRCS "*.h" "*.cpp")
+file(GLOB_RECURSE TEST_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/**/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/**/*.cpp")
 
 add_executable(belts-unit-tests ${TEST_SRCS})
 

@@ -55,3 +55,7 @@ class DefaultMapRenderer : public IMapRenderer {
 
   static const std::unordered_map<std::string, void (DefaultMapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
 };
+
+RenderSettings ParseRenderSettings(const Json::Dict& json);
+std::unordered_map<std::string, Svg::Color> ChooseBusColors(std::shared_ptr<const TransportInfo> transport_info,
+                                                            const RenderSettings& render_settings);

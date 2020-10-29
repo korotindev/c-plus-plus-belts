@@ -117,8 +117,8 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
   return stops_coords;
 }
 
-static unordered_map<string, Svg::Color> ChooseBusColors(shared_ptr<const TransportInfo> transport_info,
-                                                         const RenderSettings& render_settings) {
+unordered_map<string, Svg::Color> ChooseBusColors(shared_ptr<const TransportInfo> transport_info,
+                                                  const RenderSettings& render_settings) {
   const auto& palette = render_settings.palette;
   unordered_map<string, Svg::Color> bus_colors;
   for (const auto bus_ptr : transport_info->GetBusesRange()) {
@@ -127,7 +127,8 @@ static unordered_map<string, Svg::Color> ChooseBusColors(shared_ptr<const Transp
   return bus_colors;
 }
 
-void DefaultMapRenderer::Prepare(shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json) {
+void DefaultMapRenderer::Prepare(shared_ptr<const TransportInfo> transport_info,
+                                 const Json::Dict& render_settings_json) {
   transport_info_ = move(transport_info);
   render_settings_ = ParseRenderSettings(render_settings_json);
   stops_coords_ = ComputeStopsCoords(transport_info_, render_settings_);
