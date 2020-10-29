@@ -21,6 +21,7 @@ namespace Descriptions {
 
   struct Bus {
     std::string name;
+    bool is_roundtrip;
     std::vector<std::string> stops;
     std::vector<std::string> endpoints;
 

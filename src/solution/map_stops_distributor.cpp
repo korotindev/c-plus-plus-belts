@@ -1,23 +1,3 @@
-// #pragma once
-
-// #include <memory>
-// #include <string>
-// #include <unordered_map>
-
-// #include "sphere.h"
-// #include "transport_info.h"
-
-// class MapStopsDistributor {
-//  public:
-//   explicit MapStopsDistributor(std::shared_ptr<const TransportInfo> transport_info);
-
-//   Sphere::Point operator()(size_t id) const;
-
-//  private:
-//   std::shared_ptr<TransportInfo> transport_info;
-//   std::unordered_map<size_t, Sphere::Point> distribution;
-// };
-
 #include "map_stops_distributor.h"
 
 using namespace std;
@@ -25,10 +5,14 @@ using namespace std;
 MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transport_info) {
   unordered_map<size_t, bool> support_elements;
 
+  auto mark_stop_as_support = [this, &support_elements](const TransportInfo::ConstStopPtr &stop_ptr) {
+    support_elements[stop_ptr->id] = stop_ptr->id;
+    distribution[stop_ptr->id] = stop_ptr->position;
+  };
+
   for (const auto stop_ptr : transport_info->GetStopsRange()) {
     if (size_t size = stop_ptr->bus_names.size(); size > 1 || size == 0) {
-      support_elements[stop_ptr->id] = stop_ptr->id;
-      distribution[stop_ptr->id] = stop_ptr->position;
+      mark_stop_as_support(stop_ptr);
     }
   }
 
@@ -51,9 +35,15 @@ MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transpo
 
   for (const auto bus_ptr : transport_info->GetBusesRange()) {
     const auto &stops = bus_ptr->stops;
-    unordered_map<size_t, size_t> stops_stat;
+    unordered_map<size_t, size_t> stops_stat; // TODO: Use this to find support stops in this for loop.
     size_t prev_support_id = 0;
     vector<size_t> collected;
+
+    mark_stop_as_support(transport_info->GetStop(stops[0]));
+    if (!bus_ptr->is_roundtrip) {
+      mark_stop_as_support(transport_info->GetStop(stops[stops.size() / 2]));
+    }
+
     for (size_t i = 1; i < stops.size(); i++) {
       const auto &stop_name = stops[i];
       const auto stop_ptr = transport_info->GetStop(stop_name);

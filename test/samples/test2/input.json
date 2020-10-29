@@ -6,23 +6,24 @@
         }
     ],
     "render_settings": {
-        "underlayer_width": 3,
+        "bus_label_font_size": 18,
+        "padding": 50,
         "height": 950,
-        "stop_radius": 3,
+        "line_width": 10,
         "underlayer_color": [
             255,
             255,
             255,
             0.85
         ],
-        "width": 1500,
+        "underlayer_width": 3,
         "stop_label_font_size": 13,
-        "bus_label_font_size": 18,
+        "stop_radius": 3,
+        "width": 1500,
         "bus_label_offset": [
             7,
             15
         ],
-        "padding": 50,
         "color_palette": [
             "red",
             "green",
@@ -34,7 +35,6 @@
             7,
             -3
         ],
-        "line_width": 10,
         "layers": [
             "bus_lines",
             "bus_labels",

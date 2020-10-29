@@ -34,6 +34,7 @@ void TransportInfo::AddBus(Descriptions::Bus&& bus_desc) {
   auto bus = make_shared<Bus>();
   bus->id = buses_.size();
   bus->name = move(bus_desc.name);
+  bus->is_roundtrip = bus_desc.is_roundtrip;
   bus->stops = move(bus_desc.stops);
   bus->endpoints = move(bus_desc.endpoints);
   bus->unique_stop_count = ComputeUniqueItemsCount(AsRange(bus->stops));
