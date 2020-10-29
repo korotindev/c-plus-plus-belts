@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/test/**",
-                "${workspaceFolder}/build/src"
+                "${workspaceFolder}/build/src/protos/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++-9",
