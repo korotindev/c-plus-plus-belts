@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "real_sphere_projection.h"
+#include "map_stops_distributor.h"
 #include "sphere.h"
 #include "utils.h"
 
@@ -23,8 +24,35 @@ namespace MapRenderers {
         point_objects.push_back(stop_ptr->position);
       }
 
-      const RealSphere::RealProjector projector(begin(point_objects), end(point_objects), max_width,
-                                                            max_height, padding);
+      const RealSphere::RealProjector projector(begin(point_objects), end(point_objects), max_width, max_height,
+                                                padding);
+
+      map<string, Svg::Point> stops_coords;
+      for (const auto stop_ptr : transport_info->GetStopsRange()) {
+        stops_coords[stop_ptr->name] = projector(stop_ptr->position);
+      }
+
+      return stops_coords;
+    }
+
+    
+    static map<string, Svg::Point> ComputeStopsCoordsWithDistribution(shared_ptr<const TransportInfo> transport_info,
+                                                      const RenderSettings& render_settings) {
+      const double max_width = render_settings.max_width;
+      const double max_height = render_settings.max_height;
+      const double padding = render_settings.padding;
+
+      vector<Sphere::Point> point_objects;
+
+      MapStopsDistributor distributor(transport_info);
+
+      point_objects.reserve(transport_info->StopsCount());
+      for (const auto stop_ptr : transport_info->GetStopsRange()) {
+        point_objects.push_back(distributor(stop_ptr->id));
+      }
+
+      const RealSphere::RealProjector projector(begin(point_objects), end(point_objects), max_width, max_height,
+                                                padding);
 
       map<string, Svg::Point> stops_coords;
       for (const auto stop_ptr : transport_info->GetStopsRange()) {
@@ -35,7 +63,7 @@ namespace MapRenderers {
     }
 
     void RealMapRenderer::Prepare(shared_ptr<const TransportInfo> transport_info,
-                                     const Json::Dict& render_settings_json) {
+                                  const Json::Dict& render_settings_json) {
       transport_info_ = move(transport_info);
       render_settings_ = ParseRenderSettings(render_settings_json);
       stops_coords_ = ComputeStopsCoords(transport_info_, render_settings_);
@@ -110,12 +138,11 @@ namespace MapRenderers {
       }
     }
 
-    const unordered_map<string, void (RealMapRenderer::*)(Svg::Document&) const> RealMapRenderer::LAYER_ACTIONS =
-        {
-            {"bus_lines", &RealMapRenderer::RenderBusLines},
-            {"bus_labels", &RealMapRenderer::RenderBusLabels},
-            {"stop_points", &RealMapRenderer::RenderStopPoints},
-            {"stop_labels", &RealMapRenderer::RenderStopLabels},
+    const unordered_map<string, void (RealMapRenderer::*)(Svg::Document&) const> RealMapRenderer::LAYER_ACTIONS = {
+        {"bus_lines", &RealMapRenderer::RenderBusLines},
+        {"bus_labels", &RealMapRenderer::RenderBusLabels},
+        {"stop_points", &RealMapRenderer::RenderStopPoints},
+        {"stop_labels", &RealMapRenderer::RenderStopLabels},
     };
 
     Svg::Document RealMapRenderer::Render() const {
@@ -126,6 +153,14 @@ namespace MapRenderers {
       }
 
       return svg;
+    }
+
+    void RealWithDistributionMapRender::Prepare(shared_ptr<const TransportInfo> transport_info,
+                                                const Json::Dict& render_settings_json) {
+      transport_info_ = move(transport_info);
+      render_settings_ = ParseRenderSettings(render_settings_json);
+      stops_coords_ = ComputeStopsCoordsWithDistribution(transport_info_, render_settings_);
+      bus_colors_ = ChooseBusColors(transport_info_, render_settings_);
     }
   }  // namespace Real
 }  // namespace MapRenderers

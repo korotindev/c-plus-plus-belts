@@ -16,11 +16,11 @@ namespace MapRenderers {
   namespace Real {
     class RealMapRenderer : public IMapRenderer {
      public:
-      void Prepare(std::shared_ptr<const TransportInfo> transport_info,
-                   const Json::Dict& render_settings_json) override;
+      virtual void Prepare(std::shared_ptr<const TransportInfo> transport_info,
+                           const Json::Dict& render_settings_json) override;
       Svg::Document Render() const override;
 
-     private:
+     protected:
       std::map<std::string, Svg::Point> stops_coords_;
       std::unordered_map<std::string, Svg::Color> bus_colors_;
 
@@ -32,5 +32,9 @@ namespace MapRenderers {
       static const std::unordered_map<std::string, void (RealMapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
     };
 
+    class RealWithDistributionMapRender : public RealMapRenderer {
+      void Prepare(std::shared_ptr<const TransportInfo> transport_info,
+                   const Json::Dict& render_settings_json) override;
+    };
   }  // namespace Real
 }  // namespace MapRenderers

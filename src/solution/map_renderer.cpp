@@ -72,7 +72,6 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
   vector<Sphere::Projector::PointObject> point_objects;
   point_objects.reserve(transport_info->StopsCount());
   for (const auto stop_ptr : transport_info->GetStopsRange()) {
-    // point_objects.push_back({stop_ptr->name, stop_ptr->position});
     point_objects.push_back({stop_ptr->name, distributor(stop_ptr->id)});
   }
 

@@ -59,6 +59,7 @@ void TestIntegration(const string &test_data_folder_name) {
   stringstream output;
   TestMapRenderingIntegration<DefaultMapRenderer>(input_doc, output);
   PrintOtherRendererResult<MapRenderers::Real::RealMapRenderer>(input_doc, "real_renderer.svg");
+  PrintOtherRendererResult<MapRenderers::Real::RealWithDistributionMapRender>(input_doc, "real_with_distribution_renderer.svg");
 
   Json::Document result_doc = Json::Load(output);
   Json::Document expected_doc = Json::Load(expectedOutput);
