@@ -19,7 +19,6 @@ class TransportInfo {
     Sphere::Point position;
     std::unordered_map<std::string, int> distances;
     std::set<std::string> bus_names;
-    std::unordered_map<size_t, size_t> buses_stat;
   };
 
   struct Bus {

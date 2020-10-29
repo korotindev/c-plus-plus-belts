@@ -43,7 +43,6 @@ void TransportInfo::AddBus(Descriptions::Bus&& bus_desc) {
   for (const string& stop_name : bus->stops) {
     auto stop_ptr = GetSharedValue(name_indexed_stops_, stop_name);
     stop_ptr->bus_names.insert(bus->name);
-    stop_ptr->buses_stat[bus->id]++;
   }
 
   buses_.push_back(bus);
