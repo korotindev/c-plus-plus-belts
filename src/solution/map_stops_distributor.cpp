@@ -6,7 +6,7 @@ MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transpo
   unordered_map<size_t, bool> support_elements;
 
   auto mark_stop_as_support = [this, &support_elements](const TransportInfo::ConstStopPtr &stop_ptr) {
-    support_elements[stop_ptr->id] = stop_ptr->id;
+    support_elements[stop_ptr->id] = true;
     distribution[stop_ptr->id] = stop_ptr->position;
   };
 
