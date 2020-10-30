@@ -1,0 +1,5 @@
+file(GLOB_RECURSE BELTS_PROTOS "*.proto")
+protobuf_generate_cpp(BELTS_PROTO_SRCS BELTS_PROTO_HDRS ${BELTS_PROTOS})
+add_library(belts-protobuf ${BELTS_PROTO_SRCS} ${BELTS_PROTO_HDRS})
+target_include_directories(belts-protobuf PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(belts-protobuf PUBLIC ${Protobuf_LIBRARIES})
