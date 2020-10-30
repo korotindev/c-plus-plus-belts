@@ -150,7 +150,7 @@
             "brown",
             "orange"
         ],
-        "height": 1000,
+        "height": 3,
         "layers": [
             "bus_lines",
             "bus_labels",
