@@ -56,7 +56,7 @@ namespace MapRenderers {
 
       map<string, Svg::Point> stops_coords;
       for (const auto stop_ptr : transport_info->GetStopsRange()) {
-        stops_coords[stop_ptr->name] = projector(stop_ptr->position);
+        stops_coords[stop_ptr->name] = projector(distributor(stop_ptr->id));
       }
 
       return stops_coords;

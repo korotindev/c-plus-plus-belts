@@ -19,6 +19,7 @@ target_compile_options(belts PUBLIC
     -Wredundant-decls
     -Wsign-conversion
     -Wsign-promo
+    -Wno-error=unused-function
 )
 
 target_compile_features(belts PUBLIC cxx_std_20)

@@ -10,18 +10,26 @@ MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transpo
     distribution[stop_ptr->id] = stop_ptr->position;
   };
 
-  for (const auto stop_ptr : transport_info->GetStopsRange()) {
-    if (size_t size = stop_ptr->bus_names.size(); size != 1) {
-      mark_stop_as_support(stop_ptr);
-    } else {
-      const auto bus_ptr = transport_info->GetBus(*stop_ptr->bus_names.begin());
-      unordered_map<size_t, size_t> stops_stat;
-      for (const auto &route_stop_name : bus_ptr->stops) {
-        const auto route_stop_ptr = transport_info->GetStop(route_stop_name);
-        const auto route_stop_visits_count = ++stops_stat[route_stop_ptr->id];
-        if (route_stop_visits_count > 2) {
-          mark_stop_as_support(route_stop_ptr);
+  {
+    unordered_map<size_t, bool> visited_buses;
+    for (const auto stop_ptr : transport_info->GetStopsRange()) {
+      if (size_t size = stop_ptr->bus_names.size(); size != 1) {
+        mark_stop_as_support(stop_ptr);
+      } else {
+        const auto bus_ptr = transport_info->GetBus(*stop_ptr->bus_names.begin());
+        if (visited_buses[bus_ptr->id]) {
+          continue;
         }
+        unordered_map<size_t, size_t> stops_stat;
+        for (const auto &route_stop_name : bus_ptr->stops) {
+          const auto route_stop_ptr = transport_info->GetStop(route_stop_name);
+          const auto route_stop_visits_count = ++stops_stat[route_stop_ptr->id];
+          if (route_stop_visits_count > 2) {
+            mark_stop_as_support(route_stop_ptr);
+          }
+        }
+
+        visited_buses[bus_ptr->id] = true;
       }
     }
   }
@@ -30,16 +38,18 @@ MapStopsDistributor::MapStopsDistributor(shared_ptr<const TransportInfo> transpo
                                                                           const vector<size_t> &collected_idxs,
                                                                           size_t i, size_t j) {
     const auto first_stop = transport_info->GetStop(stops[i]);
+    const auto first_stop_position = distribution.at(first_stop->id);
     const auto last_stop = transport_info->GetStop(stops[j]);
+    const auto last_stop_position = distribution.at(last_stop->id);
 
-    double lon_step = (last_stop->position.longitude - first_stop->position.longitude) / static_cast<double>(j - i);
-    double lat_step = (last_stop->position.latitude - first_stop->position.latitude) / static_cast<double>(j - i);
+    double lon_step = (last_stop_position.longitude - first_stop_position.longitude) / static_cast<double>(j - i);
+    double lat_step = (last_stop_position.latitude - first_stop_position.latitude) / static_cast<double>(j - i);
 
     for (const size_t idx : collected_idxs) {
       const auto stop_ptr = transport_info->GetStop(stops[idx]);
       distribution[stop_ptr->id] =
-          Sphere::Point{.latitude = first_stop->position.latitude + lat_step * static_cast<double>(idx - i),
-                        .longitude = first_stop->position.longitude + lon_step * static_cast<double>(idx - i)};
+          Sphere::Point{.latitude = first_stop_position.latitude + lat_step * static_cast<double>(idx - i),
+                        .longitude = first_stop_position.longitude + lon_step * static_cast<double>(idx - i)};
     }
   };
 
