@@ -1,6 +1,7 @@
 #include "map_renderer.h"
 
 #include <cassert>
+#include <algorithm>
 
 #include "map_stops_distributor.h"
 #include "sphere.h"
@@ -72,45 +73,14 @@ static map<string, Svg::Point> ComputeStopsCoords(shared_ptr<const TransportInfo
   vector<Sphere::Projector::PointObject> point_objects;
   point_objects.reserve(transport_info->StopsCount());
   for (const auto stop_ptr : transport_info->GetStopsRange()) {
-    point_objects.push_back({stop_ptr->name, distributor(stop_ptr->id)});
+    point_objects.push_back({stop_ptr->id, distributor(stop_ptr->id)});
   }
 
-  auto stops_collider = [&transport_info](const Sphere::Projector::PointObject& stop_po,
-                                          const vector<const Sphere::Projector::PointObject*>& group) {
-    const auto stop_ptr = transport_info->GetStop(stop_po.id);
-    const auto& bus_names = stop_ptr->bus_names;
-
-    for (const auto other_stop_po : group) {
-      const auto other_stop_ptr = transport_info->GetStop(other_stop_po->id);
-
-      bool has_short_path_forward = stop_ptr->distances.count(other_stop_ptr->name) > 0;
-      bool has_short_path_backward = other_stop_ptr->distances.count(stop_ptr->name) > 0;
-
-      if (has_short_path_forward || has_short_path_backward) {
-        const auto& other_stop_buses = transport_info->GetStop(other_stop_ptr->name)->bus_names;
-
-        for (const auto& bus_name : bus_names) {
-          if (auto it = other_stop_buses.find(bus_name); it != other_stop_buses.cend()) {
-            const auto& stops = transport_info->GetBus(bus_name)->stops;
-
-            for (size_t i = 1; i < stops.size(); ++i) {
-              if ((stops[i] == stop_ptr->name && stops[i - 1] == other_stop_ptr->name) ||
-                  (stops[i] == other_stop_ptr->name && stops[i - 1] == stop_ptr->name)) {
-                return true;
-              }
-            }
-          }
-        }
-      }
-    }
-    return false;
-  };
-
-  const Sphere::Projector projector(point_objects, stops_collider, max_width, max_height, padding);
+  const Sphere::Projector projector(point_objects, transport_info, max_width, max_height, padding);
 
   map<string, Svg::Point> stops_coords;
-  for (const auto bus_ptr : transport_info->GetStopsRange()) {
-    stops_coords[bus_ptr->name] = projector(bus_ptr->name);
+  for (const auto stop_ptr : transport_info->GetStopsRange()) {
+    stops_coords[stop_ptr->name] = projector(stop_ptr->id);
   }
 
   return stops_coords;
