@@ -30,9 +30,9 @@ class Trie {
     return vertex_id;
   }
 
-  int sym_to_id(char sym) const { return sym - 'a'; }
+  int edge_id(char sym) const { return sym - 'a'; }
 
-  int get_path(int vertex_id, char sym) const { return vertexes.at(vertex_id).at(sym_to_id(sym)); }
+  int get_path(int vertex_id, char sym) const { return vertexes.at(vertex_id).at(edge_id(sym)); }
 
   bool has_path(int vertex_id, char sym) const { return get_path(vertex_id, sym) != -1; }
 
@@ -43,7 +43,7 @@ class Trie {
   int add_path(int parent_vertex_id, char sym) {
     int new_vertex_id = add_empty_vertex();
     parents[new_vertex_id] = make_pair(parent_vertex_id, sym);
-    vertexes[parent_vertex_id][sym_to_id(sym)] = new_vertex_id;
+    vertexes[parent_vertex_id][edge_id(sym)] = new_vertex_id;
     return new_vertex_id;
   }
 
