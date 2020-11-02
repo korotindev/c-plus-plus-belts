@@ -1,3 +1,8 @@
+// Задача: A. Палиндромная конкатенация
+// Ссылка: https://contest.yandex.ru/contest/19251/problems/A/
+// Время посылки: 2 ноя 2020, 13:12:49
+// Номер посылки: 39078419
+
 #include <algorithm>
 #include <iostream>
 #include <memory>

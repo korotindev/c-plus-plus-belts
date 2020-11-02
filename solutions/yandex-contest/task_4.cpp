@@ -1,3 +1,8 @@
+// Задача: D. Повтор
+// Ссылка: https://contest.yandex.ru/contest/19251/problems/D/
+// Время посылки: 2 ноя 2020, 12:58:17
+// Номер посылки: 39077501
+
 #include <iostream>
 #include <string>
 #include <vector>

@@ -1,3 +1,8 @@
+// Задача: C. Packed Prefix
+// Ссылка: https://contest.yandex.ru/contest/19251/problems/C/
+// Время посылки: 1 ноя 2020, 18:30:48
+// Номер посылки: 39042615
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
