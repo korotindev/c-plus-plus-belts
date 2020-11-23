@@ -64,7 +64,9 @@
         "thread": "cpp",
         "*.inc": "cpp",
         "charconv": "cpp",
-        "csignal": "cpp"
+        "csignal": "cpp",
+        "bitset": "cpp",
+        "complex": "cpp"
     },
     "search.exclude": {
         "solutions/**": true,
