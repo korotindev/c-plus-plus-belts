@@ -3,12 +3,15 @@
 #include <unordered_map>
 
 #include "integration_tests.h"
+#include "test_svg.h"
 #include "test_runner.h"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
   TestRunner tr;
+   
+  TestSvg::Run(tr);
 
   if (argc > 1) {
     string test_folder = argv[1];

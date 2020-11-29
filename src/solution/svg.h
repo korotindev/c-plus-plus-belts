@@ -100,6 +100,19 @@ namespace Svg {
     std::string data_;
   };
 
+  class Rect : public Object, public PathProps<Rect> {
+   public:
+    Rect& SetPoint(Point point);
+    Rect& SetWidth(double width);
+    Rect& SetHeight(double height);
+    void Render(std::ostream& out) const override;
+
+   private:
+    Point point_;
+    double width_;
+    double height_;
+  };
+
   class Document : public Object {
    public:
     template <typename ObjectType>

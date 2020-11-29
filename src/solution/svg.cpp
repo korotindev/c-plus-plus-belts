@@ -20,7 +20,7 @@ namespace Svg {
   void RenderColor(std::ostream& out, const Color& color) {
     visit([&out](const auto& value) { RenderColor(out, value); }, color);
   }
-  
+
   Circle& Circle::SetCenter(Point point) {
     center_ = point;
     return *this;
@@ -93,15 +93,40 @@ namespace Svg {
     out << "dy=\"" << offset_.y << "\" ";
     out << "font-size=\"" << font_size_ << "\" ";
     if (font_family_) {
-        out << "font-family=\"" << *font_family_ << "\" ";
+      out << "font-family=\"" << *font_family_ << "\" ";
     }
     if (font_weight_) {
-        out << "font-weight=\"" << *font_weight_ << "\" ";
+      out << "font-weight=\"" << *font_weight_ << "\" ";
     }
     PathProps::RenderAttrs(out);
     out << ">";
     out << data_;
     out << "</text>";
+  }
+
+  Rect& Rect::SetPoint(Point point) {
+    point_ = point;
+    return *this;
+  }
+
+  Rect& Rect::SetWidth(double width) {
+    width_ = width;
+    return *this;
+  }
+
+  Rect& Rect::SetHeight(double height) {
+    height_ = height;
+    return *this;
+  }
+
+  void Rect::Render(ostream& out) const {
+    out << "<rect ";
+    out << "x=\"" << point_.x << "\" ";
+    out << "y=\"" << point_.y << "\" ";
+    out << "width=\"" << width_ << "\" ";
+    out << "height=\"" << height_ << "\" ";
+    PathProps::RenderAttrs(out);
+    out << "/>";
   }
 
   void Document::Render(ostream& out) const {
@@ -113,4 +138,4 @@ namespace Svg {
     out << "</svg>";
   }
 
-}
+}  // namespace Svg
