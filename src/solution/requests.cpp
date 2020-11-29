@@ -63,14 +63,15 @@ namespace Requests {
     if (!route) {
       dict["error_message"] = Json::Node("not found"s);
     } else {
-      dict["total_time"] = Json::Node(route->total_time);
+      dict["total_time"] = Json::Node(route->transport_route_info.total_time);
       Json::Array items;
-      items.reserve(route->items.size());
-      for (const auto& item : route->items) {
+      items.reserve(route->transport_route_info.items.size());
+      for (const auto& item : route->transport_route_info.items) {
         items.push_back(visit(RouteItemResponseBuilder{}, item));
       }
 
       dict["items"] = move(items);
+      dict["map"] = move(route->map);
     }
 
     return dict;

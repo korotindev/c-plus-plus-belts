@@ -25,12 +25,18 @@ namespace Responses {
     int road_route_length = 0;
     double geo_route_length = 0.0;
   };
+
+  struct RouteInfo {
+    TransportRouter::RouteInfo transport_route_info;
+    std::string map;
+  };
 }  // namespace Responses
 
 class TransportCatalog {
  private:
   using Bus = Responses::Bus;
   using Stop = Responses::Stop;
+  using RouteInfo = Responses::RouteInfo;
 
  public:
   TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
@@ -39,7 +45,7 @@ class TransportCatalog {
   const Stop* GetStop(const std::string& name) const;
   const Bus* GetBus(const std::string& name) const;
 
-  std::optional<TransportRouter::RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
+  std::optional<RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
 
   std::string RenderMap() const;
 

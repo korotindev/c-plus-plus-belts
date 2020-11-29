@@ -58,13 +58,23 @@ const TransportCatalog::Bus* TransportCatalog::GetBus(const string& name) const 
   return GetValuePointer(buses_, name);
 }
 
-optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
-  return router_->FindRoute(stop_from, stop_to);
+optional<TransportCatalog::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
+  if (auto route = router_->FindRoute(stop_from, stop_to)) {
+    RouteInfo route_info;
+    ostringstream ss;
+  // TODO: partially cache it ??
+    RouteRenderer(*map_rendering_settings_, buses_dict_, *route, stop_to).Render().Render(ss);
+    route_info.transport_route_info = move(*route);
+    route_info.map = ss.str();
+    return route_info;
+  } else {
+    return nullopt;
+  }
 }
 
 string TransportCatalog::RenderMap() const {
   ostringstream out;
-  // TODO: cache it
+  // TODO: cache it ??
   MapRenderer(*map_rendering_settings_, buses_dict_).Render().Render(out);
   return out.str();
 }
