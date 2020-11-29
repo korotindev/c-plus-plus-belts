@@ -1,5 +1,6 @@
 #include "transport_catalog.h"
 #include "map_renderer.h"
+#include "route_renderer.h"
 #include "utils.h"
 
 #include <algorithm>

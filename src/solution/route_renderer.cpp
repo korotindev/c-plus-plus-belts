@@ -1,17 +1,18 @@
-#include "map_renderer.h"
+#include "route_renderer.h"
 
 #include <algorithm>
 #include <cassert>
 
-#include "map_rendering_utils.h"
+#include "map_renderer.h"
 #include "sphere.h"
+#include "map_rendering_utils.h"
 
 using namespace std;
 
-MapRenderer::MapRenderer(const MapRenderingSettings& settings, const Descriptions::BusesDict& buses_dict)
+RouteRenderer::RouteRenderer(const MapRenderingSettings& settings, const Descriptions::BusesDict& buses_dict)
     : settings_(settings), buses_dict_(buses_dict) {}
 
-void MapRenderer::RenderBusLines(Svg::Document& svg) const {
+void RouteRenderer::RenderBusLines(Svg::Document& svg) const {
   for (const auto& [bus_name, bus_ptr] : buses_dict_) {
     const auto& stops = bus_ptr->stops;
     if (stops.empty()) {
@@ -25,7 +26,7 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
   }
 }
 
-void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
+void RouteRenderer::RenderBusLabels(Svg::Document& svg) const {
   for (const auto& [bus_name, bus_ptr] : buses_dict_) {
     const auto& stops = bus_ptr->stops;
     if (!stops.empty()) {
@@ -36,27 +37,29 @@ void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
   }
 }
 
-void MapRenderer::RenderStopPoints(Svg::Document& svg) const {
+void RouteRenderer::RenderStopPoints(Svg::Document& svg) const {
   for (const auto& [stop_name, stop_point] : settings_.map_settings_.stops_coords_) {
     RenderStopPoint(svg, stop_point, settings_);
   }
 }
 
-void MapRenderer::RenderStopLabels(Svg::Document& svg) const {
+void RouteRenderer::RenderStopLabels(Svg::Document& svg) const {
   for (const auto& [stop_name, stop_point] : settings_.map_settings_.stops_coords_) {
     RenderStopLabel(svg, stop_name, stop_point, settings_);
   }
 }
 
-const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::LAYER_ACTIONS = {
-    {"bus_lines", &MapRenderer::RenderBusLines},
-    {"bus_labels", &MapRenderer::RenderBusLabels},
-    {"stop_points", &MapRenderer::RenderStopPoints},
-    {"stop_labels", &MapRenderer::RenderStopLabels},
+const unordered_map<string, void (RouteRenderer::*)(Svg::Document&) const> RouteRenderer::LAYER_ACTIONS = {
+    {"bus_lines", &RouteRenderer::RenderBusLines},
+    {"bus_labels", &RouteRenderer::RenderBusLabels},
+    {"stop_points", &RouteRenderer::RenderStopPoints},
+    {"stop_labels", &RouteRenderer::RenderStopLabels},
 };
 
-Svg::Document MapRenderer::Render() const {
-  Svg::Document svg;
+Svg::Document RouteRenderer::Render() const {
+  Svg::Document svg = MapRenderer(settings_, buses_dict_).Render();
+
+  RenderBigWhiteSquare(svg, settings_);
 
   for (const auto& layer : settings_.render_settings_.layers) {
     (this->*LAYER_ACTIONS.at(layer))(svg);
