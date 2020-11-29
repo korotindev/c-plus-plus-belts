@@ -47,14 +47,18 @@ void RouteRenderer::RenderBusLines(Svg::Document& svg) const {
 }
 
 void RouteRenderer::RenderBusLabels(Svg::Document& svg) const {
-  for (const auto& [bus_name, bus_ptr] : buses_dict_) {
-    const auto& stops = bus_ptr->stops;
-    if (!stops.empty()) {
-      for (const string& stop_name : bus_ptr->endpoints) {
-        RenderEndpointStopLabel(svg, bus_name, stop_name, settings_);
-      }
+  RenderRouteLine([this, &svg](const TransportRouter::RouteInfo::BusItem& bus, size_t from, size_t to) {
+    const auto& stops = buses_dict_.at(bus.bus_name)->stops;
+    const auto& endpoints = buses_dict_.at(bus.bus_name)->endpoints;
+
+    if (count(endpoints.begin(), endpoints.end(), stops[from]) > 0) {
+      RenderEndpointStopLabel(svg, bus.bus_name, stops[from], settings_);
     }
-  }
+
+    if (count(endpoints.begin(), endpoints.end(), stops[to]) > 0) {
+      RenderEndpointStopLabel(svg, bus.bus_name, stops[to], settings_);
+    }
+  });
 }
 
 void RouteRenderer::RenderStopPoints(Svg::Document& svg) const {
