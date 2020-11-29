@@ -1,31 +1,27 @@
 #include "integration_tests.h"
 
+#include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #include "descriptions.h"
 #include "json.h"
-#include "map_renderer.h"
 #include "requests.h"
-#include "sphere.h"
 #include "test_runner.h"
 #include "transport_catalog.h"
 #include "utils.h"
 
 using namespace std;
 
-void FindAndPrintSvg(const Json::Document &doc, string filename) {
+void FindAndPrintSvg(const Json::Document &doc, filesystem::path &dir, string filename_part) {
   for (const auto &answer : doc.GetRoot().AsArray()) {
     if (answer.IsMap()) {
       const auto &answer_map = answer.AsMap();
       if (answer_map.count("map")) {
         const string &rendered_map = answer_map.at("map").AsString();
-        ofstream out(filename);
+        string filename = to_string(answer_map.at("request_id").AsInt()) + "_" + filename_part + ".svg";
+        ofstream out(dir / filename);
         out << rendered_map;
-        break;
       }
     }
   }
@@ -44,13 +40,17 @@ void TestIntegration(const string &test_data_folder_name) {
   auto input = ifstream(test_data_folder_name + "/input.json");
   const auto input_doc = Json::Load(input);
 
+  filesystem::path dir = filesystem::current_path() / ".svg_test_results";
+  filesystem::remove_all(dir);
+  filesystem::create_directory(dir);
+
   stringstream output;
   RunMain(input_doc, output);
   auto result_doc = Json::Load(output);
-  FindAndPrintSvg(result_doc, "test_result.svg");
+  FindAndPrintSvg(result_doc, dir, "result");
 
   auto expected_doc_input = ifstream(test_data_folder_name + "/expected_output.json");
   Json::Document expected_doc = Json::Load(expected_doc_input);
-  FindAndPrintSvg(expected_doc, "test_expected.svg");
+  FindAndPrintSvg(expected_doc, dir, "expected");
   ASSERT_EQUAL(result_doc, expected_doc);
 }
