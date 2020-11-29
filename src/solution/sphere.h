@@ -13,4 +13,4 @@ namespace Sphere {
   };
 
   double Distance(Point lhs, Point rhs);
-}  // namespace Sphere
+}

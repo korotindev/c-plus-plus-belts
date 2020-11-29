@@ -15,4 +15,6 @@ string_view Strip(string_view line) {
   return line;
 }
 
-bool IsZero(double x) { return abs(x) < 1e-6; }
+bool IsZero(double x) {
+  return abs(x) < 1e-6;
+}

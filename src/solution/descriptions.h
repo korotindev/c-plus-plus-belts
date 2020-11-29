@@ -1,5 +1,8 @@
 #pragma once
 
+#include "json.h"
+#include "sphere.h"
+
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -7,8 +10,6 @@
 #include <variant>
 #include <vector>
 
-#include "json.h"
-#include "sphere.h"
 
 namespace Descriptions {
   struct Stop {
@@ -18,6 +19,8 @@ namespace Descriptions {
 
     static Stop ParseFrom(const Json::Dict& attrs);
   };
+
+  int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
 
   struct Bus {
     std::string name;
@@ -30,4 +33,10 @@ namespace Descriptions {
   using InputQuery = std::variant<Stop, Bus>;
 
   std::vector<InputQuery> ReadDescriptions(const Json::Array& nodes);
-}  // namespace Descriptions
+
+  template <typename Object>
+  using Dict = std::map<std::string, const Object*>;
+
+  using StopsDict = Dict<Stop>;
+  using BusesDict = Dict<Bus>;
+}

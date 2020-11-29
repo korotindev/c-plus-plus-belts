@@ -1,15 +1,14 @@
 #include "requests.h"
+#include "transport_router.h"
 
 #include <vector>
-
-#include "transport_router.h"
 
 using namespace std;
 
 namespace Requests {
 
   Json::Dict Stop::Process(const TransportCatalog& db) const {
-    const auto stop = db.GetStop(name);
+    const auto* stop = db.GetStop(name);
     Json::Dict dict;
     if (!stop) {
       dict["error_message"] = Json::Node("not found"s);
@@ -25,13 +24,13 @@ namespace Requests {
   }
 
   Json::Dict Bus::Process(const TransportCatalog& db) const {
-    const auto bus = db.GetBus(name);
+    const auto* bus = db.GetBus(name);
     Json::Dict dict;
     if (!bus) {
       dict["error_message"] = Json::Node("not found"s);
     } else {
       dict = {
-          {"stop_count", Json::Node(static_cast<int>(bus->stops.size()))},
+          {"stop_count", Json::Node(static_cast<int>(bus->stop_count))},
           {"unique_stop_count", Json::Node(static_cast<int>(bus->unique_stop_count))},
           {"route_length", Json::Node(bus->road_route_length)},
           {"curvature", Json::Node(bus->road_route_length / bus->geo_route_length)},
@@ -42,10 +41,12 @@ namespace Requests {
 
   struct RouteItemResponseBuilder {
     Json::Dict operator()(const TransportRouter::RouteInfo::BusItem& bus_item) const {
-      return Json::Dict{{"type", Json::Node("Bus"s)},
-                        {"bus", Json::Node(bus_item.bus_name)},
-                        {"time", Json::Node(bus_item.time)},
-                        {"span_count", Json::Node(static_cast<int>(bus_item.span_count))}};
+      return Json::Dict{
+          {"type", Json::Node("Bus"s)},
+          {"bus", Json::Node(bus_item.bus_name)},
+          {"time", Json::Node(bus_item.time)},
+          {"span_count", Json::Node(static_cast<int>(bus_item.span_count))}
+      };
     }
     Json::Dict operator()(const TransportRouter::RouteInfo::WaitItem& wait_item) const {
       return Json::Dict{
@@ -98,12 +99,14 @@ namespace Requests {
     Json::Array responses;
     responses.reserve(requests.size());
     for (const Json::Node& request_node : requests) {
-      Json::Dict dict =
-          visit([&db](const auto& request) { return request.Process(db); }, Requests::Read(request_node.AsMap()));
+      Json::Dict dict = visit([&db](const auto& request) {
+                                return request.Process(db);
+                              },
+                              Requests::Read(request_node.AsMap()));
       dict["request_id"] = Json::Node(request_node.AsMap().at("id").AsInt());
       responses.push_back(Json::Node(dict));
     }
     return responses;
   }
 
-}  // namespace Requests
+}

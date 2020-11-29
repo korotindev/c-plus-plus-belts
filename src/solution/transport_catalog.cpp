@@ -1,7 +1,8 @@
 #include "transport_catalog.h"
+#include "map_renderer.h"
+#include "utils.h"
 
 #include <algorithm>
-#include <iomanip>
 #include <iterator>
 #include <map>
 #include <optional>
@@ -10,40 +11,50 @@
 
 using namespace std;
 
-TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
-                                   const Json::Dict& render_settings_json, unique_ptr<IMapRenderer> renderer)
-    : transport_info_(make_shared<TransportInfo>()) {
-  auto stops_end =
-      partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
+TransportCatalog::TransportCatalog(
+    vector<Descriptions::InputQuery> data,
+    const Json::Dict& routing_settings_json,
+    const Json::Dict& render_settings_json
+) {
+  auto stops_end = partition(begin(data), end(data), [](const auto& item) {
+    return holds_alternative<Descriptions::Stop>(item);
+  });
 
-  sort(begin(data), stops_end,
-       [](auto lhs, auto rhs) { return get<Descriptions::Stop>(lhs).name < get<Descriptions::Stop>(rhs).name; });
-
-  for (auto& item : Range{begin(data), stops_end}) {
-    auto& stop = get<Descriptions::Stop>(item);
-    transport_info_->AddStop(move(stop));
+  Descriptions::StopsDict stops_dict;
+  for (const auto& item : Range{begin(data), stops_end}) {
+    const auto& stop = get<Descriptions::Stop>(item);
+    stops_dict[stop.name] = &stop;
+    stops_.insert({stop.name, {}});
   }
 
-  sort(stops_end, end(data),
-       [](auto lhs, auto rhs) { return get<Descriptions::Bus>(lhs).name < get<Descriptions::Bus>(rhs).name; });
+  Descriptions::BusesDict buses_dict;
+  for (const auto& item : Range{stops_end, end(data)}) {
+    const auto& bus = get<Descriptions::Bus>(item);
 
-  for (auto& item : Range{stops_end, end(data)}) {
-    auto& bus = get<Descriptions::Bus>(item);
-    transport_info_->AddBus(move(bus));
+    buses_dict[bus.name] = &bus;
+    buses_[bus.name] = Bus{
+      bus.stops.size(),
+      ComputeUniqueItemsCount(AsRange(bus.stops)),
+      ComputeRoadRouteLength(bus.stops, stops_dict),
+      ComputeGeoRouteDistance(bus.stops, stops_dict)
+    };
+
+    for (const string& stop_name : bus.stops) {
+      stops_.at(stop_name).bus_names.insert(bus.name);
+    }
   }
 
-  router_ = make_unique<TransportRouter>(transport_info_, routing_settings_json);
+  router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
 
-  renderer->Prepare(transport_info_, render_settings_json);
-  map_ = renderer->Render();
+  map_ = BuildMap(stops_dict, buses_dict, render_settings_json);
 }
 
-shared_ptr<const TransportInfo::Stop> TransportCatalog::GetStop(const string& name) const {
-  return transport_info_->GetStop(name);
+const TransportCatalog::Stop* TransportCatalog::GetStop(const string& name) const {
+  return GetValuePointer(stops_, name);
 }
 
-shared_ptr<const TransportInfo::Bus> TransportCatalog::GetBus(const string& name) const {
-  return transport_info_->GetBus(name);
+const TransportCatalog::Bus* TransportCatalog::GetBus(const string& name) const {
+  return GetValuePointer(buses_, name);
 }
 
 optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
@@ -52,7 +63,41 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
 
 string TransportCatalog::RenderMap() const {
   ostringstream out;
-  out.precision(6);
   map_.Render(out);
   return out.str();
 }
+
+int TransportCatalog::ComputeRoadRouteLength(
+    const vector<string>& stops,
+    const Descriptions::StopsDict& stops_dict
+) {
+  int result = 0;
+  for (size_t i = 1; i < stops.size(); ++i) {
+    result += Descriptions::ComputeStopsDistance(*stops_dict.at(stops[i - 1]), *stops_dict.at(stops[i]));
+  }
+  return result;
+}
+
+double TransportCatalog::ComputeGeoRouteDistance(
+    const vector<string>& stops,
+    const Descriptions::StopsDict& stops_dict
+) {
+  double result = 0;
+  for (size_t i = 1; i < stops.size(); ++i) {
+    result += Sphere::Distance(
+      stops_dict.at(stops[i - 1])->position, stops_dict.at(stops[i])->position
+    );
+  }
+  return result;
+}
+
+
+Svg::Document TransportCatalog::BuildMap(const Descriptions::StopsDict& stops_dict,
+                                         const Descriptions::BusesDict& buses_dict,
+                                         const Json::Dict& render_settings_json) {
+  if (stops_dict.empty()) {
+    return {};
+  }
+  return MapRenderer(stops_dict, buses_dict, render_settings_json).Render();
+}
+

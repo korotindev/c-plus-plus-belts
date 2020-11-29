@@ -29,15 +29,10 @@ namespace Svg {
   const Color NoneColor{};
 
   void RenderColor(std::ostream& out, std::monostate);
-
   void RenderColor(std::ostream& out, const std::string& value);
-
   void RenderColor(std::ostream& out, Rgb rgb);
-
   void RenderColor(std::ostream& out, Rgba rgba);
-
   void RenderColor(std::ostream& out, const Color& color);
-
 
   class Object {
    public:

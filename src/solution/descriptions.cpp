@@ -5,13 +5,14 @@ using namespace std;
 namespace Descriptions {
 
   Stop Stop::ParseFrom(const Json::Dict& attrs) {
-    Stop stop = {.name = attrs.at("name").AsString(),
-                 .position =
-                     {
-                         .latitude = attrs.at("latitude").AsDouble(),
-                         .longitude = attrs.at("longitude").AsDouble(),
-                     },
-                 .distances = {}};
+    Stop stop = {
+        .name = attrs.at("name").AsString(),
+        .position = {
+            .latitude = attrs.at("latitude").AsDouble(),
+            .longitude = attrs.at("longitude").AsDouble(),
+        },
+        .distances = {}
+    };
     if (attrs.count("road_distances") > 0) {
       for (const auto& [neighbour_stop, distance_node] : attrs.at("road_distances").AsMap()) {
         stop.distances[neighbour_stop] = distance_node.AsInt();
@@ -36,16 +37,25 @@ namespace Descriptions {
     return stops;
   }
 
+  int ComputeStopsDistance(const Stop& lhs, const Stop& rhs) {
+    if (auto it = lhs.distances.find(rhs.name); it != lhs.distances.end()) {
+      return it->second;
+    } else {
+      return rhs.distances.at(lhs.name);
+    }
+  }
+
   Bus Bus::ParseFrom(const Json::Dict& attrs) {
     const auto& name = attrs.at("name").AsString();
     const auto& stops = attrs.at("stops").AsArray();
-    const bool is_roundtrip = attrs.at("is_roundtrip").AsBool();
     if (stops.empty()) {
       return Bus{.name = name, .stops = {}, .endpoints = {}};
     } else {
-      Bus bus{.name = name,
-              .stops = ParseStops(stops, is_roundtrip),
-              .endpoints = {stops.front().AsString(), stops.back().AsString()}};
+      Bus bus{
+          .name = name,
+          .stops = ParseStops(stops, attrs.at("is_roundtrip").AsBool()),
+          .endpoints = {stops.front().AsString(), stops.back().AsString()}
+      };
       if (bus.endpoints.back() == bus.endpoints.front()) {
         bus.endpoints.pop_back();
       }
@@ -69,4 +79,4 @@ namespace Descriptions {
     return result;
   }
 
-}  // namespace Descriptions
+}

@@ -1,16 +1,14 @@
 #pragma once
 
+#include "descriptions.h"
+#include "json.h"
+#include "svg.h"
+
 #include <map>
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "descriptions.h"
-#include "json.h"
-#include "sphere_projection.h"
-#include "svg.h"
-#include "transport_info.h"
 
 struct RenderSettings {
   double max_width;
@@ -28,23 +26,17 @@ struct RenderSettings {
   std::vector<std::string> layers;
 };
 
-class IMapRenderer {
- public:
-  virtual void Prepare(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json) = 0;
-  virtual Svg::Document Render() const = 0;
-  virtual ~IMapRenderer() {}
+class MapRenderer {
+public:
+  MapRenderer(const Descriptions::StopsDict& stops_dict,
+              const Descriptions::BusesDict& buses_dict,
+              const Json::Dict& render_settings_json);
 
- protected:
-  std::shared_ptr<const TransportInfo> transport_info_;
+  Svg::Document Render() const;
+
+private:
   RenderSettings render_settings_;
-};
-
-class DefaultMapRenderer : public IMapRenderer {
- public:
-  void Prepare(std::shared_ptr<const TransportInfo> transport_info, const Json::Dict& render_settings_json) override;
-  Svg::Document Render() const override;
-
- private:
+  const Descriptions::BusesDict& buses_dict_;
   std::map<std::string, Svg::Point> stops_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;
 
@@ -53,9 +45,5 @@ class DefaultMapRenderer : public IMapRenderer {
   void RenderStopPoints(Svg::Document& svg) const;
   void RenderStopLabels(Svg::Document& svg) const;
 
-  static const std::unordered_map<std::string, void (DefaultMapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
+  static const std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
 };
-
-RenderSettings ParseRenderSettings(const Json::Dict& json);
-std::unordered_map<std::string, Svg::Color> ChooseBusColors(std::shared_ptr<const TransportInfo> transport_info,
-                                                            const RenderSettings& render_settings);

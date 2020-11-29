@@ -14,7 +14,6 @@
 #include "test_runner.h"
 #include "transport_catalog.h"
 #include "utils.h"
-#include "map_renderers/real/real.h"
 
 using namespace std;
 
@@ -32,33 +31,23 @@ void FindAndPrintSvg(const Json::Document &doc, string filename) {
   }
 }
 
-template <typename ConcreteMapRenderer, class = enable_if<is_base_of<IMapRenderer, ConcreteMapRenderer>::value>::type>
-void TestMapRenderingIntegration(const Json::Document &input_doc, ostream &out) {
+void RunMain(const Json::Document &input_doc, ostream &out) {
   const auto &input_map = input_doc.GetRoot().AsMap();
   const TransportCatalog db(Descriptions::ReadDescriptions(input_map.at("base_requests").AsArray()),
-                            input_map.at("routing_settings").AsMap(), input_map.at("render_settings").AsMap(),
-                            make_unique<ConcreteMapRenderer>());
+                            input_map.at("routing_settings").AsMap(), input_map.at("render_settings").AsMap());
   out.precision(17);
   Json::PrintValue(Requests::ProcessAll(db, input_map.at("stat_requests").AsArray()), out);
   out << endl;
 }
 
-template <typename ConcreteMapRenderer>
-Json::Document PrintOtherRendererResult(const Json::Document &input_doc, const string &filename) {
-  stringstream stream;
-  TestMapRenderingIntegration<ConcreteMapRenderer>(input_doc, stream);
-  auto result_doc = Json::Load(stream);
-  FindAndPrintSvg(result_doc, filename);
-  return result_doc;
-}
-
 void TestIntegration(const string &test_data_folder_name) {
   auto input = ifstream(test_data_folder_name + "/input.json");
   const auto input_doc = Json::Load(input);
-  
-  auto result_doc = PrintOtherRendererResult<DefaultMapRenderer>(input_doc, "test_result.svg");
-  PrintOtherRendererResult<MapRenderers::Real::RealMapRenderer>(input_doc, "real_renderer.svg");
-  PrintOtherRendererResult<MapRenderers::Real::RealWithDistributionMapRender>(input_doc, "real_with_distribution_renderer.svg");
+
+  stringstream output;
+  RunMain(input_doc, output);
+  auto result_doc = Json::Load(output);
+  FindAndPrintSvg(result_doc, "test_result.svg");
 
   auto expected_doc_input = ifstream(test_data_folder_name + "/expected_output.json");
   Json::Document expected_doc = Json::Load(expected_doc_input);
