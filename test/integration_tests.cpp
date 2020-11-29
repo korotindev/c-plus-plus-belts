@@ -11,7 +11,7 @@
 #include "transport_catalog.h"
 #include "utils.h"
 
-constexpr bool debug_svg = false;
+const bool debug_svg = true;
 
 using namespace std;
 
@@ -49,7 +49,7 @@ void TestIntegration(const string &test_data_folder_name) {
   auto expected_doc_input = ifstream(test_data_folder_name + "/expected_output.json");
   Json::Document expected_doc = Json::Load(expected_doc_input);
 
-  if constexpr (debug_svg) {
+  if (debug_svg) {
     filesystem::path dir = filesystem::current_path() / ".svg_test_results";
     filesystem::remove_all(dir);
     filesystem::create_directory(dir);
