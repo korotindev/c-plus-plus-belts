@@ -62,12 +62,12 @@ namespace {
 }  // namespace
 
 MapRenderer::MapRenderer(const MapRenderingSettings& settings,
-                         const std::unordered_map<std::string, Responses::Bus>& buses_dict)
+                         const Descriptions::BusesDict& buses_dict)
     : settings_(settings), buses_dict_(buses_dict) {}
 
 void MapRenderer::RenderBusLines(Svg::Document& svg) const {
   for (const auto& [bus_name, bus_ptr] : buses_dict_) {
-    const auto& stops = bus_ptr.stops;
+    const auto& stops = bus_ptr->stops;
     if (stops.empty()) {
       continue;
     }
@@ -81,9 +81,9 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
 
 void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
   for (const auto& [bus_name, bus_ptr] : buses_dict_) {
-    const auto& stops = bus_ptr.stops;
+    const auto& stops = bus_ptr->stops;
     if (!stops.empty()) {
-      for (const string& endpoint : bus_ptr.endpoints) {
+      for (const string& endpoint : bus_ptr->endpoints) {
         const auto stop_point = settings_.GetStopPoint(endpoint);
         RenderEndpointStopLabel(svg, bus_name, stop_point, settings_);
       }

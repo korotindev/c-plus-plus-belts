@@ -10,7 +10,7 @@
 class MapRenderer {
  public:
   MapRenderer(const MapRenderingSettings& map_rendering_settings,
-                           const std::unordered_map<std::string, Responses::Bus>& buses_dict);
+                           const Descriptions::BusesDict& buses_dict);
   Svg::Document Render() const;
 
  private:
@@ -20,6 +20,6 @@ class MapRenderer {
   void RenderStopLabels(Svg::Document& svg) const;
 
   const MapRenderingSettings& settings_;
-  const std::unordered_map<std::string, Responses::Bus>& buses_dict_;
+  const Descriptions::BusesDict& buses_dict_;
   const static std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> LAYER_ACTIONS;
 };

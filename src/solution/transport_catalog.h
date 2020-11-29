@@ -20,8 +20,7 @@ namespace Responses {
   };
 
   struct Bus {
-    std::vector<std::string> endpoints;
-    std::vector<std::string> stops;
+    size_t stops_count = 0;
     size_t unique_stop_count = 0;
     int road_route_length = 0;
     double geo_route_length = 0.0;
@@ -50,6 +49,8 @@ class TransportCatalog {
   static double ComputeGeoRouteDistance(const std::vector<std::string>& stops,
                                         const Descriptions::StopsDict& stops_dict);
 
+  Descriptions::StopsDict stops_dict_;
+  Descriptions::BusesDict buses_dict_;
   std::unordered_map<std::string, Stop> stops_;
   std::unordered_map<std::string, Bus> buses_;
   std::unique_ptr<TransportRouter> router_;

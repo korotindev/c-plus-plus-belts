@@ -69,8 +69,8 @@ static unordered_set<string> FindSupportStops(const Descriptions::BusesDict& bus
     }
     for (const string& stop : bus_ptr->stops) {
       ++stops_rank[stop];
-      const auto [it, inserted] = stops_first_bus.emplace(stop, bus_ptr);
-      if (!inserted && it->second != bus_ptr) {
+      const auto [it, inserted] = stops_first_bus.emplace(stop, bus_ptr.get());
+      if (!inserted && it->second != bus_ptr.get()) {
         support_stops.insert(stop);
       }
     }

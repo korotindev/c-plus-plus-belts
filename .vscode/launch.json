@@ -27,7 +27,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/belts-unit-tests",
-            "args": ["${workspaceFolder}/test/samples/test1"],
+            "args": ["${workspaceFolder}/test/samples/test2"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/test",
             "environment": [],

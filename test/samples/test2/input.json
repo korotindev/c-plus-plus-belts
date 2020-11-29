@@ -10,6 +10,7 @@
         "padding": 50,
         "height": 950,
         "line_width": 10,
+        "outer_margin": 150,
         "underlayer_color": [
             255,
             255,

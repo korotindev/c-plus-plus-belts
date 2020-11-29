@@ -20,34 +20,33 @@ TransportCatalog::TransportCatalog(
     return holds_alternative<Descriptions::Stop>(item);
   });
 
-  Descriptions::StopsDict stops_dict;
-  for (const auto& item : Range{begin(data), stops_end}) {
-    const auto& stop = get<Descriptions::Stop>(item);
-    stops_dict[stop.name] = &stop;
+  for (auto& item : Range{begin(data), stops_end}) {
+    auto& stop = get<Descriptions::Stop>(item);
     stops_.insert({stop.name, {}});
+    string name = stop.name;
+    stops_dict_[name] = make_unique<Descriptions::Stop>(move(stop));
   }
 
-  Descriptions::BusesDict buses_dict;
-  for (const auto& item : Range{stops_end, end(data)}) {
-    const auto& bus = get<Descriptions::Bus>(item);
+  for (auto& item : Range{stops_end, end(data)}) {
+    auto& bus = get<Descriptions::Bus>(item);
 
-    buses_dict[bus.name] = &bus;
     buses_[bus.name] = Bus{
-      bus.stops,
-      bus.endpoints,
+      bus.stops.size(),
       ComputeUniqueItemsCount(AsRange(bus.stops)),
-      ComputeRoadRouteLength(bus.stops, stops_dict),
-      ComputeGeoRouteDistance(bus.stops, stops_dict)
+      ComputeRoadRouteLength(bus.stops, stops_dict_),
+      ComputeGeoRouteDistance(bus.stops, stops_dict_)
     };
 
     for (const string& stop_name : bus.stops) {
       stops_.at(stop_name).bus_names.insert(bus.name);
     }
+    string name = bus.name;
+    buses_dict_[name] = make_unique<Descriptions::Bus>(move(bus));
   }
 
-  router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
+  router_ = make_unique<TransportRouter>(stops_dict_, buses_dict_, routing_settings_json);
 
-  map_rendering_settings_ = make_unique<const MapRenderingSettings>(stops_dict, buses_dict, render_settings_json);
+  map_rendering_settings_ = make_unique<const MapRenderingSettings>(stops_dict_, buses_dict_, render_settings_json);
 }
 
 const TransportCatalog::Stop* TransportCatalog::GetStop(const string& name) const {
@@ -65,7 +64,7 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
 string TransportCatalog::RenderMap() const {
   ostringstream out;
   // TODO: cache it
-  MapRenderer(*map_rendering_settings_, buses_).Render().Render(out);
+  MapRenderer(*map_rendering_settings_, buses_dict_).Render().Render(out);
   return out.str();
 }
 
