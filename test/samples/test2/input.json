@@ -1,6 +1,18 @@
 {
     "stat_requests": [
         {
+            "from": "Улица Лизы Чайкиной",
+            "to": "Краево-Греческая улица",
+            "type": "Route",
+            "id": 822710686
+        },
+        {
+            "from": "Пансионат Нева",
+            "to": "Мацестинская долина",
+            "type": "Route",
+            "id": 299735397
+        },
+        {
             "type": "Map",
             "id": 1821171961
         }
@@ -10,7 +22,6 @@
         "padding": 50,
         "height": 950,
         "line_width": 10,
-        "outer_margin": 150,
         "underlayer_color": [
             255,
             255,
@@ -20,6 +31,7 @@
         "underlayer_width": 3,
         "stop_label_font_size": 13,
         "stop_radius": 3,
+        "outer_margin": 150,
         "width": 1500,
         "bus_label_offset": [
             7,

@@ -11,6 +11,8 @@
 #include "transport_catalog.h"
 #include "utils.h"
 
+constexpr bool debug_svg = false;
+
 using namespace std;
 
 void FindAndPrintSvg(const Json::Document &doc, filesystem::path &dir, string filename_part) {
@@ -40,17 +42,20 @@ void TestIntegration(const string &test_data_folder_name) {
   auto input = ifstream(test_data_folder_name + "/input.json");
   const auto input_doc = Json::Load(input);
 
-  filesystem::path dir = filesystem::current_path() / ".svg_test_results";
-  filesystem::remove_all(dir);
-  filesystem::create_directory(dir);
-
   stringstream output;
   RunMain(input_doc, output);
   auto result_doc = Json::Load(output);
-  FindAndPrintSvg(result_doc, dir, "result");
 
   auto expected_doc_input = ifstream(test_data_folder_name + "/expected_output.json");
   Json::Document expected_doc = Json::Load(expected_doc_input);
-  FindAndPrintSvg(expected_doc, dir, "expected");
+
+  if constexpr (debug_svg) {
+    filesystem::path dir = filesystem::current_path() / ".svg_test_results";
+    filesystem::remove_all(dir);
+    filesystem::create_directory(dir);
+    FindAndPrintSvg(result_doc, dir, "result");
+    FindAndPrintSvg(expected_doc, dir, "expected");
+  }
+
   ASSERT_EQUAL(result_doc, expected_doc);
 }
