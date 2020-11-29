@@ -57,7 +57,7 @@ void RenderStopPoint(Svg::Document& svg, const Svg::Point& stop_point, const Map
 void RenderBigWhiteSquare(Svg::Document& svg, const MapRenderingSettings& settings) {
   svg.Add(Svg::Rect{}
               .SetPoint({.x = -settings.render_settings_.outer_margin, .y = -settings.render_settings_.outer_margin})
-              .SetHeight(settings.render_settings_.max_height + settings.render_settings_.outer_margin)
-              .SetWidth(settings.render_settings_.max_width + settings.render_settings_.outer_margin)
+              .SetHeight(settings.render_settings_.max_height + 2.0 * settings.render_settings_.outer_margin)
+              .SetWidth(settings.render_settings_.max_width + 2.0 * settings.render_settings_.outer_margin)
               .SetFillColor(settings.render_settings_.underlayer_color));
 }
