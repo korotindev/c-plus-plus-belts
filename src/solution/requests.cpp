@@ -30,7 +30,7 @@ namespace Requests {
       dict["error_message"] = Json::Node("not found"s);
     } else {
       dict = {
-          {"stop_count", Json::Node(static_cast<int>(bus->stop_count))},
+          {"stop_count", Json::Node(static_cast<int>(bus->stops.size()))},
           {"unique_stop_count", Json::Node(static_cast<int>(bus->unique_stop_count))},
           {"route_length", Json::Node(bus->road_route_length)},
           {"curvature", Json::Node(bus->road_route_length / bus->geo_route_length)},

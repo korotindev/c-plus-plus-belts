@@ -33,7 +33,8 @@ TransportCatalog::TransportCatalog(
 
     buses_dict[bus.name] = &bus;
     buses_[bus.name] = Bus{
-      bus.stops.size(),
+      bus.stops,
+      bus.endpoints,
       ComputeUniqueItemsCount(AsRange(bus.stops)),
       ComputeRoadRouteLength(bus.stops, stops_dict),
       ComputeGeoRouteDistance(bus.stops, stops_dict)
@@ -46,7 +47,7 @@ TransportCatalog::TransportCatalog(
 
   router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
 
-  map_ = BuildMap(stops_dict, buses_dict, render_settings_json);
+  map_rendering_settings_ = make_unique<const MapRenderingSettings>(stops_dict, buses_dict, render_settings_json);
 }
 
 const TransportCatalog::Stop* TransportCatalog::GetStop(const string& name) const {
@@ -63,7 +64,8 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
 
 string TransportCatalog::RenderMap() const {
   ostringstream out;
-  map_.Render(out);
+  // TODO: cache it
+  MapRenderer(*map_rendering_settings_, buses_).Render().Render(out);
   return out.str();
 }
 
@@ -89,15 +91,5 @@ double TransportCatalog::ComputeGeoRouteDistance(
     );
   }
   return result;
-}
-
-
-Svg::Document TransportCatalog::BuildMap(const Descriptions::StopsDict& stops_dict,
-                                         const Descriptions::BusesDict& buses_dict,
-                                         const Json::Dict& render_settings_json) {
-  if (stops_dict.empty()) {
-    return {};
-  }
-  return MapRenderer(stops_dict, buses_dict, render_settings_json).Render();
 }
 

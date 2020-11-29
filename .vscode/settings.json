@@ -67,7 +67,8 @@
         "csignal": "cpp",
         "bitset": "cpp",
         "complex": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "codecvt": "cpp"
     },
     "search.exclude": {
         "solutions/**": true,

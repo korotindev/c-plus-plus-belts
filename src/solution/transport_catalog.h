@@ -1,11 +1,5 @@
 #pragma once
 
-#include "descriptions.h"
-#include "json.h"
-#include "svg.h"
-#include "transport_router.h"
-#include "utils.h"
-
 #include <optional>
 #include <set>
 #include <string>
@@ -13,30 +7,35 @@
 #include <variant>
 #include <vector>
 
+#include "descriptions.h"
+#include "json.h"
+#include "svg.h"
+#include "transport_router.h"
+#include "map_rendering_settings.h"
+#include "utils.h"
+
 namespace Responses {
   struct Stop {
     std::set<std::string> bus_names;
   };
 
   struct Bus {
-    size_t stop_count = 0;
+    std::vector<std::string> endpoints;
+    std::vector<std::string> stops;
     size_t unique_stop_count = 0;
     int road_route_length = 0;
     double geo_route_length = 0.0;
   };
-}
+}  // namespace Responses
 
 class TransportCatalog {
-private:
+ private:
   using Bus = Responses::Bus;
   using Stop = Responses::Stop;
 
-public:
-  TransportCatalog(
-      std::vector<Descriptions::InputQuery> data,
-      const Json::Dict& routing_settings_json,
-      const Json::Dict& render_settings_json
-  );
+ public:
+  TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
+                   const Json::Dict& render_settings_json);
 
   const Stop* GetStop(const std::string& name) const;
   const Bus* GetBus(const std::string& name) const;
@@ -45,25 +44,14 @@ public:
 
   std::string RenderMap() const;
 
-private:
-  static int ComputeRoadRouteLength(
-      const std::vector<std::string>& stops,
-      const Descriptions::StopsDict& stops_dict
-  );
+ private:
+  static int ComputeRoadRouteLength(const std::vector<std::string>& stops, const Descriptions::StopsDict& stops_dict);
 
-  static double ComputeGeoRouteDistance(
-      const std::vector<std::string>& stops,
-      const Descriptions::StopsDict& stops_dict
-  );
-
-  static Svg::Document BuildMap(
-      const Descriptions::StopsDict& stops_dict,
-      const Descriptions::BusesDict& buses_dict,
-      const Json::Dict& render_settings_json
-  );
+  static double ComputeGeoRouteDistance(const std::vector<std::string>& stops,
+                                        const Descriptions::StopsDict& stops_dict);
 
   std::unordered_map<std::string, Stop> stops_;
   std::unordered_map<std::string, Bus> buses_;
   std::unique_ptr<TransportRouter> router_;
-  Svg::Document map_;
+  std::unique_ptr<const MapRenderingSettings> map_rendering_settings_;
 };
