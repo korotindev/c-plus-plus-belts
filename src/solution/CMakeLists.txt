@@ -9,7 +9,6 @@ target_compile_options(belts PUBLIC
     -Wpedantic
     -Wcast-align
     -Wcast-qual
-    -Wconversion
     -Wctor-dtor-privacy
     -Wenum-compare
     -Wfloat-equal
@@ -17,7 +16,6 @@ target_compile_options(belts PUBLIC
     -Wold-style-cast
     -Woverloaded-virtual
     -Wredundant-decls
-    -Wsign-conversion
     -Wsign-promo
     -Wno-error=unused-function
 )

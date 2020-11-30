@@ -11,7 +11,7 @@
 #include "transport_catalog.h"
 #include "utils.h"
 
-const bool debug_svg = true;
+const bool debug_svg = false;
 
 using namespace std;
 

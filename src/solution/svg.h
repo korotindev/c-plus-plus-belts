@@ -36,8 +36,16 @@ namespace Svg {
 
   class Object {
    public:
+    virtual std::unique_ptr<Object> Copy() const = 0;
     virtual void Render(std::ostream& out) const = 0;
     virtual ~Object() = default;
+  };
+
+  template <typename Owner>
+  class CopyableObject : public Object {
+   public:
+    std::unique_ptr<Object> Copy() const override;
+    virtual ~CopyableObject() = default;
   };
 
   template <typename Owner>
@@ -61,7 +69,7 @@ namespace Svg {
     Owner& AsOwner();
   };
 
-  class Circle : public Object, public PathProps<Circle> {
+  class Circle : public CopyableObject<Circle>, public PathProps<Circle> {
    public:
     Circle& SetCenter(Point point);
     Circle& SetRadius(double radius);
@@ -72,7 +80,7 @@ namespace Svg {
     double radius_ = 1;
   };
 
-  class Polyline : public Object, public PathProps<Polyline> {
+  class Polyline : public CopyableObject<Polyline>, public PathProps<Polyline> {
    public:
     Polyline& AddPoint(Point point);
     void Render(std::ostream& out) const override;
@@ -81,7 +89,18 @@ namespace Svg {
     std::vector<Point> points_;
   };
 
-  class Text : public Object, public PathProps<Text> {
+  class Rectangle : public CopyableObject<Rectangle>, public PathProps<Rectangle> {
+   public:
+    Rectangle& SetTopLeftPoint(Point point);
+    Rectangle& SetBottomRightPoint(Point point);
+    void Render(std::ostream& out) const override;
+
+   private:
+    Point top_left_point_;
+    Point bottom_right_point_;
+  };
+
+  class Text : public CopyableObject<Text>, public PathProps<Text> {
    public:
     Text& SetPoint(Point point);
     Text& SetOffset(Point point);
@@ -100,21 +119,15 @@ namespace Svg {
     std::string data_;
   };
 
-  class Rect : public Object, public PathProps<Rect> {
+  class Document : public CopyableObject<Document> {
    public:
-    Rect& SetPoint(Point point);
-    Rect& SetWidth(double width);
-    Rect& SetHeight(double height);
-    void Render(std::ostream& out) const override;
+    Document() = default;
+    Document(const Document& other);
+    Document& operator=(const Document& other);
 
-   private:
-    Point point_;
-    double width_;
-    double height_;
-  };
+    Document(Document&&) = default;
+    Document& operator=(Document&&) = default;
 
-  class Document : public Object {
-   public:
     template <typename ObjectType>
     void Add(ObjectType object);
 
@@ -123,6 +136,11 @@ namespace Svg {
    private:
     std::vector<std::unique_ptr<Object>> objects_;
   };
+
+  template <typename Owner>
+  std::unique_ptr<Object> CopyableObject<Owner>::Copy() const {
+    return std::make_unique<Owner>(static_cast<const Owner&>(*this));
+  }
 
   template <typename Owner>
   Owner& PathProps<Owner>::AsOwner() {

@@ -30,7 +30,7 @@ namespace Requests {
       dict["error_message"] = Json::Node("not found"s);
     } else {
       dict = {
-          {"stop_count", Json::Node(static_cast<int>(bus->stops_count))},
+          {"stop_count", Json::Node(static_cast<int>(bus->stop_count))},
           {"unique_stop_count", Json::Node(static_cast<int>(bus->unique_stop_count))},
           {"route_length", Json::Node(bus->road_route_length)},
           {"curvature", Json::Node(bus->road_route_length / bus->geo_route_length)},
@@ -63,15 +63,16 @@ namespace Requests {
     if (!route) {
       dict["error_message"] = Json::Node("not found"s);
     } else {
-      dict["total_time"] = Json::Node(route->transport_route_info.total_time);
+      dict["total_time"] = Json::Node(route->total_time);
       Json::Array items;
-      items.reserve(route->transport_route_info.items.size());
-      for (const auto& item : route->transport_route_info.items) {
+      items.reserve(route->items.size());
+      for (const auto& item : route->items) {
         items.push_back(visit(RouteItemResponseBuilder{}, item));
       }
 
       dict["items"] = move(items);
-      dict["map"] = move(route->map);
+
+      dict["map"] = Json::Node(db.RenderRoute(*route));
     }
 
     return dict;

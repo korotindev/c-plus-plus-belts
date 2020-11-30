@@ -9,7 +9,6 @@
 #include <unordered_set>
 #include <variant>
 #include <vector>
-#include <memory>
 
 
 namespace Descriptions {
@@ -36,7 +35,7 @@ namespace Descriptions {
   std::vector<InputQuery> ReadDescriptions(const Json::Array& nodes);
 
   template <typename Object>
-  using Dict = std::map<std::string, std::unique_ptr<Object>>;
+  using Dict = std::map<std::string, const Object*>;
 
   using StopsDict = Dict<Stop>;
   using BusesDict = Dict<Bus>;

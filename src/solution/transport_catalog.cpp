@@ -1,6 +1,4 @@
 #include "transport_catalog.h"
-#include "map_renderer.h"
-#include "route_renderer.h"
 #include "utils.h"
 
 #include <algorithm>
@@ -21,33 +19,34 @@ TransportCatalog::TransportCatalog(
     return holds_alternative<Descriptions::Stop>(item);
   });
 
-  for (auto& item : Range{begin(data), stops_end}) {
-    auto& stop = get<Descriptions::Stop>(item);
+  Descriptions::StopsDict stops_dict;
+  for (const auto& item : Range{begin(data), stops_end}) {
+    const auto& stop = get<Descriptions::Stop>(item);
+    stops_dict[stop.name] = &stop;
     stops_.insert({stop.name, {}});
-    string name = stop.name;
-    stops_dict_[name] = make_unique<Descriptions::Stop>(move(stop));
   }
 
-  for (auto& item : Range{stops_end, end(data)}) {
-    auto& bus = get<Descriptions::Bus>(item);
+  Descriptions::BusesDict buses_dict;
+  for (const auto& item : Range{stops_end, end(data)}) {
+    const auto& bus = get<Descriptions::Bus>(item);
 
+    buses_dict[bus.name] = &bus;
     buses_[bus.name] = Bus{
       bus.stops.size(),
       ComputeUniqueItemsCount(AsRange(bus.stops)),
-      ComputeRoadRouteLength(bus.stops, stops_dict_),
-      ComputeGeoRouteDistance(bus.stops, stops_dict_)
+      ComputeRoadRouteLength(bus.stops, stops_dict),
+      ComputeGeoRouteDistance(bus.stops, stops_dict)
     };
 
     for (const string& stop_name : bus.stops) {
       stops_.at(stop_name).bus_names.insert(bus.name);
     }
-    string name = bus.name;
-    buses_dict_[name] = make_unique<Descriptions::Bus>(move(bus));
   }
 
-  router_ = make_unique<TransportRouter>(stops_dict_, buses_dict_, routing_settings_json);
+  router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
 
-  map_rendering_settings_ = make_unique<const MapRenderingSettings>(stops_dict_, buses_dict_, render_settings_json);
+  map_renderer_ = make_unique<MapRenderer>(stops_dict, buses_dict, render_settings_json);
+  map_ = map_renderer_->Render();
 }
 
 const TransportCatalog::Stop* TransportCatalog::GetStop(const string& name) const {
@@ -58,24 +57,19 @@ const TransportCatalog::Bus* TransportCatalog::GetBus(const string& name) const 
   return GetValuePointer(buses_, name);
 }
 
-optional<TransportCatalog::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
-  if (auto route = router_->FindRoute(stop_from, stop_to)) {
-    RouteInfo route_info;
-    ostringstream ss;
-  // TODO: partially cache it ??
-    RouteRenderer(*map_rendering_settings_, buses_dict_, *route, stop_to).Render().Render(ss);
-    route_info.transport_route_info = move(*route);
-    route_info.map = ss.str();
-    return route_info;
-  } else {
-    return nullopt;
-  }
+optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const string& stop_to) const {
+  return router_->FindRoute(stop_from, stop_to);
 }
 
 string TransportCatalog::RenderMap() const {
   ostringstream out;
-  // TODO: cache it ??
-  MapRenderer(*map_rendering_settings_, buses_dict_).Render().Render(out);
+  map_.Render(out);
+  return out.str();
+}
+
+string TransportCatalog::RenderRoute(const TransportRouter::RouteInfo& route) const {
+  ostringstream out;
+  BuildRouteMap(route).Render(out);
   return out.str();
 }
 
@@ -103,3 +97,6 @@ double TransportCatalog::ComputeGeoRouteDistance(
   return result;
 }
 
+Svg::Document TransportCatalog::BuildRouteMap(const TransportRouter::RouteInfo& route) const {
+  return map_renderer_->RenderRoute(map_, route);
+}
