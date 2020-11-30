@@ -1,18 +1,19 @@
 #pragma once
 
-#include "descriptions.h"
-#include "json.h"
-#include "map_renderer.h"
-#include "svg.h"
-#include "transport_router.h"
-#include "utils.h"
-
 #include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+#include "descriptions.h"
+#include "json.h"
+#include "map_renderer.h"
+#include "svg.h"
+#include "transport_catalog.pb.h"
+#include "transport_router.h"
+#include "utils.h"
 
 namespace Responses {
   struct Stop {
@@ -25,19 +26,17 @@ namespace Responses {
     int road_route_length = 0;
     double geo_route_length = 0.0;
   };
-}
+}  // namespace Responses
 
 class TransportCatalog {
-private:
+ private:
   using Bus = Responses::Bus;
   using Stop = Responses::Stop;
 
-public:
-  TransportCatalog(
-      std::vector<Descriptions::InputQuery> data,
-      const Json::Dict& routing_settings_json,
-      const Json::Dict& render_settings_json
-  );
+ public:
+  explicit TransportCatalog(Messages::TransportCatalog message);
+  TransportCatalog(std::vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
+                   const Json::Dict& render_settings_json);
 
   const Stop* GetStop(const std::string& name) const;
   const Bus* GetBus(const std::string& name) const;
@@ -47,22 +46,15 @@ public:
   std::string RenderMap() const;
   std::string RenderRoute(const TransportRouter::RouteInfo& route) const;
 
-private:
-  static int ComputeRoadRouteLength(
-      const std::vector<std::string>& stops,
-      const Descriptions::StopsDict& stops_dict
-  );
+  Messages::TransportCatalog Serialize() const;
+ private:
+  static int ComputeRoadRouteLength(const std::vector<std::string>& stops, const Descriptions::StopsDict& stops_dict);
 
-  static double ComputeGeoRouteDistance(
-      const std::vector<std::string>& stops,
-      const Descriptions::StopsDict& stops_dict
-  );
+  static double ComputeGeoRouteDistance(const std::vector<std::string>& stops,
+                                        const Descriptions::StopsDict& stops_dict);
 
-  static Svg::Document BuildMap(
-      const Descriptions::StopsDict& stops_dict,
-      const Descriptions::BusesDict& buses_dict,
-      const Json::Dict& render_settings_json
-  );
+  static Svg::Document BuildMap(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+                                const Json::Dict& render_settings_json);
   Svg::Document BuildRouteMap(const TransportRouter::RouteInfo& route) const;
 
   std::unordered_map<std::string, Stop> stops_;
@@ -71,3 +63,6 @@ private:
   std::unique_ptr<MapRenderer> map_renderer_;
   Svg::Document map_;
 };
+
+void SerializeTransportCatalog(const TransportCatalog& db, const Json::Dict& serialization_settings);
+TransportCatalog ParseTransportCatalog(const Json::Dict& serialization_settings);

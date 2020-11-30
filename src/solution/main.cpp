@@ -1,29 +1,24 @@
-#include "descriptions.h"
-#include "json.h"
-#include "requests.h"
-#include "sphere.h"
-#include "transport_catalog.h"
-#include "utils.h"
-
 #include <iostream>
+#include <fstream>
+#include <string_view>
+
+#include "processes.h"
 
 using namespace std;
 
-int main() {
-  const auto input_doc = Json::Load(cin);
-  const auto& input_map = input_doc.GetRoot().AsMap();
+int main(int argc, const char* argv[]) {
+  if (argc != 2) {
+    cerr << "Usage: belts-runner [make_base|process_requests]\n";
+    return 5;
+  }
 
-  const TransportCatalog db(
-      Descriptions::ReadDescriptions(input_map.at("base_requests").AsArray()),
-      input_map.at("routing_settings").AsMap(),
-      input_map.at("render_settings").AsMap()
-  );
+  const string_view mode(argv[1]);
 
-  Json::PrintValue(
-    Requests::ProcessAll(db, input_map.at("stat_requests").AsArray()),
-    cout
-  );
-  cout << endl;
+  if (mode == "make_base") {
+    MakeBase(cin);
+  } else if (mode == "process_requests") {
+    ProcessRequests(cin, cout);
+  }
 
   return 0;
 }

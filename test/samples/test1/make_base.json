@@ -1,4 +1,7 @@
 {
+    "serialization_settings": {
+        "file": "/tmp/tmp7f2a431a"
+    },
     "routing_settings": {
         "bus_wait_time": 2,
         "bus_velocity": 30
@@ -168,23 +171,6 @@
             "latitude": 43.601202,
             "longitude": 39.715498,
             "road_distances": {}
-        }
-    ],
-    "stat_requests": [
-        {
-            "id": 83786973,
-            "type": "Bus",
-            "name": "14"
-        },
-        {
-            "id": 133160474,
-            "type": "Route",
-            "from": "Морской вокзал",
-            "to": "Параллельная улица"
-        },
-        {
-            "id": 1639812454,
-            "type": "Map"
         }
     ]
 }

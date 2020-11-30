@@ -1,0 +1,17 @@
+{
+    "serialization_settings": {
+        "file": "/tmp/tmpu3xdy0el"
+    },
+    "stat_requests": [
+        {
+            "id": 83401682,
+            "type": "Bus",
+            "name": "13"
+        },
+        {
+            "id": 1425847267,
+            "type": "Stop",
+            "name": "Театральная"
+        }
+    ]
+}
