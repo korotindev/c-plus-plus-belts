@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package Messages;
+
+message Response {
+  message Stop {
+    string name = 1;
+    repeated string bus_names = 2;
+  }
+  message Bus {
+    string name = 1;
+    uint32 stop_count = 2;
+    uint32 unique_stop_count = 3;
+    int32 road_route_length = 4;
+    double geo_route_length = 5;
+  }
+}
+
+message TransportCatalog {
+  repeated Response.Stop stops_responses = 1;
+  repeated Response.Bus buses_responses = 2;
+}

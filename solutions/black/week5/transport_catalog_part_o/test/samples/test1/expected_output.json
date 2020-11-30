@@ -1,0 +1,16 @@
+[
+   {
+      "request_id":1415477150,
+      "stop_count":8,
+      "unique_stop_count":7,
+      "route_length":11230,
+      "curvature":1.6048112037594995
+   },
+   {
+      "request_id":477534717,
+      "buses":[
+         "14",
+         "24"
+      ]
+   }
+]
