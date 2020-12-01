@@ -10,9 +10,9 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
   for (auto& vertex_info_msg : *message.mutable_vertices_info()) {
     vertices_info_.push_back(MakeVertexInfo(move(vertex_info_msg)));
   }
-  
+
   edges_info_.reserve(message.bus_edges_info_size() + message.stops_vertex_ids_size());
-  
+
   for (auto& stop_vertex_ids_msg : *message.mutable_stops_vertex_ids()) {
     const auto [it, _] = stops_vertex_ids_.emplace(MakeStopVertexIdsPair(move(stop_vertex_ids_msg)));
     graph_.AddEdge({it->second.out, it->second.in, static_cast<double>(routing_settings_.bus_wait_time)});
@@ -25,7 +25,7 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
     edges_info_.emplace_back(move(bus_edge_info));
   }
 
-  router_ = std::make_unique<Router>(graph_);
+  router_ = MakeGraphRouter(graph_, move(*message.mutable_graph_router_internal_data()));
 }
 
 TransportRouter::TransportRouter(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
@@ -214,7 +214,48 @@ Messages::TransportRouter TransportRouter::Serialize() const {
     }
   }
 
-  
+  *message.mutable_graph_router_internal_data() = SerializeGraphRouter();
 
   return message;
+}
+
+Messages::TransportRouter::GraphRouterInternalData TransportRouter::SerializeGraphRouter() const {
+  Messages::TransportRouter::GraphRouterInternalData message;
+  const auto& internal_data = router_->InternalData();
+  size_t N = internal_data.size();
+  size_t M = internal_data[0].size();
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < M; j++) {
+      if (internal_data[i][j].has_value()) {
+        Messages::TransportRouter::GraphRouterInternalData::Item item_msg;
+        item_msg.set_from(i);
+        item_msg.set_to(j);
+        auto& elem = internal_data[i][j].value();
+        item_msg.set_weight(elem.weight);
+        item_msg.set_has_prev_edge(false);
+        if (elem.prev_edge.has_value()) {
+          item_msg.set_prev_edge(elem.prev_edge.value());
+          item_msg.set_has_prev_edge(true);
+        }
+        *message.add_items() = move(item_msg);
+      }
+    }
+  }
+  return message;
+}
+
+unique_ptr<TransportRouter::Router> TransportRouter::MakeGraphRouter(
+    const BusGraph& grapth, Messages::TransportRouter::GraphRouterInternalData message) {
+  TransportRouter::Router::RoutesInternalData internal_data(
+      grapth.GetVertexCount(), vector<optional<TransportRouter::Router::RouteInternalData>>(grapth.GetVertexCount()));
+
+  for (auto& item_msg : *message.mutable_items()) {
+    auto& elem = internal_data[item_msg.from()][item_msg.to()].value();
+    elem.weight = item_msg.weight();
+    if (item_msg.has_prev_edge()) {
+      elem.prev_edge = item_msg.prev_edge();
+    }
+  }
+
+  return make_unique<TransportRouter::Router>(grapth, move(internal_data));
 }

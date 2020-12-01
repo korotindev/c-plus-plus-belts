@@ -26,9 +26,7 @@ message TransportRouter {
     uint64 in = 2;
     uint64 out = 3;
   }
-  message VertexInfo {
-    string stop_name = 1;
-  }
+  message VertexInfo { string stop_name = 1; }
   message BusEdgeInfo {
     string bus_name = 1;
     uint64 start_stop_idx = 2;
@@ -37,12 +35,13 @@ message TransportRouter {
     uint64 finish_vertex_id = 5;
     double ride_time = 6;
   }
-  message GrapthRouterInternalData {
+  message GraphRouterInternalData {
     message Item {
       uint64 from = 1;
       uint64 to = 2;
       double weight = 3;
-      uint64 prev_edge = 4;
+      bool has_prev_edge = 4;
+      uint64 prev_edge = 5;
     }
     repeated Item items = 1;
   }
@@ -51,6 +50,7 @@ message TransportRouter {
   repeated VertexInfo vertices_info = 2;
   repeated StopVertexIds stops_vertex_ids = 3;
   repeated BusEdgeInfo bus_edges_info = 4;
+  GraphRouterInternalData graph_router_internal_data = 5;
 }
 
 message TransportCatalog {

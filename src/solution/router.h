@@ -15,10 +15,9 @@ namespace Graph {
 
   template <typename Weight>
   class Router {
-   private:
+   public:
     using Graph = DirectedWeightedGraph<Weight>;
 
-   public:
     struct RouteInternalData {
       Weight weight;
       std::optional<EdgeId> prev_edge;
@@ -26,7 +25,7 @@ namespace Graph {
     using RoutesInternalData = std::vector<std::vector<std::optional<RouteInternalData>>>;
 
     Router(const Graph& graph);
-    Router(RoutesInternalData data);
+    Router(const Router<Weight>::Graph& graph, RoutesInternalData data);
 
     using RouteId = uint64_t;
 
@@ -88,7 +87,8 @@ namespace Graph {
   };
 
   template <typename Weight>
-  Router<Weight>::Router(Router<Weight>::RoutesInternalData data) : routes_internal_data_(std::move(data)) {}
+  Router<Weight>::Router(const Router<Weight>::Graph& graph, Router<Weight>::RoutesInternalData data)
+      : graph_(graph), routes_internal_data_(std::move(data)) {}
 
   template <typename Weight>
   Router<Weight>::Router(const Graph& graph)
