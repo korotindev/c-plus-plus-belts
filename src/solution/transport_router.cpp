@@ -250,11 +250,13 @@ unique_ptr<TransportRouter::Router> TransportRouter::MakeGraphRouter(
       grapth.GetVertexCount(), vector<optional<TransportRouter::Router::RouteInternalData>>(grapth.GetVertexCount()));
 
   for (auto& item_msg : *message.mutable_items()) {
-    auto& elem = internal_data[item_msg.from()][item_msg.to()].value();
-    elem.weight = item_msg.weight();
+    TransportRouter::Router::RouteInternalData item;
+    item.weight = item_msg.weight();
     if (item_msg.has_prev_edge()) {
-      elem.prev_edge = item_msg.prev_edge();
+      item.prev_edge = item_msg.prev_edge();
     }
+
+    internal_data[item_msg.from()][item_msg.to()] = item;
   }
 
   return make_unique<TransportRouter::Router>(grapth, move(internal_data));
