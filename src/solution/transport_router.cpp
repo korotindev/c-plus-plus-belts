@@ -6,18 +6,21 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
   routing_settings_ = MakeRoutingSettings(move(*message.mutable_routing_settings()));
   graph_ = BusGraph(message.vertices_info_size());
 
-  vertices_info_.reserve(message.vertices_info_size());
-
-  for (auto& vertex_info_msg : *message.mutable_vertices_info()) {
-    vertices_info_.push_back(MakeVertexInfo(move(vertex_info_msg)));
+  for (auto& stop_vertex_ids_msg : *message.mutable_stops_vertex_ids()) {
+    stops_vertex_ids_.emplace(MakeStopVertexIdsPair(move(stop_vertex_ids_msg)));
   }
 
   edges_info_.reserve(message.bus_edges_info_size() + message.stops_vertex_ids_size());
-
-  for (auto& stop_vertex_ids_msg : *message.mutable_stops_vertex_ids()) {
-    const auto [it, _] = stops_vertex_ids_.emplace(MakeStopVertexIdsPair(move(stop_vertex_ids_msg)));
-    graph_.AddEdge({it->second.out, it->second.in, static_cast<double>(routing_settings_.bus_wait_time)});
-    edges_info_.push_back(WaitEdgeInfo{});
+  vertices_info_.reserve(message.vertices_info_size());
+  bool processed = false;
+  for (auto& vertex_info_msg : *message.mutable_vertices_info()) {
+    vertices_info_.push_back(MakeVertexInfo(move(vertex_info_msg)));
+    const auto& stop_ids = stops_vertex_ids_[vertices_info_.back().stop_name];
+    if (!processed) {
+      graph_.AddEdge({stop_ids.out, stop_ids.in, static_cast<double>(routing_settings_.bus_wait_time)});
+      edges_info_.push_back(WaitEdgeInfo{});
+    }
+    processed = !processed;
   }
 
   for (auto& bus_edge_info_msg : *message.mutable_bus_edges_info()) {
@@ -25,7 +28,7 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
     graph_.AddEdge({bus_edge_info.start_vertex_id, bus_edge_info.finish_vertex_id, bus_edge_info.ride_time});
     edges_info_.push_back(move(bus_edge_info));
   }
-  
+
   router_ = MakeGraphRouter(graph_, move(*message.mutable_graph_router_internal_data()));
 }
 
