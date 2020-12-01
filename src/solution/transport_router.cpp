@@ -7,6 +7,7 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
   graph_ = BusGraph(message.vertices_info_size());
 
   vertices_info_.reserve(message.vertices_info_size());
+
   for (auto& vertex_info_msg : *message.mutable_vertices_info()) {
     vertices_info_.push_back(MakeVertexInfo(move(vertex_info_msg)));
   }
@@ -16,15 +17,15 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
   for (auto& stop_vertex_ids_msg : *message.mutable_stops_vertex_ids()) {
     const auto [it, _] = stops_vertex_ids_.emplace(MakeStopVertexIdsPair(move(stop_vertex_ids_msg)));
     graph_.AddEdge({it->second.out, it->second.in, static_cast<double>(routing_settings_.bus_wait_time)});
-    edges_info_.emplace_back(WaitEdgeInfo{});
+    edges_info_.push_back(WaitEdgeInfo{});
   }
 
   for (auto& bus_edge_info_msg : *message.mutable_bus_edges_info()) {
     auto bus_edge_info = MakeBusEdgeInfo(move(bus_edge_info_msg));
     graph_.AddEdge({bus_edge_info.start_vertex_id, bus_edge_info.finish_vertex_id, bus_edge_info.ride_time});
-    edges_info_.emplace_back(move(bus_edge_info));
+    edges_info_.push_back(move(bus_edge_info));
   }
-
+  
   router_ = MakeGraphRouter(graph_, move(*message.mutable_graph_router_internal_data()));
 }
 
@@ -223,9 +224,8 @@ Messages::TransportRouter::GraphRouterInternalData TransportRouter::SerializeGra
   Messages::TransportRouter::GraphRouterInternalData message;
   const auto& internal_data = router_->InternalData();
   size_t N = internal_data.size();
-  size_t M = internal_data[0].size();
   for (size_t i = 0; i < N; i++) {
-    for (size_t j = 0; j < M; j++) {
+    for (size_t j = 0; j < N; j++) {
       if (internal_data[i][j].has_value()) {
         Messages::TransportRouter::GraphRouterInternalData::Item item_msg;
         item_msg.set_from(i);
@@ -255,8 +255,7 @@ unique_ptr<TransportRouter::Router> TransportRouter::MakeGraphRouter(
     if (item_msg.has_prev_edge()) {
       item.prev_edge = item_msg.prev_edge();
     }
-
-    internal_data[item_msg.from()][item_msg.to()] = item;
+    internal_data[item_msg.from()][item_msg.to()] = move(item);
   }
 
   return make_unique<TransportRouter::Router>(grapth, move(internal_data));

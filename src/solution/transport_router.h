@@ -92,7 +92,6 @@ class TransportRouter {
 
   RoutingSettings routing_settings_;
   BusGraph graph_;
-  // TODO: Tell about this unique_ptr usage case
   std::unique_ptr<Router> router_;
   std::unordered_map<std::string, StopVertexIds> stops_vertex_ids_;
   std::vector<VertexInfo> vertices_info_;
