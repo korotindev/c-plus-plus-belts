@@ -86,6 +86,9 @@ class TransportRouter {
   struct WaitEdgeInfo {};
   using EdgeInfo = std::variant<BusEdgeInfo, WaitEdgeInfo>;
 
+  Messages::TransportRouter::GraphRouterInternalData SerializeGrapthRouter() const;
+  static Router MakeGrapthRouter(Messages::TransportRouter::GraphRouterInternalData message);
+
   RoutingSettings routing_settings_;
   BusGraph graph_;
   // TODO: Tell about this unique_ptr usage case

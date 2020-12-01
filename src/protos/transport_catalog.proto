@@ -37,6 +37,15 @@ message TransportRouter {
     uint64 finish_vertex_id = 5;
     double ride_time = 6;
   }
+  message GrapthRouterInternalData {
+    message Item {
+      uint64 from = 1;
+      uint64 to = 2;
+      double weight = 3;
+      uint64 prev_edge = 4;
+    }
+    repeated Item items = 1;
+  }
 
   RoutingSettings routing_settings = 1;
   repeated VertexInfo vertices_info = 2;
