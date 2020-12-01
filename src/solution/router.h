@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graph.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -11,14 +9,16 @@
 #include <utility>
 #include <vector>
 
+#include "graph.h"
+
 namespace Graph {
 
   template <typename Weight>
   class Router {
-  private:
+   private:
     using Graph = DirectedWeightedGraph<Weight>;
 
-  public:
+   public:
     Router(const Graph& graph);
 
     using RouteId = uint64_t;
@@ -33,7 +33,7 @@ namespace Graph {
     EdgeId GetRouteEdge(RouteId route_id, size_t edge_idx) const;
     void ReleaseRoute(RouteId route_id);
 
-  private:
+   private:
     const Graph& graph_;
 
     struct RouteInternalData {
@@ -61,17 +61,12 @@ namespace Graph {
       }
     }
 
-    void RelaxRoute(VertexId vertex_from, VertexId vertex_to,
-                    const RouteInternalData& route_from, const RouteInternalData& route_to) {
+    void RelaxRoute(VertexId vertex_from, VertexId vertex_to, const RouteInternalData& route_from,
+                    const RouteInternalData& route_to) {
       auto& route_relaxing = routes_internal_data_[vertex_from][vertex_to];
       const Weight candidate_weight = route_from.weight + route_to.weight;
       if (!route_relaxing || candidate_weight < route_relaxing->weight) {
-        route_relaxing = {
-            candidate_weight,
-            route_to.prev_edge
-                ? route_to.prev_edge
-                : route_from.prev_edge
-        };
+        route_relaxing = {candidate_weight, route_to.prev_edge ? route_to.prev_edge : route_from.prev_edge};
       }
     }
 
@@ -90,12 +85,11 @@ namespace Graph {
     RoutesInternalData routes_internal_data_;
   };
 
-
   template <typename Weight>
   Router<Weight>::Router(const Graph& graph)
       : graph_(graph),
-        routes_internal_data_(graph.GetVertexCount(), std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount()))
-  {
+        routes_internal_data_(graph.GetVertexCount(),
+                              std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount())) {
     InitializeRoutesInternalData(graph);
 
     const size_t vertex_count = graph.GetVertexCount();
@@ -112,8 +106,7 @@ namespace Graph {
     }
     const Weight weight = route_internal_data->weight;
     std::vector<EdgeId> edges;
-    for (std::optional<EdgeId> edge_id = route_internal_data->prev_edge;
-         edge_id;
+    for (std::optional<EdgeId> edge_id = route_internal_data->prev_edge; edge_id;
          edge_id = routes_internal_data_[from][graph_.GetEdge(*edge_id).from]->prev_edge) {
       edges.push_back(*edge_id);
     }
@@ -135,4 +128,4 @@ namespace Graph {
     expanded_routes_cache_.erase(route_id);
   }
 
-}
+}  // namespace Graph

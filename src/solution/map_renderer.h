@@ -1,15 +1,14 @@
 #pragma once
 
-#include "descriptions.h"
-#include "json.h"
-#include "svg.h"
-#include "transport_router.h"
-
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "descriptions.h"
+#include "json.h"
+#include "svg.h"
+#include "transport_router.h"
 
 struct RenderSettings {
   double max_width;
@@ -29,15 +28,14 @@ struct RenderSettings {
 };
 
 class MapRenderer {
-public:
-  MapRenderer(const Descriptions::StopsDict& stops_dict,
-              const Descriptions::BusesDict& buses_dict,
+ public:
+  MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
               const Json::Dict& render_settings_json);
 
   Svg::Document Render() const;
   Svg::Document RenderRoute(Svg::Document whole_map, const TransportRouter::RouteInfo& route) const;
 
-private:
+ private:
   RenderSettings render_settings_;
   std::map<std::string, Svg::Point> stops_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;
@@ -58,13 +56,9 @@ private:
   void RenderRouteStopPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
   void RenderRouteStopLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
 
-  static const std::unordered_map<
-      std::string,
-      void (MapRenderer::*)(Svg::Document&) const
-  > MAP_LAYER_ACTIONS;
-  
-  static const std::unordered_map<
-      std::string,
-      void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const
-  > ROUTE_LAYER_ACTIONS;
+  static const std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> MAP_LAYER_ACTIONS;
+
+  static const std::unordered_map<std::string,
+                                  void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const>
+      ROUTE_LAYER_ACTIONS;
 };

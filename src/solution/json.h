@@ -2,11 +2,11 @@
 
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <variant>
 #include <vector>
-#include <sstream>
 
 namespace Json {
 
@@ -75,9 +75,9 @@ namespace Json {
   void Print(const Document& document, std::ostream& output);
 
   template <>
-  void PrintValue<Document>(const Document &doc, std::ostream &output);
-  
-  std::ostream &operator<<(std::ostream &output, const Document &rhs);
+  void PrintValue<Document>(const Document& doc, std::ostream& output);
 
-  bool operator==(const Document &lhs, const Document &rhs);
+  std::ostream& operator<<(std::ostream& output, const Document& rhs);
+
+  bool operator==(const Document& lhs, const Document& rhs);
 }  // namespace Json

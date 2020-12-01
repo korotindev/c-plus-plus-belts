@@ -47,6 +47,7 @@ class TransportCatalog {
   std::string RenderRoute(const TransportRouter::RouteInfo& route) const;
 
   Messages::TransportCatalog Serialize() const;
+
  private:
   static int ComputeRoadRouteLength(const std::vector<std::string>& stops, const Descriptions::StopsDict& stops_dict);
 

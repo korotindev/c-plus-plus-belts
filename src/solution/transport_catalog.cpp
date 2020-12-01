@@ -28,6 +28,8 @@ TransportCatalog::TransportCatalog(Messages::TransportCatalog message) {
         Stop{.bus_names = set<string>(move_iterator(begin(*stop_message.mutable_bus_names())),
                                       move_iterator(end(*stop_message.mutable_bus_names())))};
   }
+  
+  router_ = make_unique<TransportRouter>(move(*message.mutable_transport_router()));
 }
 
 TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
@@ -128,6 +130,8 @@ Messages::TransportCatalog TransportCatalog::Serialize() const {
     *message.add_stops_responses() = move(stop_msg);
   }
 
+  *message.mutable_transport_router() = router_->Serialize();
+
   return message;
 }
 
@@ -137,18 +141,6 @@ void SerializeTransportCatalog(const TransportCatalog& db, const Json::Dict& ser
   auto message = db.Serialize();
   message.SerializeToOstream(&output);
 }
-
-// namespace {
-//   string ReadFileData(const string& file_name) {
-//     ifstream file(file_name, ios::binary | ios::ate);
-//     const ifstream::pos_type end_pos = file.tellg();
-//     file.seekg(0, ios::beg);
-
-//     string data(end_pos, '\0');
-//     file.read(&data[0], end_pos);
-//     return data;
-//   }
-// }  // namespace
 
 TransportCatalog ParseTransportCatalog(const Json::Dict& serialization_settings) {
   const string& filename = serialization_settings.at("file").AsString();
