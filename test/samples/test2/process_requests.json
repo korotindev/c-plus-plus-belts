@@ -1,17 +1,23 @@
 {
     "serialization_settings": {
-        "file": "/tmp/tmpu3xdy0el"
+        "file": "/tmp/tmpbuezwca9"
     },
     "stat_requests": [
         {
-            "id": 83401682,
+            "id": 517161241,
             "type": "Bus",
             "name": "13"
         },
         {
-            "id": 1425847267,
+            "id": 300166811,
             "type": "Stop",
-            "name": "Театральная"
+            "name": "Морской вокзал"
+        },
+        {
+            "id": 1231848878,
+            "type": "Route",
+            "from": "Пансионат Нева",
+            "to": "Мацестинская долина"
         }
     ]
 }
