@@ -6,18 +6,19 @@ TransportRouter::TransportRouter(Messages::TransportRouter message) {
   routing_settings_ = MakeRoutingSettings(move(*message.mutable_routing_settings()));
   graph_ = BusGraph(message.vertices_info_size());
 
-  vertices_info_.resize(message.vertices_info_size());
+  vertices_info_.reserve(message.vertices_info_size());
   for (auto& vertex_info_msg : *message.mutable_vertices_info()) {
     vertices_info_.push_back(MakeVertexInfo(move(vertex_info_msg)));
   }
-
-  stops_vertex_ids_.reserve(message.stops_vertex_ids_size());
+  
+  edges_info_.reserve(message.bus_edges_info_size() + message.stops_vertex_ids_size());
+  
   for (auto& stop_vertex_ids_msg : *message.mutable_stops_vertex_ids()) {
     const auto [it, _] = stops_vertex_ids_.emplace(MakeStopVertexIdsPair(move(stop_vertex_ids_msg)));
     graph_.AddEdge({it->second.out, it->second.in, static_cast<double>(routing_settings_.bus_wait_time)});
+    edges_info_.emplace_back(WaitEdgeInfo{});
   }
 
-  edges_info_.reserve(message.bus_edges_info_size());
   for (auto& bus_edge_info_msg : *message.mutable_bus_edges_info()) {
     auto bus_edge_info = MakeBusEdgeInfo(move(bus_edge_info_msg));
     graph_.AddEdge({bus_edge_info.start_vertex_id, bus_edge_info.finish_vertex_id, bus_edge_info.ride_time});
