@@ -22,6 +22,7 @@ void ProcessRequests(istream &input, ostream &output) {
   const auto &input_map = doc.GetRoot().AsMap();
 
   TransportCatalog db = ParseTransportCatalog(input_map.at("serialization_settings").AsMap());
-
+  
+  output.precision(17);
   Json::PrintValue(Requests::ProcessAll(db, input_map.at("stat_requests").AsArray()), output);
 }
