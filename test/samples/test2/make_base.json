@@ -1,6 +1,6 @@
 {
     "serialization_settings": {
-        "file": "/tmp/test1"
+        "file": "/tmp/test2"
     },
     "routing_settings": {
         "bus_wait_time": 2,
