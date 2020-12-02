@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package Messages;
+
+message Response {
+  message Stop {
+    string name = 1;
+    repeated string bus_names = 2;
+  }
+  message Bus {
+    string name = 1;
+    uint32 stop_count = 2;
+    uint32 unique_stop_count = 3;
+    int32 road_route_length = 4;
+    double geo_route_length = 5;
+  }
+}
+
+message TransportRouter {
+  message RoutingSettings {
+    int32 bus_wait_time = 1;
+    double bus_velocity = 2;
+  }
+  message StopVertexIds {
+    string name = 1;
+    uint64 in = 2;
+    uint64 out = 3;
+  }
+  message VertexInfo { string stop_name = 1; }
+  message BusEdgeInfo {
+    string bus_name = 1;
+    uint64 start_stop_idx = 2;
+    uint64 finish_stop_idx = 3;
+    uint64 start_vertex_id = 4;
+    uint64 finish_vertex_id = 5;
+    double ride_time = 6;
+  }
+  message GraphRouterInternalData {
+    message Item {
+      uint64 from = 1;
+      uint64 to = 2;
+      double weight = 3;
+      bool has_prev_edge = 4;
+      uint64 prev_edge = 5;
+    }
+    repeated Item items = 1;
+  }
+
+  RoutingSettings routing_settings = 1;
+  repeated VertexInfo vertices_info = 2;
+  repeated StopVertexIds stops_vertex_ids = 3;
+  repeated BusEdgeInfo bus_edges_info = 4;
+  GraphRouterInternalData graph_router_internal_data = 5;
+}
+// std::variant<std::monostate, std::string, Rgb, Rgba>;
+
+message Svg {
+  message Point {
+    double x = 1;
+    double y = 2;
+  }
+}
+
+message RenderSettings {
+  double max_width = 1;
+  double max_height = 2;
+  double padding = 3;
+  double outer_margin = 4;
+  repeated string palette = 5;
+  double line_width = 6;
+  string underlayer_color = 7;
+  double underlayer_width = 8;
+  double stop_radius = 9;
+  Svg.Point bus_label_offset = 10;
+  int32 bus_label_font_size = 11;
+  Svg.Point stop_label_offset = 12;
+  int32 stop_label_font_size = 13;
+  repeated string layers = 14;
+};
+
+message Descriptions {
+  message Bus {
+    string name = 1;
+    repeated string stops = 2;
+    repeated string endpoints = 3;
+  }
+}
+
+message MapRenderer {
+  RenderSettings render_settings = 1;
+  map<string, Svg.Point> stop_coords = 2;
+  map<string, string> bus_colors = 3;
+  map<string, Descriptions.Bus> buses_dict = 4;
+}
+
+message TransportCatalog {
+  repeated Response.Stop stops_responses = 1;
+  repeated Response.Bus buses_responses = 2;
+  TransportRouter transport_router = 3;
+  MapRenderer map_renderer = 4;
+}
