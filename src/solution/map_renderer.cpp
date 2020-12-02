@@ -1,17 +1,24 @@
 #include "map_renderer.h"
-#include "sphere.h"
+
 #include <algorithm>
 #include <iterator>
 
-using namespace std;
+#include "sphere.h"
 
+using namespace std;
 
 static Svg::Point ParsePoint(const Json::Node& json) {
   const auto& array = json.AsArray();
-  return {
-      array[0].AsDouble(),
-      array[1].AsDouble()
-  };
+  return {array[0].AsDouble(), array[1].AsDouble()};
+}
+
+static Svg::Point ParsePoint(Messages::Svg::Point message) { return {.x = message.x(), .y = message.y()}; }
+
+static Messages::Svg::Point SerializePoint(Svg::Point p) {
+  Messages::Svg::Point message;
+  message.set_x(p.x);
+  message.set_y(p.y);
+  return message;
 }
 
 static Svg::Color ParseColor(const Json::Node& json) {
@@ -20,11 +27,8 @@ static Svg::Color ParseColor(const Json::Node& json) {
   }
   const auto& array = json.AsArray();
   assert(array.size() == 3 || array.size() == 4);
-  Svg::Rgb rgb{
-      static_cast<uint8_t>(array[0].AsInt()),
-      static_cast<uint8_t>(array[1].AsInt()),
-      static_cast<uint8_t>(array[2].AsInt())
-  };
+  Svg::Rgb rgb{static_cast<uint8_t>(array[0].AsInt()), static_cast<uint8_t>(array[1].AsInt()),
+               static_cast<uint8_t>(array[2].AsInt())};
   if (array.size() == 3) {
     return rgb;
   } else {
@@ -38,6 +42,12 @@ static vector<Svg::Color> ParseColors(const Json::Node& json) {
   colors.reserve(array.size());
   transform(begin(array), end(array), back_inserter(colors), ParseColor);
   return colors;
+}
+
+static string SerializeColor(const Svg::Color& color) {
+  stringstream ss;
+  Svg::RenderColor(ss, color);
+  return ss.str();
 }
 
 RenderSettings ParseRenderSettings(const Json::Dict& json) {
@@ -64,6 +74,52 @@ RenderSettings ParseRenderSettings(const Json::Dict& json) {
 
   return result;
 }
+
+RenderSettings ParseRenderSettings(Messages::RenderSettings message) {
+  RenderSettings settings {};
+  settings.max_width = message.max_width();
+  settings.max_height = message.max_height();
+  settings.padding = message.padding();
+  settings.outer_margin = message.outer_margin();
+  settings.line_width = message.line_width();
+  settings.underlayer_color = move(*message.mutable_underlayer_color());
+  settings.underlayer_width = message.underlayer_width();
+  settings.stop_radius = message.stop_radius();
+  settings.bus_label_offset = ParsePoint(move(*message.mutable_bus_label_offset()));
+  settings.bus_label_font_size = message.bus_label_font_size();
+  settings.stop_label_offset = ParsePoint(move(*message.mutable_stop_label_offset()));
+  settings.stop_label_font_size = message.stop_label_font_size();
+
+  settings.layers = {move_iterator(message.mutable_layers()->begin()), move_iterator(message.mutable_layers()->end())};
+  settings.palette = {move_iterator(message.mutable_palette()->begin()), move_iterator(message.mutable_palette()->end())};
+
+  return settings;
+}
+
+Messages::RenderSettings RenderSettings::Serialize() const {
+  Messages::RenderSettings message;
+  message.set_max_width(max_width);
+  message.set_max_height(max_height);
+  message.set_padding(padding);
+  message.set_outer_margin(outer_margin);
+  message.set_line_width(line_width);
+  *message.mutable_underlayer_color() = SerializeColor(underlayer_color);
+  message.set_underlayer_width(underlayer_width);
+  message.set_stop_radius(stop_radius);
+  *message.mutable_bus_label_offset() = SerializePoint(bus_label_offset);
+  message.set_bus_label_font_size(bus_label_font_size);
+  *message.mutable_stop_label_offset() = SerializePoint(stop_label_offset);
+  message.set_stop_label_font_size(stop_label_font_size);
+  
+  *message.mutable_layers() = {layers.begin(), layers.end()};
+
+  for(auto &color : palette) {
+    *message.add_palette() = SerializeColor(color);
+  }
+
+  return message;
+} 
+
 
 static map<string, Descriptions::Bus> CopyBusesDict(const Descriptions::BusesDict& source) {
   map<string, Descriptions::Bus> target;
@@ -100,9 +156,7 @@ static unordered_set<string> FindSupportStops(const Descriptions::BusesDict& bus
 }
 
 static unordered_map<string, Sphere::Point> ComputeInterpolatedStopsGeoCoords(
-    const Descriptions::StopsDict& stops_dict,
-    const Descriptions::BusesDict& buses_dict
-) {
+    const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict) {
   const unordered_set<string> support_stops = FindSupportStops(buses_dict);
 
   unordered_map<string, Sphere::Point> stops_coords;
@@ -176,7 +230,7 @@ static NeighboursDicts BuildCoordNeighboursDicts(const unordered_map<string, Sph
 }
 
 class CoordsCompressor {
-public:
+ public:
   CoordsCompressor(const unordered_map<string, Sphere::Point>& stops_coords) {
     for (const auto& [_, coord] : stops_coords) {
       lats_.push_back({coord.latitude});
@@ -212,22 +266,16 @@ public:
     }
   }
 
-  double MapLat(double value) const {
-    return Find(lats_, value).target;
-  }
-  double MapLon(double value) const {
-    return Find(lons_, value).target;
-  }
+  double MapLat(double value) const { return Find(lats_, value).target; }
+  double MapLon(double value) const { return Find(lons_, value).target; }
 
-private:
+ private:
   struct CoordInfo {
     double source;
     size_t idx = 0;
     double target = 0;
 
-    bool operator<(const CoordInfo& other) const {
-      return source < other.source;
-    }
+    bool operator<(const CoordInfo& other) const { return source < other.source; }
   };
 
   vector<CoordInfo> lats_;
@@ -252,27 +300,19 @@ private:
     }
   }
 
-  static const CoordInfo& Find(const vector<CoordInfo>& sorted_values,
-                               double value,
+  static const CoordInfo& Find(const vector<CoordInfo>& sorted_values, double value,
                                optional<vector<CoordInfo>::const_iterator> end_it = nullopt) {
     return *lower_bound(begin(sorted_values), end_it.value_or(end(sorted_values)), CoordInfo{value});
   }
 
   static size_t FindMaxIdx(const vector<CoordInfo>& coords) {
-    return max_element(
-        begin(coords), end(coords),
-        [](const CoordInfo& lhs, const CoordInfo& rhs) {
-          return lhs.idx < rhs.idx;
-        }
-    )->idx;
+    return max_element(begin(coords), end(coords),
+                       [](const CoordInfo& lhs, const CoordInfo& rhs) { return lhs.idx < rhs.idx; })
+        ->idx;
   }
 
-  size_t FindMaxLatIdx() const {
-    return FindMaxIdx(lats_);
-  }
-  size_t FindMaxLonIdx() const {
-    return FindMaxIdx(lons_);
-  }
+  size_t FindMaxLatIdx() const { return FindMaxIdx(lats_); }
+  size_t FindMaxLonIdx() const { return FindMaxIdx(lons_); }
 };
 
 static map<string, Svg::Point> ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict,
@@ -305,15 +345,28 @@ static unordered_map<string, Svg::Color> ChooseBusColors(const Descriptions::Bus
   return bus_colors;
 }
 
-MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict,
-                         const Descriptions::BusesDict& buses_dict,
+MapRenderer::MapRenderer(Messages::MapRenderer message) {
+  render_settings_ = ParseRenderSettings(move(*message.mutable_render_settings()));
+
+  for (auto& p : *message.mutable_stop_coords()) {
+    stops_coords_.emplace(make_pair(move(p.first), ParsePoint(move(p.second))));
+  }
+
+  for (auto& p : *message.mutable_bus_colors()) {
+    bus_colors_.emplace(make_pair(move(p.first), ParseColor(move(p.second))));
+  }
+
+  for (auto& p : *message.mutable_buses_dict()) {
+    buses_dict_.emplace(make_pair(move(p.first), Descriptions::Bus::ParseFrom(move(p.second))));
+  }
+}
+
+MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
                          const Json::Dict& render_settings_json)
     : render_settings_(ParseRenderSettings(render_settings_json)),
       stops_coords_(ComputeStopsCoordsByGrid(stops_dict, buses_dict, render_settings_)),
       bus_colors_(ChooseBusColors(buses_dict, render_settings_)),
-      buses_dict_(CopyBusesDict(buses_dict))
-{
-}
+      buses_dict_(CopyBusesDict(buses_dict)) {}
 
 using RouteBusItem = TransportRouter::RouteInfo::BusItem;
 using RouteWaitItem = TransportRouter::RouteInfo::WaitItem;
@@ -327,7 +380,8 @@ void MapRenderer::RenderBusLines(Svg::Document& svg) const {
     Svg::Polyline line;
     line.SetStrokeColor(bus_colors_.at(bus_name))
         .SetStrokeWidth(render_settings_.line_width)
-        .SetStrokeLineCap("round").SetStrokeLineJoin("round");
+        .SetStrokeLineCap("round")
+        .SetStrokeLineJoin("round");
     for (const auto& stop_name : stops) {
       line.AddPoint(stops_coords_.at(stop_name));
     }
@@ -349,7 +403,8 @@ void MapRenderer::RenderRouteBusLines(Svg::Document& svg, const TransportRouter:
     Svg::Polyline line;
     line.SetStrokeColor(bus_colors_.at(bus_name))
         .SetStrokeWidth(render_settings_.line_width)
-        .SetStrokeLineCap("round").SetStrokeLineJoin("round");
+        .SetStrokeLineCap("round")
+        .SetStrokeLineJoin("round");
     for (size_t stop_idx = bus_item.start_stop_idx; stop_idx <= bus_item.finish_stop_idx; ++stop_idx) {
       const string& stop_name = stops[stop_idx];
       line.AddPoint(stops_coords_.at(stop_name));
@@ -361,25 +416,20 @@ void MapRenderer::RenderRouteBusLines(Svg::Document& svg, const TransportRouter:
 void MapRenderer::RenderBusLabel(Svg::Document& svg, const string& bus_name, const string& stop_name) const {
   const auto& color = bus_colors_.at(bus_name);  // can be optimized a bit by moving upper
   const auto point = stops_coords_.at(stop_name);
-  const auto base_text =
-      Svg::Text{}
-      .SetPoint(point)
-      .SetOffset(render_settings_.bus_label_offset)
-      .SetFontSize(render_settings_.bus_label_font_size)
-      .SetFontFamily("Verdana")
-      .SetFontWeight("bold")
-      .SetData(bus_name);
-  svg.Add(
-      Svg::Text(base_text)
-      .SetFillColor(render_settings_.underlayer_color)
-      .SetStrokeColor(render_settings_.underlayer_color)
-      .SetStrokeWidth(render_settings_.underlayer_width)
-      .SetStrokeLineCap("round").SetStrokeLineJoin("round")
-  );
-  svg.Add(
-      Svg::Text(base_text)
-      .SetFillColor(color)
-  );
+  const auto base_text = Svg::Text{}
+                             .SetPoint(point)
+                             .SetOffset(render_settings_.bus_label_offset)
+                             .SetFontSize(render_settings_.bus_label_font_size)
+                             .SetFontFamily("Verdana")
+                             .SetFontWeight("bold")
+                             .SetData(bus_name);
+  svg.Add(Svg::Text(base_text)
+              .SetFillColor(render_settings_.underlayer_color)
+              .SetStrokeColor(render_settings_.underlayer_color)
+              .SetStrokeWidth(render_settings_.underlayer_width)
+              .SetStrokeLineCap("round")
+              .SetStrokeLineJoin("round"));
+  svg.Add(Svg::Text(base_text).SetFillColor(color));
 }
 
 void MapRenderer::RenderBusLabels(Svg::Document& svg) const {
@@ -408,10 +458,8 @@ void MapRenderer::RenderRouteBusLabels(Svg::Document& svg, const TransportRouter
     }
     for (const size_t stop_idx : {bus_item.start_stop_idx, bus_item.finish_stop_idx}) {
       const auto stop_name = stops[stop_idx];
-      if (stop_idx == 0 
-          || stop_idx == stops.size() - 1 
-          || find(begin(bus.endpoints), end(bus.endpoints), stop_name) != end(bus.endpoints)
-      ) {
+      if (stop_idx == 0 || stop_idx == stops.size() - 1 ||
+          find(begin(bus.endpoints), end(bus.endpoints), stop_name) != end(bus.endpoints)) {
         RenderBusLabel(svg, bus_name, stop_name);
       }
     }
@@ -419,10 +467,7 @@ void MapRenderer::RenderRouteBusLabels(Svg::Document& svg, const TransportRouter
 }
 
 void MapRenderer::RenderStopPoint(Svg::Document& svg, Svg::Point point) const {
-  svg.Add(Svg::Circle{}
-          .SetCenter(point)
-          .SetRadius(render_settings_.stop_radius)
-          .SetFillColor("white"));
+  svg.Add(Svg::Circle{}.SetCenter(point).SetRadius(render_settings_.stop_radius).SetFillColor("white"));
 }
 
 void MapRenderer::RenderStopPoints(Svg::Document& svg) const {
@@ -451,24 +496,19 @@ void MapRenderer::RenderRouteStopPoints(Svg::Document& svg, const TransportRoute
 }
 
 void MapRenderer::RenderStopLabel(Svg::Document& svg, Svg::Point point, const string& name) const {
-  auto base_text =
-      Svg::Text{}
-      .SetPoint(point)
-      .SetOffset(render_settings_.stop_label_offset)
-      .SetFontSize(render_settings_.stop_label_font_size)
-      .SetFontFamily("Verdana")
-      .SetData(name);
-  svg.Add(
-      Svg::Text(base_text)
-      .SetFillColor(render_settings_.underlayer_color)
-      .SetStrokeColor(render_settings_.underlayer_color)
-      .SetStrokeWidth(render_settings_.underlayer_width)
-      .SetStrokeLineCap("round").SetStrokeLineJoin("round")
-  );
-  svg.Add(
-      base_text
-      .SetFillColor("black")
-  );
+  auto base_text = Svg::Text{}
+                       .SetPoint(point)
+                       .SetOffset(render_settings_.stop_label_offset)
+                       .SetFontSize(render_settings_.stop_label_font_size)
+                       .SetFontFamily("Verdana")
+                       .SetData(name);
+  svg.Add(Svg::Text(base_text)
+              .SetFillColor(render_settings_.underlayer_color)
+              .SetStrokeColor(render_settings_.underlayer_color)
+              .SetStrokeWidth(render_settings_.underlayer_width)
+              .SetStrokeLineCap("round")
+              .SetStrokeLineJoin("round"));
+  svg.Add(base_text.SetFillColor("black"));
 }
 
 void MapRenderer::RenderStopLabels(Svg::Document& svg) const {
@@ -496,24 +536,19 @@ void MapRenderer::RenderRouteStopLabels(Svg::Document& svg, const TransportRoute
   RenderStopLabel(svg, stops_coords_.at(last_stop_name), last_stop_name);
 }
 
-const unordered_map<
-    string,
-    void (MapRenderer::*)(Svg::Document&) const
-> MapRenderer::MAP_LAYER_ACTIONS = {
-    {"bus_lines",   &MapRenderer::RenderBusLines},
-    {"bus_labels",  &MapRenderer::RenderBusLabels},
+const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::MAP_LAYER_ACTIONS = {
+    {"bus_lines", &MapRenderer::RenderBusLines},
+    {"bus_labels", &MapRenderer::RenderBusLabels},
     {"stop_points", &MapRenderer::RenderStopPoints},
     {"stop_labels", &MapRenderer::RenderStopLabels},
 };
 
-const unordered_map<
-    string,
-    void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const
-> MapRenderer::ROUTE_LAYER_ACTIONS = {
-    {"bus_lines",   &MapRenderer::RenderRouteBusLines},
-    {"bus_labels",  &MapRenderer::RenderRouteBusLabels},
-    {"stop_points", &MapRenderer::RenderRouteStopPoints},
-    {"stop_labels", &MapRenderer::RenderRouteStopLabels},
+const unordered_map<string, void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const>
+    MapRenderer::ROUTE_LAYER_ACTIONS = {
+        {"bus_lines", &MapRenderer::RenderRouteBusLines},
+        {"bus_labels", &MapRenderer::RenderRouteBusLabels},
+        {"stop_points", &MapRenderer::RenderRouteStopPoints},
+        {"stop_labels", &MapRenderer::RenderRouteStopLabels},
 };
 
 Svg::Document MapRenderer::Render() const {
@@ -526,24 +561,35 @@ Svg::Document MapRenderer::Render() const {
   return svg;
 }
 
-Svg::Document MapRenderer::RenderRoute(
-    Svg::Document svg,
-    const TransportRouter::RouteInfo& route
-) const {
+Svg::Document MapRenderer::RenderRoute(Svg::Document svg, const TransportRouter::RouteInfo& route) const {
   const double outer_margin = render_settings_.outer_margin;
-  svg.Add(
-      Svg::Rectangle{}
-      .SetFillColor(render_settings_.underlayer_color)
-      .SetTopLeftPoint({-outer_margin, -outer_margin})
-      .SetBottomRightPoint({
-          render_settings_.max_width + outer_margin,
-          render_settings_.max_height + outer_margin
-      })
-  );
+  svg.Add(Svg::Rectangle{}
+              .SetFillColor(render_settings_.underlayer_color)
+              .SetTopLeftPoint({-outer_margin, -outer_margin})
+              .SetBottomRightPoint(
+                  {render_settings_.max_width + outer_margin, render_settings_.max_height + outer_margin}));
 
   for (const auto& layer : render_settings_.layers) {
     (this->*ROUTE_LAYER_ACTIONS.at(layer))(svg, route);
   }
 
   return svg;
+}
+
+Messages::MapRenderer MapRenderer::Serialize() const {
+  Messages::MapRenderer message;
+  *message.mutable_render_settings() = render_settings_.Serialize();
+  for (const auto& [name, point] : stops_coords_) {
+    (*message.mutable_stop_coords())[name] = SerializePoint(point);
+  }
+
+  for (const auto& [name, color] : bus_colors_) {
+    (*message.mutable_bus_colors())[name] = SerializeColor(color);
+  }
+
+  for (const auto& [name, bus] : buses_dict_) {
+    (*message.mutable_buses_dict())[name] = bus.Serialize();
+  }
+
+  return message;
 }

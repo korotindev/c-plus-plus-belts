@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <variant>
 #include <vector>
+#include "transport_catalog.pb.h"
 
 
 namespace Descriptions {
@@ -26,8 +27,10 @@ namespace Descriptions {
     std::string name;
     std::vector<std::string> stops;
     std::vector<std::string> endpoints;
-
+    
+    Messages::Descriptions::Bus Serialize() const;
     static Bus ParseFrom(const Json::Dict& attrs);
+    static Bus ParseFrom(Messages::Descriptions::Bus message);
   };
 
   using InputQuery = std::variant<Stop, Bus>;

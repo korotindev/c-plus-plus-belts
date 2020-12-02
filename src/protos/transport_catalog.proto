@@ -52,9 +52,50 @@ message TransportRouter {
   repeated BusEdgeInfo bus_edges_info = 4;
   GraphRouterInternalData graph_router_internal_data = 5;
 }
+// std::variant<std::monostate, std::string, Rgb, Rgba>;
+
+message Svg {
+  message Point {
+    double x = 1;
+    double y = 2;
+  }
+}
+
+message RenderSettings {
+  double max_width = 1;
+  double max_height = 2;
+  double padding = 3;
+  double outer_margin = 4;
+  repeated string palette = 5;
+  double line_width = 6;
+  string underlayer_color = 7;
+  double underlayer_width = 8;
+  double stop_radius = 9;
+  Svg.Point bus_label_offset = 10;
+  int32 bus_label_font_size = 11;
+  Svg.Point stop_label_offset = 12;
+  int32 stop_label_font_size = 13;
+  repeated string layers = 14;
+};
+
+message Descriptions {
+  message Bus {
+    string name = 1;
+    repeated string stops = 2;
+    repeated string endpoints = 3;
+  }
+}
+
+message MapRenderer {
+  RenderSettings render_settings = 1;
+  map<string, Svg.Point> stop_coords = 2;
+  map<string, string> bus_colors = 3;
+  map<string, Descriptions.Bus> buses_dict = 4;
+}
 
 message TransportCatalog {
   repeated Response.Stop stops_responses = 1;
   repeated Response.Bus buses_responses = 2;
   TransportRouter transport_router = 3;
+  MapRenderer map_renderer = 4;
 }

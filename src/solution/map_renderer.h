@@ -9,6 +9,7 @@
 #include "json.h"
 #include "svg.h"
 #include "transport_router.h"
+#include "transport_catalog.pb.h"
 
 struct RenderSettings {
   double max_width;
@@ -25,15 +26,18 @@ struct RenderSettings {
   Svg::Point stop_label_offset;
   int stop_label_font_size;
   std::vector<std::string> layers;
+  Messages::RenderSettings Serialize() const;
 };
 
 class MapRenderer {
  public:
   MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
               const Json::Dict& render_settings_json);
+  MapRenderer(Messages::MapRenderer message);
 
   Svg::Document Render() const;
   Svg::Document RenderRoute(Svg::Document whole_map, const TransportRouter::RouteInfo& route) const;
+  Messages::MapRenderer Serialize() const;
 
  private:
   RenderSettings render_settings_;

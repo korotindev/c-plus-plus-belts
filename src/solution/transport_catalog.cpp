@@ -30,6 +30,8 @@ TransportCatalog::TransportCatalog(Messages::TransportCatalog message) {
   }
   
   router_ = make_unique<TransportRouter>(move(*message.mutable_transport_router()));
+  map_renderer_ = make_unique<MapRenderer>(move(*message.mutable_map_renderer()));
+  map_ = map_renderer_->Render();
 }
 
 TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
@@ -131,6 +133,7 @@ Messages::TransportCatalog TransportCatalog::Serialize() const {
   }
 
   *message.mutable_transport_router() = router_->Serialize();
+  *message.mutable_map_renderer() = map_renderer_->Serialize();
 
   return message;
 }

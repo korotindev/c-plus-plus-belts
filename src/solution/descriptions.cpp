@@ -20,6 +20,34 @@ namespace Descriptions {
     return stop;
   }
 
+  Messages::Descriptions::Bus Bus::Serialize() const {
+    Messages::Descriptions::Bus message;
+    message.set_name(name);
+    for (const auto& stop : stops) {
+      *message.add_stops() = stop;
+    }
+    for (const auto& endpoint : endpoints) {
+      *message.add_endpoints() = endpoint;
+    }
+    return message;
+  }
+  
+  Bus Bus::ParseFrom(Messages::Descriptions::Bus message) {
+    Bus bus;
+    bus.name = move(*message.mutable_name());
+
+    bus.stops.reserve(message.stops_size());
+    for (auto& stop : *message.mutable_stops()) {
+      bus.stops.push_back(move(stop));
+    }
+
+    bus.endpoints.reserve(2);
+    for (auto& endpoint : *message.mutable_endpoints()) {
+      bus.stops.push_back(move(endpoint));
+    }
+    return bus;
+  }
+
   static vector<string> ParseStops(const Json::Array& stop_nodes, bool is_roundtrip) {
     vector<string> stops;
     stops.reserve(stop_nodes.size());
