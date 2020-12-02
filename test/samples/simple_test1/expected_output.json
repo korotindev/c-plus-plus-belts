@@ -1,10 +1,17 @@
 [
    {
       "curvature":1.60481,
-      "request_id":83786973,
+      "request_id":130627203,
       "route_length":11230,
       "stop_count":8,
       "unique_stop_count":7
+   },
+   {
+      "buses":[
+         "14",
+         "24"
+      ],
+      "request_id":1360715858
    },
    {
       "items":[
@@ -42,6 +49,7 @@
             "type":"Bus"
          }
       ],
-      "request_id":1639812454
+      "request_id":1641382366,
+      "total_time":15.96
    }
 ]
