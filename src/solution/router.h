@@ -87,7 +87,7 @@ namespace Graph {
   };
 
   template <typename Weight>
-  Router<Weight>::Router(const Router<Weight>::Graph& graph, Router<Weight>::RoutesInternalData data)
+  Router<Weight>::Router(const Router<Weight>::Graph& graph, typename Router<Weight>::RoutesInternalData data)
       : graph_(graph), routes_internal_data_(std::move(data)) {}
 
   template <typename Weight>
@@ -134,7 +134,7 @@ namespace Graph {
   }
 
   template <typename Weight>
-  Router<Weight>::RoutesInternalData& Router<Weight>::InternalData() {
+  typename Router<Weight>::RoutesInternalData& Router<Weight>::InternalData() {
     return routes_internal_data_;
   }
 
