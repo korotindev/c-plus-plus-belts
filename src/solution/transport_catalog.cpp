@@ -138,6 +138,7 @@ Messages::TransportCatalog TransportCatalog::Serialize() const {
 void SerializeTransportCatalog(const TransportCatalog& db, const Json::Dict& serialization_settings) {
   const string& filename = serialization_settings.at("file").AsString();
   ofstream output(filename, ios::binary);
+  output.precision(17);
   auto message = db.Serialize();
   message.SerializeToOstream(&output);
 }

@@ -13,7 +13,7 @@ void MakeBase(istream &input) {
 
   const TransportCatalog db(Descriptions::ReadDescriptions(input_map.at("base_requests").AsArray()),
                             input_map.at("routing_settings").AsMap(), input_map.at("render_settings").AsMap());
-
+  
   SerializeTransportCatalog(db, input_map.at("serialization_settings").AsMap());
 }
 
