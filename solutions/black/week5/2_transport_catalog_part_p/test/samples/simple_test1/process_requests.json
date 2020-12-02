@@ -1,0 +1,23 @@
+{
+    "serialization_settings": {
+        "file": "/tmp/simple_test1"
+    },
+    "stat_requests": [
+        {
+            "id": 130627203,
+            "type": "Bus",
+            "name": "14"
+        },
+        {
+            "id": 1360715858,
+            "type": "Stop",
+            "name": "Электросети"
+        },
+        {
+            "id": 1641382366,
+            "type": "Route",
+            "from": "Морской вокзал",
+            "to": "Параллельная улица"
+        }
+    ]
+}

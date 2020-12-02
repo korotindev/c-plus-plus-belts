@@ -1,0 +1,44 @@
+[
+   {
+      "request_id":517161241,
+      "stop_count":7,
+      "unique_stop_count":4,
+      "route_length":5540,
+      "curvature":1.2672342762883075
+   },
+   {
+      "request_id":300166811,
+      "buses":[
+         "23",
+         "36"
+      ]
+   },
+   {
+      "request_id":1231848878,
+      "total_time":37.5,
+      "items":[
+         {
+            "type":"Wait",
+            "stop_name":"Пансионат Нева",
+            "time":2
+         },
+         {
+            "type":"Bus",
+            "bus":"23",
+            "time":18.28,
+            "span_count":12
+         },
+         {
+            "type":"Wait",
+            "stop_name":"Улица Бытха",
+            "time":2
+         },
+         {
+            "type":"Bus",
+            "bus":"90",
+            "time":15.22,
+            "span_count":5
+         }
+      ]
+   }
+]

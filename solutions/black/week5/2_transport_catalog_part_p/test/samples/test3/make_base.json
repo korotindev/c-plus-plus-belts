@@ -1,0 +1,101 @@
+{
+    "serialization_settings": {
+        "file": "/tmp/test3"
+    },
+    "routing_settings": {
+        "bus_wait_time": 2,
+        "bus_velocity": 30
+    },
+    "render_settings": {
+        "width": 1500,
+        "height": 950,
+        "padding": 50,
+        "outer_margin": 150,
+        "stop_radius": 3,
+        "line_width": 10,
+        "bus_label_font_size": 18,
+        "bus_label_offset": [
+            7,
+            15
+        ],
+        "stop_label_font_size": 13,
+        "stop_label_offset": [
+            7,
+            -3
+        ],
+        "underlayer_color": [
+            255,
+            255,
+            255,
+            0.85
+        ],
+        "underlayer_width": 3,
+        "color_palette": [
+            "red",
+            "green",
+            "blue",
+            "brown",
+            "orange"
+        ],
+        "layers": [
+            "bus_lines",
+            "bus_labels",
+            "stop_points",
+            "stop_labels"
+        ]
+    },
+    "base_requests": [
+        {
+            "type": "Bus",
+            "name": "289",
+            "stops": [
+                "Zagorye",
+                "Lipetskaya ulitsa 46",
+                "Lipetskaya ulitsa 40",
+                "Lipetskaya ulitsa 40",
+                "Lipetskaya ulitsa 46",
+                "Moskvorechye",
+                "Zagorye"
+            ],
+            "is_roundtrip": true
+        },
+        {
+            "type": "Stop",
+            "road_distances": {
+                "Lipetskaya ulitsa 46": 230
+            },
+            "longitude": 37.68372,
+            "name": "Zagorye",
+            "latitude": 55.579909
+        },
+        {
+            "type": "Stop",
+            "road_distances": {
+                "Lipetskaya ulitsa 40": 390,
+                "Moskvorechye": 12400
+            },
+            "longitude": 37.682205,
+            "name": "Lipetskaya ulitsa 46",
+            "latitude": 55.581441
+        },
+        {
+            "type": "Stop",
+            "road_distances": {
+                "Lipetskaya ulitsa 40": 1090,
+                "Lipetskaya ulitsa 46": 380
+            },
+            "longitude": 37.679133,
+            "name": "Lipetskaya ulitsa 40",
+            "latitude": 55.584496
+        },
+        {
+            "type": "Stop",
+            "road_distances": {
+                "Zagorye": 10000
+            },
+            "longitude": 37.638433,
+            "name": "Moskvorechye",
+            "latitude": 55.638433
+        }
+    ]
+}

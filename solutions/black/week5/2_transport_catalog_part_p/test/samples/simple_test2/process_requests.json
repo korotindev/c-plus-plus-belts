@@ -1,0 +1,23 @@
+{
+    "serialization_settings": {
+        "file": "/tmp/simple_test2"
+    },
+    "stat_requests": [
+        {
+            "id": 517161241,
+            "type": "Bus",
+            "name": "13"
+        },
+        {
+            "id": 300166811,
+            "type": "Stop",
+            "name": "Морской вокзал"
+        },
+        {
+            "id": 1231848878,
+            "type": "Route",
+            "from": "Пансионат Нева",
+            "to": "Мацестинская долина"
+        }
+    ]
+}
