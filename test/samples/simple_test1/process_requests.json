@@ -1,23 +1,27 @@
 {
     "serialization_settings": {
-        "file": "/tmp/simple_test1"
+        "file": "/tmp/simple_test_1"
     },
     "stat_requests": [
         {
-            "id": 130627203,
+            "id": 218563507,
             "type": "Bus",
             "name": "14"
         },
         {
-            "id": 1360715858,
+            "id": 508658276,
             "type": "Stop",
             "name": "Электросети"
         },
         {
-            "id": 1641382366,
+            "id": 1964680131,
             "type": "Route",
             "from": "Морской вокзал",
             "to": "Параллельная улица"
+        },
+        {
+            "id": 1359372752,
+            "type": "Map"
         }
     ]
 }
