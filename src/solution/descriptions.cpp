@@ -43,7 +43,7 @@ namespace Descriptions {
 
     bus.endpoints.reserve(2);
     for (auto& endpoint : *message.mutable_endpoints()) {
-      bus.stops.push_back(move(endpoint));
+      bus.endpoints.push_back(move(endpoint));
     }
     return bus;
   }

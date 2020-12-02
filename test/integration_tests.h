@@ -2,4 +2,4 @@
 
 #include <string>
 
-void TestIntegration(const std::string &testDataFolderName);
+void TestIntegration(const std::string &testDataFolderName, bool draw_results);
