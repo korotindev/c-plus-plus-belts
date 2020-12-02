@@ -3,8 +3,8 @@
         "file": "/tmp/test4"
     },
     "routing_settings": {
-        "bus_wait_time": 2,
-        "bus_velocity": 30
+        "bus_velocity": 280,
+        "bus_wait_time": 490
     },
     "render_settings": {
         "width": 1500,
