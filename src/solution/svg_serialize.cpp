@@ -9,9 +9,7 @@ namespace Svg {
     proto.set_y(point.y);
   }
 
-  Point DeserializePoint(const SvgProto::Point& proto) {
-    return {proto.x(), proto.y()};
-  }
+  Point DeserializePoint(const SvgProto::Point& proto) { return {proto.x(), proto.y()}; }
 
   void SerializeColor(const Color& color, SvgProto::Color& proto) {
     if (holds_alternative<monostate>(color)) {
@@ -31,6 +29,11 @@ namespace Svg {
         rgba_proto.set_opacity(get<Rgba>(color).opacity);
       }
     }
+  }
+
+  Svg::Point ParsePoint(const Json::Node& json) {
+    const auto& array = json.AsArray();
+    return {array[0].AsDouble(), array[1].AsDouble()};
   }
 
   Color DeserializeColor(const SvgProto::Color& proto) {
@@ -54,4 +57,19 @@ namespace Svg {
     }
   }
 
-}
+  Svg::Color ParseColor(const Json::Node& json) {
+    if (json.IsString()) {
+      return json.AsString();
+    }
+    const auto& array = json.AsArray();
+    assert(array.size() == 3 || array.size() == 4);
+    Svg::Rgb rgb{static_cast<uint8_t>(array[0].AsInt()), static_cast<uint8_t>(array[1].AsInt()),
+                 static_cast<uint8_t>(array[2].AsInt())};
+    if (array.size() == 3) {
+      return rgb;
+    } else {
+      return Svg::Rgba{rgb, array[3].AsDouble()};
+    }
+  }
+
+}  // namespace Svg

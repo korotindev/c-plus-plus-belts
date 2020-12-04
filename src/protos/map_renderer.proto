@@ -2,27 +2,9 @@ syntax = "proto3";
 
 import "descriptions.proto";
 import "svg.proto";
+import "render_settings.proto";
 
 package TCProto;
-
-message RenderSettings {
-  double max_width = 1;
-  double max_height = 2;
-  double padding = 3;
-  double outer_margin = 4;
-  repeated SvgProto.Color palette = 5;
-  double line_width = 6;
-  double company_line_width = 15;
-  SvgProto.Color underlayer_color = 7;
-  double underlayer_width = 8;
-  double stop_radius = 9;
-  double company_radius = 16;
-  SvgProto.Point bus_label_offset = 10;
-  int32 bus_label_font_size = 11;
-  SvgProto.Point stop_label_offset = 12;
-  int32 stop_label_font_size = 13;
-  repeated string layers = 14;
-}
 
 message StopCoords {
   string name = 1;
