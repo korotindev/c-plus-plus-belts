@@ -1,43 +1,25 @@
 #include "transport_catalog.h"
+#include "utils.h"
+
+#include "transport_catalog.pb.h"
 
 #include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <optional>
 #include <sstream>
 #include <unordered_map>
 
-#include "utils.h"
-
 using namespace std;
 
-TransportCatalog::TransportCatalog(Messages::TransportCatalog message) {
-  for (auto& bus_message : *message.mutable_buses_responses()) {
-    buses_[move(*bus_message.mutable_name())] = Bus{
-        .stop_count = bus_message.stop_count(),
-        .unique_stop_count = bus_message.unique_stop_count(),
-        .road_route_length = bus_message.road_route_length(),
-        .geo_route_length = bus_message.geo_route_length(),
-    };
-  }
-
-  for (auto& stop_message : *message.mutable_stops_responses()) {
-    stops_[move(*stop_message.mutable_name())] =
-        Stop{.bus_names = set<string>(move_iterator(begin(*stop_message.mutable_bus_names())),
-                                      move_iterator(end(*stop_message.mutable_bus_names())))};
-  }
-  
-  router_ = make_unique<TransportRouter>(move(*message.mutable_transport_router()));
-  map_renderer_ = make_unique<MapRenderer>(move(*message.mutable_map_renderer()));
-  map_ = map_renderer_->Render();
-}
-
-TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const Json::Dict& routing_settings_json,
-                                   const Json::Dict& render_settings_json) {
-  auto stops_end =
-      partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
+TransportCatalog::TransportCatalog(
+    vector<Descriptions::InputQuery> data,
+    const Json::Dict& routing_settings_json,
+    const Json::Dict& render_settings_json
+) {
+  auto stops_end = partition(begin(data), end(data), [](const auto& item) {
+    return holds_alternative<Descriptions::Stop>(item);
+  });
 
   Descriptions::StopsDict stops_dict;
   for (const auto& item : Range{begin(data), stops_end}) {
@@ -51,9 +33,12 @@ TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, const 
     const auto& bus = get<Descriptions::Bus>(item);
 
     buses_dict[bus.name] = &bus;
-    buses_[bus.name] =
-        Bus{bus.stops.size(), ComputeUniqueItemsCount(AsRange(bus.stops)),
-            ComputeRoadRouteLength(bus.stops, stops_dict), ComputeGeoRouteDistance(bus.stops, stops_dict)};
+    buses_[bus.name] = Bus{
+      bus.stops.size(),
+      ComputeUniqueItemsCount(AsRange(bus.stops)),
+      ComputeRoadRouteLength(bus.stops, stops_dict),
+      ComputeGeoRouteDistance(bus.stops, stops_dict)
+    };
 
     for (const string& stop_name : bus.stops) {
       stops_.at(stop_name).bus_names.insert(bus.name);
@@ -90,19 +75,26 @@ string TransportCatalog::RenderRoute(const TransportRouter::RouteInfo& route) co
   return out.str();
 }
 
-int TransportCatalog::ComputeRoadRouteLength(const vector<string>& stops, const Descriptions::StopsDict& stops_dict) {
-  int result = 0;
+size_t TransportCatalog::ComputeRoadRouteLength(
+    const vector<string>& stops,
+    const Descriptions::StopsDict& stops_dict
+) {
+  size_t result = 0;
   for (size_t i = 1; i < stops.size(); ++i) {
     result += Descriptions::ComputeStopsDistance(*stops_dict.at(stops[i - 1]), *stops_dict.at(stops[i]));
   }
   return result;
 }
 
-double TransportCatalog::ComputeGeoRouteDistance(const vector<string>& stops,
-                                                 const Descriptions::StopsDict& stops_dict) {
+double TransportCatalog::ComputeGeoRouteDistance(
+    const vector<string>& stops,
+    const Descriptions::StopsDict& stops_dict
+) {
   double result = 0;
   for (size_t i = 1; i < stops.size(); ++i) {
-    result += Sphere::Distance(stops_dict.at(stops[i - 1])->position, stops_dict.at(stops[i])->position);
+    result += Sphere::Distance(
+      stops_dict.at(stops[i - 1])->position, stops_dict.at(stops[i])->position
+    );
   }
   return result;
 }
@@ -111,45 +103,56 @@ Svg::Document TransportCatalog::BuildRouteMap(const TransportRouter::RouteInfo& 
   return map_renderer_->RenderRoute(map_, route);
 }
 
-Messages::TransportCatalog TransportCatalog::Serialize() const {
-  Messages::TransportCatalog message;
+string TransportCatalog::Serialize() const {
+  TCProto::TransportCatalog db_proto;
 
-  for (auto& [bus_name, bus] : buses_) {
-    Messages::Response_Bus bus_msg;
-    bus_msg.set_name(bus_name);
-    bus_msg.set_stop_count(bus.stop_count);
-    bus_msg.set_unique_stop_count(bus.unique_stop_count);
-    bus_msg.set_road_route_length(bus.road_route_length);
-    bus_msg.set_geo_route_length(bus.geo_route_length);
-    *message.add_buses_responses() = move(bus_msg);
+  for (const auto& [name, stop] : stops_) {
+    TCProto::StopResponse& stop_proto = *db_proto.add_stops();
+    stop_proto.set_name(name);
+    for (const string& bus_name : stop.bus_names) {
+      stop_proto.add_bus_names(bus_name);
+    }
   }
 
-  for (auto& [stop_name, stop] : stops_) {
-    Messages::Response_Stop stop_msg;
-    stop_msg.set_name(stop_name);
-    for_each(stop.bus_names.begin(), stop.bus_names.end(),
-             [&stop_msg](const string& name) { stop_msg.add_bus_names(name); });
-    *message.add_stops_responses() = move(stop_msg);
+  for (const auto& [name, bus] : buses_) {
+    TCProto::BusResponse& bus_proto = *db_proto.add_buses();
+    bus_proto.set_name(name);
+    bus_proto.set_stop_count(bus.stop_count);
+    bus_proto.set_unique_stop_count(bus.unique_stop_count);
+    bus_proto.set_road_route_length(bus.road_route_length);
+    bus_proto.set_geo_route_length(bus.geo_route_length);
   }
 
-  *message.mutable_transport_router() = router_->Serialize();
-  *message.mutable_map_renderer() = map_renderer_->Serialize();
+  router_->Serialize(*db_proto.mutable_router());
+  map_renderer_->Serialize(*db_proto.mutable_renderer());
 
-  return message;
+  return db_proto.SerializeAsString();
 }
 
-void SerializeTransportCatalog(const TransportCatalog& db, const Json::Dict& serialization_settings) {
-  const string& filename = serialization_settings.at("file").AsString();
-  ofstream output(filename, ios::binary);
-  output.precision(17);
-  auto message = db.Serialize();
-  message.SerializeToOstream(&output);
-}
+TransportCatalog TransportCatalog::Deserialize(const string& data) {
+  TCProto::TransportCatalog proto;
+  assert(proto.ParseFromString(data));
 
-TransportCatalog ParseTransportCatalog(const Json::Dict& serialization_settings) {
-  const string& filename = serialization_settings.at("file").AsString();
-  Messages::TransportCatalog message;
-  ifstream file(filename, ios::binary);
-  message.ParseFromIstream(&file);
-  return TransportCatalog(move(message));
+  TransportCatalog catalog;
+
+  for (const TCProto::StopResponse& stop_proto : proto.stops()) {
+    Stop& stop = catalog.stops_[stop_proto.name()];
+    for (const string& bus_name : stop_proto.bus_names()) {
+      stop.bus_names.insert(bus_name);
+    }
+  }
+
+  for (const TCProto::BusResponse& bus_proto : proto.buses()) {
+    Bus& bus = catalog.buses_[bus_proto.name()];
+    bus.stop_count = bus_proto.stop_count();
+    bus.unique_stop_count = bus_proto.unique_stop_count();
+    bus.road_route_length = bus_proto.road_route_length();
+    bus.geo_route_length = bus_proto.geo_route_length();
+  }
+
+  catalog.router_ = TransportRouter::Deserialize(proto.router());
+  catalog.map_renderer_ = MapRenderer::Deserialize(proto.renderer());
+  catalog.map_ = catalog.map_renderer_->Render();
+
+  return catalog;
 }

@@ -11,41 +11,13 @@ namespace Descriptions {
                          .latitude = attrs.at("latitude").AsDouble(),
                          .longitude = attrs.at("longitude").AsDouble(),
                      },
-                 .distances = {}};
+                         .distances = {}};
     if (attrs.count("road_distances") > 0) {
       for (const auto& [neighbour_stop, distance_node] : attrs.at("road_distances").AsMap()) {
         stop.distances[neighbour_stop] = distance_node.AsInt();
       }
     }
     return stop;
-  }
-
-  Messages::Descriptions::Bus Bus::Serialize() const {
-    Messages::Descriptions::Bus message;
-    message.set_name(name);
-    for (const auto& stop : stops) {
-      *message.add_stops() = stop;
-    }
-    for (const auto& endpoint : endpoints) {
-      *message.add_endpoints() = endpoint;
-    }
-    return message;
-  }
-  
-  Bus Bus::ParseFrom(Messages::Descriptions::Bus message) {
-    Bus bus;
-    bus.name = move(*message.mutable_name());
-
-    bus.stops.reserve(message.stops_size());
-    for (auto& stop : *message.mutable_stops()) {
-      bus.stops.push_back(move(stop));
-    }
-
-    bus.endpoints.reserve(2);
-    for (auto& endpoint : *message.mutable_endpoints()) {
-      bus.endpoints.push_back(move(endpoint));
-    }
-    return bus;
   }
 
   static vector<string> ParseStops(const Json::Array& stop_nodes, bool is_roundtrip) {
@@ -64,7 +36,7 @@ namespace Descriptions {
     return stops;
   }
 
-  int ComputeStopsDistance(const Stop& lhs, const Stop& rhs) {
+  size_t ComputeStopsDistance(const Stop& lhs, const Stop& rhs) {
     if (auto it = lhs.distances.find(rhs.name); it != lhs.distances.end()) {
       return it->second;
     } else {
@@ -86,6 +58,33 @@ namespace Descriptions {
       }
       return bus;
     }
+  }
+
+  void Bus::Serialize(TCProto::BusDescription& proto) const {
+    proto.set_name(name);
+    for (const string& stop : stops) {
+      proto.add_stops(stop);
+    }
+    for (const string& stop : endpoints) {
+      proto.add_endpoints(stop);
+    }
+  }
+
+  Bus Bus::Deserialize(const TCProto::BusDescription& proto) {
+    Bus bus;
+    bus.name = proto.name();
+
+    bus.stops.reserve(proto.stops_size());
+    for (const auto& stop : proto.stops()) {
+      bus.stops.push_back(stop);
+    }
+
+    bus.endpoints.reserve(proto.endpoints_size());
+    for (const auto& stop : proto.endpoints()) {
+      bus.endpoints.push_back(stop);
+    }
+
+    return bus;
   }
 
   vector<InputQuery> ReadDescriptions(const Json::Array& nodes) {

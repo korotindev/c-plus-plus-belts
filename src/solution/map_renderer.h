@@ -1,15 +1,17 @@
 #pragma once
 
+#include "descriptions.h"
+#include "json.h"
+#include "svg.h"
+#include "transport_router.h"
+
+#include "map_renderer.pb.h"
+
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "descriptions.h"
-#include "json.h"
-#include "svg.h"
-#include "transport_router.h"
-#include "transport_catalog.pb.h"
 
 struct RenderSettings {
   double max_width;
@@ -26,20 +28,26 @@ struct RenderSettings {
   Svg::Point stop_label_offset;
   int stop_label_font_size;
   std::vector<std::string> layers;
-  Messages::RenderSettings Serialize() const;
+
+  void Serialize(TCProto::RenderSettings& proto) const;
+  static RenderSettings Deserialize(const TCProto::RenderSettings& proto);
 };
 
 class MapRenderer {
- public:
-  MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+public:
+  MapRenderer(const Descriptions::StopsDict& stops_dict,
+              const Descriptions::BusesDict& buses_dict,
               const Json::Dict& render_settings_json);
-  MapRenderer(Messages::MapRenderer message);
+
+  void Serialize(TCProto::MapRenderer& proto);
+  static std::unique_ptr<MapRenderer> Deserialize(const TCProto::MapRenderer& proto);
 
   Svg::Document Render() const;
   Svg::Document RenderRoute(Svg::Document whole_map, const TransportRouter::RouteInfo& route) const;
-  Messages::MapRenderer Serialize() const;
 
- private:
+private:
+  MapRenderer() = default;
+
   RenderSettings render_settings_;
   std::map<std::string, Svg::Point> stops_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;
@@ -60,9 +68,13 @@ class MapRenderer {
   void RenderRouteStopPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
   void RenderRouteStopLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
 
-  static const std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> MAP_LAYER_ACTIONS;
+  static const std::unordered_map<
+      std::string,
+      void (MapRenderer::*)(Svg::Document&) const
+  > MAP_LAYER_ACTIONS;
 
-  static const std::unordered_map<std::string,
-                                  void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const>
-      ROUTE_LAYER_ACTIONS;
+  static const std::unordered_map<
+      std::string,
+      void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const
+  > ROUTE_LAYER_ACTIONS;
 };
