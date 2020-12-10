@@ -4,8 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "commands.h"
 #include "json.h"
-#include "processes.h"
 #include "test_runner.h"
 
 using namespace std;

@@ -7,39 +7,25 @@
 
 #include "descriptions.h"
 #include "json.h"
+#include "map_renderer.pb.h"
+#include "render_settings.h"
 #include "svg.h"
 #include "transport_router.h"
-#include "transport_catalog.pb.h"
-
-struct RenderSettings {
-  double max_width;
-  double max_height;
-  double padding;
-  double outer_margin;
-  std::vector<Svg::Color> palette;
-  double line_width;
-  Svg::Color underlayer_color;
-  double underlayer_width;
-  double stop_radius;
-  Svg::Point bus_label_offset;
-  int bus_label_font_size;
-  Svg::Point stop_label_offset;
-  int stop_label_font_size;
-  std::vector<std::string> layers;
-  Messages::RenderSettings Serialize() const;
-};
 
 class MapRenderer {
  public:
   MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
               const Json::Dict& render_settings_json);
-  MapRenderer(Messages::MapRenderer message);
+
+  void Serialize(TCProto::MapRenderer& proto);
+  static std::unique_ptr<MapRenderer> Deserialize(const TCProto::MapRenderer& proto);
 
   Svg::Document Render() const;
   Svg::Document RenderRoute(Svg::Document whole_map, const TransportRouter::RouteInfo& route) const;
-  Messages::MapRenderer Serialize() const;
 
  private:
+  MapRenderer() = default;
+
   RenderSettings render_settings_;
   std::map<std::string, Svg::Point> stops_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;

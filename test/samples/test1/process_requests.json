@@ -1,6 +1,6 @@
 {
     "serialization_settings": {
-        "file": "/tmp/test1"
+        "file": "/tmp/tmpjyqkrtm8"
     },
     "stat_requests": [
         {
@@ -22,6 +22,70 @@
         {
             "id": 1359372752,
             "type": "Map"
+        },
+        {
+            "id": 379575119,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Сквер"
+            ]
+        },
+        {
+            "id": 702762979,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Вокзал"
+            ]
+        },
+        {
+            "id": 7543138,
+            "type": "FindCompanies",
+            "names": [
+                "Комсомольский"
+            ]
+        },
+        {
+            "id": 162389115,
+            "type": "FindCompanies",
+            "names": [
+                "Комсомольский"
+            ],
+            "rubrics": [
+                "Вокзал"
+            ]
+        },
+        {
+            "id": 279616443,
+            "type": "FindCompanies",
+            "names": [
+                "Комсомольский"
+            ],
+            "rubrics": [
+                "Сквер"
+            ]
+        },
+        {
+            "id": 675139528,
+            "type": "FindCompanies",
+            "names": [
+                "Комсомольский",
+                "Кооперативный"
+            ],
+            "rubrics": [
+                "Сквер"
+            ]
+        },
+        {
+            "id": 1374027080,
+            "type": "FindCompanies",
+            "names": [
+                "Комсомольский",
+                "Кооперативный"
+            ],
+            "rubrics": [
+                "Сквер",
+                "Вокзал"
+            ]
         }
     ]
 }

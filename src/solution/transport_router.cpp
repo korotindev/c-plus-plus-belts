@@ -2,36 +2,6 @@
 
 using namespace std;
 
-TransportRouter::TransportRouter(Messages::TransportRouter message) {
-  routing_settings_ = MakeRoutingSettings(move(*message.mutable_routing_settings()));
-  graph_ = BusGraph(message.vertices_info_size());
-
-  for (auto& stop_vertex_ids_msg : *message.mutable_stops_vertex_ids()) {
-    stops_vertex_ids_.emplace(MakeStopVertexIdsPair(move(stop_vertex_ids_msg)));
-  }
-
-  edges_info_.reserve(message.bus_edges_info_size() + message.stops_vertex_ids_size());
-  vertices_info_.reserve(message.vertices_info_size());
-  bool processed = false;
-  for (auto& vertex_info_msg : *message.mutable_vertices_info()) {
-    vertices_info_.push_back(MakeVertexInfo(move(vertex_info_msg)));
-    const auto& stop_ids = stops_vertex_ids_[vertices_info_.back().stop_name];
-    if (!processed) {
-      graph_.AddEdge({stop_ids.out, stop_ids.in, static_cast<double>(routing_settings_.bus_wait_time)});
-      edges_info_.push_back(WaitEdgeInfo{});
-    }
-    processed = !processed;
-  }
-
-  for (auto& bus_edge_info_msg : *message.mutable_bus_edges_info()) {
-    auto bus_edge_info = MakeBusEdgeInfo(move(bus_edge_info_msg));
-    graph_.AddEdge({bus_edge_info.start_vertex_id, bus_edge_info.finish_vertex_id, bus_edge_info.ride_time});
-    edges_info_.push_back(move(bus_edge_info));
-  }
-
-  router_ = MakeGraphRouter(graph_, move(*message.mutable_graph_router_internal_data()));
-}
-
 TransportRouter::TransportRouter(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
                                  const Json::Dict& routing_settings_json)
     : routing_settings_(MakeRoutingSettings(routing_settings_json)) {
@@ -62,7 +32,7 @@ void TransportRouter::FillGraphWithStops(const Descriptions::StopsDict& stops_di
     vertices_info_[vertex_ids.in] = {stop_name};
     vertices_info_[vertex_ids.out] = {stop_name};
 
-    edges_info_.emplace_back(WaitEdgeInfo{});
+    edges_info_.push_back(WaitEdgeInfo{});
     const Graph::EdgeId edge_id =
         graph_.AddEdge({vertex_ids.out, vertex_ids.in, static_cast<double>(routing_settings_.bus_wait_time)});
     assert(edge_id == edges_info_.size() - 1);
@@ -88,23 +58,93 @@ void TransportRouter::FillGraphWithBuses(const Descriptions::StopsDict& stops_di
       int total_distance = 0;
       for (size_t finish_stop_idx = start_stop_idx + 1; finish_stop_idx < stop_count; ++finish_stop_idx) {
         total_distance += compute_distance_from(finish_stop_idx - 1);
-        auto bus_edge_info = BusEdgeInfo{
+        edges_info_.push_back(BusEdgeInfo{
             .bus_name = bus.name,
             .start_stop_idx = start_stop_idx,
             .finish_stop_idx = finish_stop_idx,
-            .start_vertex_id = start_vertex,
-            .finish_vertex_id = stops_vertex_ids_[bus.stops[finish_stop_idx]].out,
-            .ride_time =
-                total_distance * 1.0 / (routing_settings_.bus_velocity * 1000.0 / 60),  // m / (km/h * 1000 / 60) = min
-        };
-        const Graph::EdgeId edge_id =
-            graph_.AddEdge({bus_edge_info.start_vertex_id, bus_edge_info.finish_vertex_id, bus_edge_info.ride_time});
-        edges_info_.push_back(move(bus_edge_info));
-
+        });
+        const Graph::EdgeId edge_id = graph_.AddEdge({
+            start_vertex, stops_vertex_ids_[bus.stops[finish_stop_idx]].out,
+            total_distance * 1.0 / (routing_settings_.bus_velocity * 1000.0 / 60)  // m / (km/h * 1000 / 60) = min
+        });
         assert(edge_id == edges_info_.size() - 1);
       }
     }
   }
+}
+
+void TransportRouter::Serialize(TCProto::TransportRouter& proto) const {
+  auto& routing_settings_proto = *proto.mutable_routing_settings();
+  routing_settings_proto.set_bus_wait_time(routing_settings_.bus_wait_time);
+  routing_settings_proto.set_bus_velocity(routing_settings_.bus_velocity);
+
+  graph_.Serialize(*proto.mutable_graph());
+  router_->Serialize(*proto.mutable_router());
+
+  for (const auto& [name, vertex_ids] : stops_vertex_ids_) {
+    auto& vertex_ids_proto = *proto.add_stops_vertex_ids();
+    vertex_ids_proto.set_name(name);
+    vertex_ids_proto.set_in(vertex_ids.in);
+    vertex_ids_proto.set_out(vertex_ids.out);
+  }
+
+  for (const auto& [stop_name] : vertices_info_) {
+    proto.add_vertices_info()->set_stop_name(stop_name);
+  }
+
+  for (const auto& edge_info : edges_info_) {
+    auto& edge_info_proto = *proto.add_edges_info();
+    if (holds_alternative<BusEdgeInfo>(edge_info)) {
+      const auto& bus_edge_info = get<BusEdgeInfo>(edge_info);
+      auto& bus_edge_info_proto = *edge_info_proto.mutable_bus_data();
+      bus_edge_info_proto.set_bus_name(bus_edge_info.bus_name);
+      bus_edge_info_proto.set_start_stop_idx(bus_edge_info.start_stop_idx);
+      bus_edge_info_proto.set_finish_stop_idx(bus_edge_info.finish_stop_idx);
+    } else {
+      edge_info_proto.mutable_wait_data();
+    }
+  }
+}
+
+unique_ptr<TransportRouter> TransportRouter::Deserialize(const TCProto::TransportRouter& proto) {
+  unique_ptr<TransportRouter> router_holder(new TransportRouter);  // ctor is private, so can't use make_unique
+  TransportRouter& router = *router_holder;
+
+  auto& routing_settings = router.routing_settings_;
+  routing_settings.bus_wait_time = proto.routing_settings().bus_wait_time();
+  routing_settings.bus_velocity = proto.routing_settings().bus_velocity();
+
+  router.graph_ = BusGraph::Deserialize(proto.graph());
+  router.router_ = Router::Deserialize(proto.router(), router.graph_);
+
+  for (const auto& stop_vertex_ids_proto : proto.stops_vertex_ids()) {
+    router.stops_vertex_ids_[stop_vertex_ids_proto.name()] = {
+        stop_vertex_ids_proto.in(),
+        stop_vertex_ids_proto.out(),
+    };
+  }
+
+  router.vertices_info_.reserve(proto.vertices_info_size());
+  for (const auto& vertex_info_proto : proto.vertices_info()) {
+    router.vertices_info_.emplace_back().stop_name = vertex_info_proto.stop_name();
+  }
+
+  router.edges_info_.reserve(proto.edges_info_size());
+  for (const auto& edge_info_proto : proto.edges_info()) {
+    auto& edge_info = router.edges_info_.emplace_back();
+    if (edge_info_proto.has_bus_data()) {
+      const auto& bus_info_proto = edge_info_proto.bus_data();
+      edge_info = BusEdgeInfo{
+          bus_info_proto.bus_name(),
+          bus_info_proto.start_stop_idx(),
+          bus_info_proto.finish_stop_idx(),
+      };
+    } else {
+      edge_info = WaitEdgeInfo{};
+    }
+  }
+
+  return router_holder;
 }
 
 optional<TransportRouter::RouteInfo> TransportRouter::FindRoute(const string& stop_from, const string& stop_to) const {
@@ -143,123 +183,4 @@ optional<TransportRouter::RouteInfo> TransportRouter::FindRoute(const string& st
   // but we do not expect exceptions in normal workflow
   router_->ReleaseRoute(route->id);
   return route_info;
-}
-
-Messages::TransportRouter::RoutingSettings TransportRouter::RoutingSettings::Serialize() const {
-  Messages::TransportRouter::RoutingSettings message;
-  message.set_bus_velocity(bus_velocity);
-  message.set_bus_wait_time(bus_wait_time);
-  return message;
-}
-
-TransportRouter::RoutingSettings TransportRouter::MakeRoutingSettings(
-    Messages::TransportRouter::RoutingSettings message) {
-  return {.bus_wait_time = message.bus_wait_time(), .bus_velocity = message.bus_velocity()};
-}
-
-std::pair<std::string, TransportRouter::StopVertexIds> TransportRouter::MakeStopVertexIdsPair(
-    Messages::TransportRouter::StopVertexIds message) {
-  return {move(*message.mutable_name()), TransportRouter::StopVertexIds{.in = message.in(), .out = message.out()}};
-}
-
-Messages::TransportRouter::StopVertexIds TransportRouter::StopVertexIds::Serialize() const {
-  Messages::TransportRouter::StopVertexIds message;
-  message.set_in(in);
-  message.set_out(out);
-  return message;
-}
-
-TransportRouter::VertexInfo TransportRouter::MakeVertexInfo(Messages::TransportRouter::VertexInfo message) {
-  return {.stop_name = move(*message.mutable_stop_name())};
-}
-
-Messages::TransportRouter::VertexInfo TransportRouter::VertexInfo::Serialize() const {
-  Messages::TransportRouter::VertexInfo message;
-  message.set_stop_name(stop_name);
-  return message;
-}
-
-TransportRouter::BusEdgeInfo TransportRouter::MakeBusEdgeInfo(Messages::TransportRouter::BusEdgeInfo message) {
-  return {.bus_name = move(*message.mutable_bus_name()),
-          .start_stop_idx = message.start_stop_idx(),
-          .finish_stop_idx = message.finish_stop_idx(),
-          .start_vertex_id = message.start_vertex_id(),
-          .finish_vertex_id = message.finish_vertex_id(),
-          .ride_time = message.ride_time()};
-}
-
-Messages::TransportRouter::BusEdgeInfo TransportRouter::BusEdgeInfo::Serialize() const {
-  Messages::TransportRouter::BusEdgeInfo message;
-  message.set_bus_name(bus_name);
-  message.set_start_stop_idx(start_stop_idx);
-  message.set_finish_stop_idx(finish_stop_idx);
-  message.set_start_vertex_id(start_vertex_id);
-  message.set_finish_vertex_id(finish_vertex_id);
-  message.set_ride_time(ride_time);
-  return message;
-}
-
-Messages::TransportRouter TransportRouter::Serialize() const {
-  Messages::TransportRouter message;
-  *message.mutable_routing_settings() = routing_settings_.Serialize();
-  for (const auto& vertex_info : vertices_info_) {
-    *message.add_vertices_info() = vertex_info.Serialize();
-  }
-
-  for (const auto& [name, vertex_info] : stops_vertex_ids_) {
-    auto stop_vertex_info_msg = vertex_info.Serialize();
-    stop_vertex_info_msg.set_name(name);
-    *message.add_stops_vertex_ids() = move(stop_vertex_info_msg);
-  }
-
-  for (const auto& edge_info : edges_info_) {
-    if (holds_alternative<BusEdgeInfo>(edge_info)) {
-      *message.add_bus_edges_info() = get<BusEdgeInfo>(edge_info).Serialize();
-    }
-  }
-
-  *message.mutable_graph_router_internal_data() = SerializeGraphRouter();
-
-  return message;
-}
-
-Messages::TransportRouter::GraphRouterInternalData TransportRouter::SerializeGraphRouter() const {
-  Messages::TransportRouter::GraphRouterInternalData message;
-  const auto& internal_data = router_->InternalData();
-  size_t N = internal_data.size();
-  for (size_t i = 0; i < N; i++) {
-    for (size_t j = 0; j < N; j++) {
-      if (internal_data[i][j].has_value()) {
-        Messages::TransportRouter::GraphRouterInternalData::Item item_msg;
-        item_msg.set_from(i);
-        item_msg.set_to(j);
-        auto& elem = internal_data[i][j].value();
-        item_msg.set_weight(elem.weight);
-        item_msg.set_has_prev_edge(false);
-        if (elem.prev_edge.has_value()) {
-          item_msg.set_prev_edge(elem.prev_edge.value());
-          item_msg.set_has_prev_edge(true);
-        }
-        *message.add_items() = move(item_msg);
-      }
-    }
-  }
-  return message;
-}
-
-unique_ptr<TransportRouter::Router> TransportRouter::MakeGraphRouter(
-    const BusGraph& grapth, Messages::TransportRouter::GraphRouterInternalData message) {
-  TransportRouter::Router::RoutesInternalData internal_data(
-      grapth.GetVertexCount(), vector<optional<TransportRouter::Router::RouteInternalData>>(grapth.GetVertexCount()));
-
-  for (auto& item_msg : *message.mutable_items()) {
-    TransportRouter::Router::RouteInternalData item;
-    item.weight = item_msg.weight();
-    if (item_msg.has_prev_edge()) {
-      item.prev_edge = item_msg.prev_edge();
-    }
-    internal_data[item_msg.from()][item_msg.to()] = move(item);
-  }
-
-  return make_unique<TransportRouter::Router>(grapth, move(internal_data));
 }

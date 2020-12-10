@@ -1,6 +1,6 @@
 {
     "serialization_settings": {
-        "file": "/tmp/test1"
+        "file": "/tmp/tmpjyqkrtm8"
     },
     "routing_settings": {
         "bus_wait_time": 2,
@@ -172,5 +172,37 @@
             "longitude": 39.715498,
             "road_distances": {}
         }
-    ]
+    ],
+    "yellow_pages": {
+        "rubrics": {
+            "1": {
+                "name": "Сквер"
+            },
+            "2": {
+                "name": "Вокзал"
+            }
+        },
+        "companies": [
+            {
+                "names": [
+                    {
+                        "value": "Комсомольский"
+                    }
+                ],
+                "rubrics": [
+                    1
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "value": "Кооперативный"
+                    }
+                ],
+                "rubrics": [
+                    1
+                ]
+            }
+        ]
+    }
 }

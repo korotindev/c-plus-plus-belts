@@ -1,6 +1,6 @@
 {
     "serialization_settings": {
-        "file": "/tmp/test2"
+        "file": "/tmp/tmptxbmhtnl"
     },
     "stat_requests": [
         {
@@ -22,6 +22,54 @@
         {
             "id": 684758285,
             "type": "Map"
+        },
+        {
+            "id": 1297727706,
+            "type": "Bus",
+            "name": "13"
+        },
+        {
+            "id": 749458699,
+            "type": "Stop",
+            "name": "ÐœÐ¾Ñ€ÑÐºÐ¾Ð¹ Ð²Ð¾ÐºÐ·Ð°Ð»"
+        },
+        {
+            "id": 2053647165,
+            "type": "FindCompanies",
+            "rubrics": [
+                "ÐŸÐ°Ñ€Ðº"
+            ]
+        },
+        {
+            "id": 866281987,
+            "type": "FindCompanies",
+            "rubrics": [
+                "ÐŸÐ°Ñ€Ðº"
+            ],
+            "phones": [
+                {
+                    "number": "2671646"
+                }
+            ]
+        },
+        {
+            "id": 1306125210,
+            "type": "FindCompanies",
+            "phones": [
+                {
+                    "type": "PHONE",
+                    "number": "2671646"
+                }
+            ]
+        },
+        {
+            "id": 589984419,
+            "type": "FindCompanies",
+            "phones": [
+                {
+                    "type": "PHONE"
+                }
+            ]
         }
     ]
 }
