@@ -1,0 +1,39 @@
+[
+   {
+      "curvature": 1.26723,
+      "request_id": 1297727706,
+      "route_length": 5540,
+      "stop_count": 7,
+      "unique_stop_count": 4
+   },
+   {
+      "buses": [
+         "23",
+         "36"
+      ],
+      "request_id": 749458699
+   },
+   {
+      "companies": [
+         "Дендрарий",
+         "им. Фрунзе"
+      ],
+      "request_id": 2053647165
+   },
+   {
+      "companies": [
+         "Дендрарий"
+      ],
+      "request_id": 866281987
+   },
+   {
+      "companies": [
+         "Дендрарий"
+      ],
+      "request_id": 1306125210
+   },
+   {
+      "companies": [],
+      "request_id": 589984419
+   }
+]
