@@ -33,6 +33,7 @@ void MakeBase(istream& in) {
   const auto& input_map = input_doc.GetRoot().AsMap();
 
   const TransportCatalog db(Descriptions::ReadDescriptions(input_map.at("base_requests").AsArray()),
+                            Descriptions::ReadYellowPages(input_map.at("yellow_pages").AsMap()),
                             input_map.at("routing_settings").AsMap(), input_map.at("render_settings").AsMap());
 
   const string& file_name = input_map.at("serialization_settings").AsMap().at("file").AsString();

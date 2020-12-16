@@ -14,6 +14,7 @@ using namespace std;
 
 TransportCatalog::TransportCatalog(
     vector<Descriptions::InputQuery> data,
+    YellowPages::Database yellow_pages,
     const Json::Dict& routing_settings_json,
     const Json::Dict& render_settings_json
 ) {
@@ -49,6 +50,7 @@ TransportCatalog::TransportCatalog(
 
   map_renderer_ = make_unique<MapRenderer>(stops_dict, buses_dict, render_settings_json);
   map_ = map_renderer_->Render();
+  yellow_pages_catalog_ = make_unique<YellowPagesCatalog>(move(yellow_pages));
 }
 
 const TransportCatalog::Stop* TransportCatalog::GetStop(const string& name) const {
@@ -125,7 +127,8 @@ string TransportCatalog::Serialize() const {
 
   router_->Serialize(*db_proto.mutable_router());
   map_renderer_->Serialize(*db_proto.mutable_renderer());
-
+  yellow_pages_catalog_->Serialize(*db_proto.mutable_yellow_pages());
+  
   return db_proto.SerializeAsString();
 }
 
@@ -153,6 +156,22 @@ TransportCatalog TransportCatalog::Deserialize(const string& data) {
   catalog.router_ = TransportRouter::Deserialize(proto.router());
   catalog.map_renderer_ = MapRenderer::Deserialize(proto.renderer());
   catalog.map_ = catalog.map_renderer_->Render();
+  catalog.yellow_pages_catalog_ = YellowPagesCatalog::Deserialize(proto.yellow_pages());
 
   return catalog;
+}
+
+vector<string> TransportCatalog::FilterCompanies(const vector<string>& names, const vector<string>& rubrics, const vector<string>& urls,
+                               const vector<YellowPages::Phone>& phones) const {
+  auto companies = yellow_pages_catalog_->Filter(names, rubrics, urls, phones);
+  vector<string> filtered_names;
+  transform(
+      companies.begin(), companies.end(), back_inserter(filtered_names), [](const YellowPages::Company* company) {
+        const auto& names = company->names();
+        return find_if(
+                   names.begin(), names.end(),
+                   [](const YellowPages::Name& name) { return name.type() == YellowPages::Name_Type::Name_Type_MAIN; })
+            ->value();
+      });
+  return filtered_names;
 }

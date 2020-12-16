@@ -5,6 +5,7 @@
 #include "map_renderer.h"
 #include "svg.h"
 #include "transport_router.h"
+#include "yellow_pages_catalog.h"
 #include "utils.h"
 
 #include <optional>
@@ -35,6 +36,7 @@ private:
 public:
   TransportCatalog(
       std::vector<Descriptions::InputQuery> data,
+      YellowPages::Database yellow_pages,
       const Json::Dict& routing_settings_json,
       const Json::Dict& render_settings_json
   );
@@ -46,6 +48,10 @@ public:
 
   std::string RenderMap() const;
   std::string RenderRoute(const TransportRouter::RouteInfo& route) const;
+  std::vector<std::string> FilterCompanies(const std::vector<std::string>& names,
+                                           const std::vector<std::string>& rubrics,
+                                           const std::vector<std::string>& urls,
+                                           const std::vector<YellowPages::Phone>& phones) const;
 
   std::string Serialize() const;
   static TransportCatalog Deserialize(const std::string& data);
@@ -75,4 +81,5 @@ private:
   std::unique_ptr<TransportRouter> router_;
   std::unique_ptr<MapRenderer> map_renderer_;
   Svg::Document map_;
+  std::unique_ptr<YellowPagesCatalog> yellow_pages_catalog_;
 };
