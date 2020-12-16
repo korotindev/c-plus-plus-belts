@@ -2,6 +2,9 @@
 using namespace std;
 
 static bool MatchNames(const YellowPages::Company& company, const vector<string>& names) {
+  if (names.empty()) {
+    return true;
+  }
   // think about unordered_map_of_names but where should I build it?
   for (const auto& name : company.names()) {
     for (const auto& other : names) {
@@ -14,6 +17,9 @@ static bool MatchNames(const YellowPages::Company& company, const vector<string>
 }
 
 static bool MatchRubrics(const YellowPages::Company& company, const vector<uint64_t>& rubrics_ids) {
+  if (rubrics_ids.empty()) {
+    return true;
+  }
   // think about unordered_map_of_names but where should I build it?
   for (const auto& rubric_id : company.rubrics()) {
     for (const auto& other : rubrics_ids) {
@@ -26,6 +32,9 @@ static bool MatchRubrics(const YellowPages::Company& company, const vector<uint6
 }
 
 static bool MatchUrls(const YellowPages::Company& company, const vector<string>& urls) {
+  if (urls.empty()) {
+    return true;
+  }
   // think about unordered_map_of_names but where should I build it?
   for (const auto& url : company.urls()) {
     for (const auto& other : urls) {
@@ -55,6 +64,9 @@ static bool MatchPhone(const YellowPages::Phone& object, const YellowPages::Phon
 }
 
 static bool MatchPhones(const YellowPages::Company& company, const vector<YellowPages::Phone>& phones) {
+  if (phones.empty()) {
+    return true;
+  }
   // think about unordered_map_of_names but where should I build it?
   for (const auto& phone : company.phones()) {
     for (const auto& other : phones) {
