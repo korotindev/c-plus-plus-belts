@@ -161,12 +161,12 @@ namespace Descriptions {
       const auto& dict = company_node.AsMap();
 
       for (const auto& name_node : dict.at("names").AsArray()) {
-        (*company.mutable_names()).Add(ReadName(name_node.AsMap()));
+        *company.add_names() = ReadName(name_node.AsMap());
       }
 
       if (dict.count("rubrics")) {
         for (const auto& rubric_id_node : dict.at("rubrics").AsArray()) {
-          (*company.mutable_rubrics()).Add(rubric_id_node.AsInt());
+          company.add_rubrics(rubric_id_node.AsInt());
         }
       }
 
@@ -174,17 +174,17 @@ namespace Descriptions {
         for (const auto& url_node : dict.at("urls").AsArray()) {
           YellowPages::Url url;
           url.set_value(url_node.AsMap().at("value").AsString());
-          (*company.mutable_urls()).Add(move(url));
+          *company.add_urls() = move(url);
         }
       }
 
       if (dict.count("phones")) {
         for (const auto& phone_node : dict.at("phones").AsArray()) {
-          (*company.mutable_phones()).Add(ReadPhone(phone_node.AsMap()));
+          *company.add_phones() = ReadPhone(phone_node.AsMap());
         }
       }
 
-      (*db.mutable_companies()).Add(move(company));
+      *db.add_companies() = move(company);
     }
 
     return db;
