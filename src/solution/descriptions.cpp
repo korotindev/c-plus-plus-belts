@@ -103,4 +103,90 @@ namespace Descriptions {
     return result;
   }
 
+  static YellowPages::Phone ReadPhone(const Json::Dict& attrs) {
+    YellowPages::Phone phone;
+
+    phone.set_type(YellowPages::Phone_Type::Phone_Type_PHONE);
+    if (attrs.count("type")) {
+      if (attrs.at("type").AsString() == "FAX") {
+        phone.set_type(YellowPages::Phone_Type::Phone_Type_FAX);
+      }
+    }
+
+    if (attrs.count("country_code")) {
+      *phone.mutable_country_code() = attrs.at("country_code").AsString();
+    }
+
+    if (attrs.count("local_code")) {
+      *phone.mutable_local_code() = attrs.at("local_code").AsString();
+    }
+
+    if (attrs.count("number")) {
+      *phone.mutable_number() = attrs.at("number").AsString();
+    }
+
+    if (attrs.count("extension")) {
+      *phone.mutable_extension() = attrs.at("extension").AsString();
+    }
+
+    return phone;
+  }
+
+  static YellowPages::Name ReadName(const Json::Dict& attrs) {
+    YellowPages::Name name;
+    name.set_value(attrs.at("value").AsString());
+    if (attrs.count("type")) {
+      const auto& type = attrs.at("type").AsString();
+      if (type == "MAIN") {
+        name.set_type(YellowPages::Name_Type_MAIN);
+      } else if (type == "SYNONYM") {
+        name.set_type(YellowPages::Name_Type_SYNONYM);
+      } else {
+        name.set_type(YellowPages::Name_Type_SHORT);
+      }
+    }
+    return name;
+  }
+
+  YellowPages::Database ReadYellowPages(const Json::Dict& attrs) {
+    YellowPages::Database db;
+    for (const auto& [id, rubric] : attrs.at("rubrics").AsMap()) {
+      YellowPages::Rubric r;
+      *r.mutable_name() = rubric.AsMap().at("name").AsString();
+      (*db.mutable_rubrics())[stoi(id)] = move(r);
+    }
+
+    for (const auto& company_node : attrs.at("companies").AsArray()) {
+      YellowPages::Company company;
+      const auto& dict = company_node.AsMap();
+
+      for (const auto& name_node : dict.at("names").AsArray()) {
+        *company.add_names() = ReadName(name_node.AsMap());
+      }
+
+      if (dict.count("rubrics")) {
+        for (const auto& rubric_id_node : dict.at("rubrics").AsArray()) {
+          company.add_rubrics(rubric_id_node.AsInt());
+        }
+      }
+
+      if (dict.count("urls")) {
+        for (const auto& url_node : dict.at("urls").AsArray()) {
+          YellowPages::Url url;
+          url.set_value(url_node.AsMap().at("value").AsString());
+          *company.add_urls() = move(url);
+        }
+      }
+
+      if (dict.count("phones")) {
+        for (const auto& phone_node : dict.at("phones").AsArray()) {
+          *company.add_phones() = ReadPhone(phone_node.AsMap());
+        }
+      }
+
+      *db.add_companies() = move(company);
+    }
+
+    return db;
+  }
 }  // namespace Descriptions

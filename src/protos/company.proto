@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package YellowPages;
 
-import "address.proto";
+// import "address.proto";
 import "name.proto";
 import "phone.proto";
-import "working_time.proto";
+// import "working_time.proto";
 import "url.proto";
 
 message NearbyStop {
@@ -14,11 +14,11 @@ message NearbyStop {
 }
 
 message Company {
-  Address address = 1;
+  // Address address = 1;
   repeated Name names = 2;
   repeated Phone phones = 3;
   repeated Url urls = 4;
   repeated uint64 rubrics = 5;
-  WorkingTime working_time = 6;
-  repeated NearbyStop nearby_stops = 7;
+  // WorkingTime working_time = 6;
+  // repeated NearbyStop nearby_stops = 7;
 }

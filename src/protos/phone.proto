@@ -7,6 +7,7 @@ message Phone {
   enum Type {
     PHONE = 0;
     FAX = 1;
+    UNKNOWN = 2;
   }
   Type type = 2;
   string country_code = 3;

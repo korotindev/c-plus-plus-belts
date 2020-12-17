@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "map_renderer.proto";
 import "transport_router.proto";
+import "database.proto";
 
 package TCProto;
 
@@ -22,4 +23,5 @@ message TransportCatalog {
     repeated BusResponse buses = 2;
     TransportRouter router = 3;
     MapRenderer renderer = 4;
+    YellowPages.Database yellow_pages = 5;
 };
