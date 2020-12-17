@@ -84,7 +84,19 @@ namespace Requests {
     };
   }
 
-  variant<Stop, Bus, Route, Map> Read(const Json::Dict& attrs) {
+  Json::Dict FindCompanies::Process(const TransportCatalog& db) const {
+    const auto companies = db.FilterCompanies(names, rubrics, urls, phones);
+    Json::Array items;
+    items.reserve(companies.size());
+    for(auto &company : companies){
+      items.push_back(move(company));
+    }
+    return Json::Dict{
+      {"companies", move(items)}
+    };
+  }
+
+  variant<Stop, Bus, Route, Map, FindCompanies> Read(const Json::Dict& attrs) {
     const string& type = attrs.at("type").AsString();
     if (type == "Bus") {
       return Bus{attrs.at("name").AsString()};
@@ -92,6 +104,55 @@ namespace Requests {
       return Stop{attrs.at("name").AsString()};
     } else if (type == "Route") {
       return Route{attrs.at("from").AsString(), attrs.at("to").AsString()};
+    } else if (type == "FindCompanies") {
+      FindCompanies fc;
+      if(attrs.count("names")) {
+        for(const auto &name : attrs.at("names").AsArray()) {
+          fc.names.push_back(name.AsString());
+        }
+      }
+      if(attrs.count("urls")) {
+        for(const auto &url : attrs.at("urls").AsArray()) {
+          fc.urls.push_back(url.AsString());
+        }
+      }
+      if(attrs.count("rubrics")) {
+        for(const auto &rubric : attrs.at("rubrics").AsArray()) {
+          fc.rubrics.push_back(rubric.AsString());
+        }
+      }
+
+      if (attrs.count("phones")) {
+        for(const auto &phone_node : attrs.at("phones").AsArray()) {
+          const auto& phone_dict = phone_node.AsMap();
+          YellowPages::Phone phone;
+          if(phone_dict.count("type")) {
+            if(phone_dict.at("type").AsString() == "FAX") {
+              phone.set_type(YellowPages::Phone_Type::Phone_Type_FAX);
+            } else {
+              phone.set_type(YellowPages::Phone_Type::Phone_Type_PHONE);
+            }
+          } else {
+            phone.set_type(YellowPages::Phone_Type::Phone_Type_UNKNOWN);
+          }
+
+          if (phone_dict.count("country_code")) {
+            *phone.mutable_country_code() = phone_dict.at("country_code").AsString();
+          }
+          if (phone_dict.count("local_code")) {
+            *phone.mutable_local_code() = phone_dict.at("local_code").AsString();
+          }
+          if (phone_dict.count("number")) {
+            *phone.mutable_number() = phone_dict.at("number").AsString();
+          }
+          if (phone_dict.count("extension")) {
+            *phone.mutable_extension() = phone_dict.at("extension").AsString();
+          }
+
+          fc.phones.push_back(move(phone));
+        }
+      }
+      return fc;
     } else {
       return Map{};
     }
@@ -110,5 +171,4 @@ namespace Requests {
     }
     return responses;
   }
-
 }
