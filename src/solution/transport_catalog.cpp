@@ -156,7 +156,7 @@ TransportCatalog TransportCatalog::Deserialize(const string& data) {
   catalog.router_ = TransportRouter::Deserialize(proto.router());
   catalog.map_renderer_ = MapRenderer::Deserialize(proto.renderer());
   catalog.map_ = catalog.map_renderer_->Render();
-  catalog.yellow_pages_catalog_ = YellowPagesCatalog::Deserialize(proto.yellow_pages());
+  catalog.yellow_pages_catalog_ = YellowPagesCatalog::Deserialize(move(*proto.mutable_yellow_pages()));
 
   return catalog;
 }
