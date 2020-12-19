@@ -2,7 +2,7 @@
 
 #include "json.h"
 #include "transport_catalog.h"
-#include "phone.pb.h"
+#include "filters.h"
 
 #include <string>
 #include <variant>
@@ -33,15 +33,19 @@ namespace Requests {
   };
 
   struct FindCompanies {
-    std::vector<std::string> names;
-    std::vector<std::string> rubrics;
-    std::vector<std::string> urls;
-    std::vector<YellowPages::Phone> phones;
+    CompaniesFilter filter;
+
+    Json::Dict Process(const TransportCatalog& db) const;
+  };
+  
+  struct RouteToCompany {
+    std::string stop_from;
+    CompaniesFilter filter;
 
     Json::Dict Process(const TransportCatalog& db) const;
   };
 
-  std::variant<Stop, Bus, Route, Map, FindCompanies> Read(const Json::Dict& attrs);
+  std::variant<Stop, Bus, Route, Map, FindCompanies, RouteToCompany> Read(const Json::Dict& attrs);
 
   Json::Array ProcessAll(const TransportCatalog& db, const Json::Array& requests);
 }

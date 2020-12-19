@@ -40,19 +40,27 @@ namespace Requests {
   }
 
   struct RouteItemResponseBuilder {
-    Json::Dict operator()(const TransportRouter::RouteInfo::BusItem& bus_item) const {
+    Json::Dict operator()(const TransportRouter::RouteInfo::RideBusItem& bus_item) const {
       return Json::Dict{
-          {"type", Json::Node("Bus"s)},
+          {"type", Json::Node("RideBus"s)},
           {"bus", Json::Node(bus_item.bus_name)},
           {"time", Json::Node(bus_item.time)},
           {"span_count", Json::Node(static_cast<int>(bus_item.span_count))}
       };
     }
-    Json::Dict operator()(const TransportRouter::RouteInfo::WaitItem& wait_item) const {
+    Json::Dict operator()(const TransportRouter::RouteInfo::WaitBusItem& wait_item) const {
       return Json::Dict{
-          {"type", Json::Node("Wait"s)},
+          {"type", Json::Node("WaitBus"s)},
           {"stop_name", Json::Node(wait_item.stop_name)},
           {"time", Json::Node(wait_item.time)},
+      };
+    }
+    Json::Dict operator()(const TransportRouter::RouteInfo::WalkToCompanyItem& walk_item) const {
+      return Json::Dict{
+          {"type", Json::Node("WalkToCompany"s)},
+          {"stop_name", Json::Node(walk_item.stop_name)},
+          {"company", Json::Node(walk_item.company)},
+          {"time", Json::Node(walk_item.time)},
       };
     }
   };
@@ -84,8 +92,9 @@ namespace Requests {
     };
   }
 
+
   Json::Dict FindCompanies::Process(const TransportCatalog& db) const {
-    const auto companies = db.FilterCompanies(names, rubrics, urls, phones);
+    const auto companies = db.FindCompanies(filter);
     Json::Array items;
     items.reserve(companies.size());
     for(auto &company : companies){
@@ -96,7 +105,29 @@ namespace Requests {
     };
   }
 
-  variant<Stop, Bus, Route, Map, FindCompanies> Read(const Json::Dict& attrs) {
+  Json::Dict RouteToCompany::Process(const TransportCatalog& db) const {
+    Json::Dict dict;
+    const auto filtered_companies = db.FindCompanies(companies);
+    const auto route = db.FindRouteToCompany(stop_from, companies);
+    if (!route) {
+      dict["error_message"] = Json::Node("not found"s);
+    } else {
+      dict["total_time"] = Json::Node(route->total_time);
+      Json::Array items;
+      items.reserve(route->items.size());
+      for (const auto& item : route->items) {
+        items.push_back(visit(RouteItemResponseBuilder{}, item));
+      }
+
+      dict["items"] = move(items);
+
+      dict["map"] = Json::Node(db.RenderRoute(*route));
+    }
+
+    return dict;
+  }
+
+  variant<Stop, Bus, Route, Map, FindCompanies, RouteToCompany> Read(const Json::Dict& attrs) {
     const string& type = attrs.at("type").AsString();
     if (type == "Bus") {
       return Bus{attrs.at("name").AsString()};
@@ -105,59 +136,14 @@ namespace Requests {
     } else if (type == "Route") {
       return Route{attrs.at("from").AsString(), attrs.at("to").AsString()};
     } else if (type == "FindCompanies") {
-      FindCompanies fc;
-      if(attrs.count("names")) {
-        for(const auto &name : attrs.at("names").AsArray()) {
-          fc.names.push_back(name.AsString());
-        }
-      }
-      if(attrs.count("urls")) {
-        for(const auto &url : attrs.at("urls").AsArray()) {
-          fc.urls.push_back(url.AsString());
-        }
-      }
-      if(attrs.count("rubrics")) {
-        for(const auto &rubric : attrs.at("rubrics").AsArray()) {
-          fc.rubrics.push_back(rubric.AsString());
-        }
-      }
-
-      if (attrs.count("phones")) {
-        for(const auto &phone_node : attrs.at("phones").AsArray()) {
-          const auto& phone_dict = phone_node.AsMap();
-          YellowPages::Phone phone;
-          if(phone_dict.count("type")) {
-            if(phone_dict.at("type").AsString() == "FAX") {
-              phone.set_type(YellowPages::Phone_Type::Phone_Type_FAX);
-            } else {
-              phone.set_type(YellowPages::Phone_Type::Phone_Type_PHONE);
-            }
-          } else {
-            phone.set_type(YellowPages::Phone_Type::Phone_Type_UNKNOWN);
-          }
-
-          if (phone_dict.count("country_code")) {
-            *phone.mutable_country_code() = phone_dict.at("country_code").AsString();
-          }
-          if (phone_dict.count("local_code")) {
-            *phone.mutable_local_code() = phone_dict.at("local_code").AsString();
-          }
-          if (phone_dict.count("number")) {
-            *phone.mutable_number() = phone_dict.at("number").AsString();
-          }
-          if (phone_dict.count("extension")) {
-            *phone.mutable_extension() = phone_dict.at("extension").AsString();
-          }
-
-          fc.phones.push_back(move(phone));
-        }
-      }
-      return fc;
+      return FindCompanies{CompaniesFilter(attrs)};
+    } else if (type == "RouteToCompany") {
+      return RouteToCompany{attrs.at("from").AsString(), CompaniesFilter(attrs.at("companies").AsMap())};
     } else {
       return Map{};
     }
   }
-
+   
   Json::Array ProcessAll(const TransportCatalog& db, const Json::Array& requests) {
     Json::Array responses;
     responses.reserve(requests.size());

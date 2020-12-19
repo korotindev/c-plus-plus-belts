@@ -20,5 +20,5 @@ message Company {
   repeated Url urls = 4;
   repeated uint64 rubrics = 5;
   // WorkingTime working_time = 6;
-  // repeated NearbyStop nearby_stops = 7;
+  repeated NearbyStop nearby_stops = 7;
 }

@@ -36,6 +36,7 @@ namespace Graph {
     };
 
     std::optional<RouteInfo> BuildRoute(VertexId from, VertexId to) const;
+    std::optional<Weight> GetWeight(VertexId from, VertexId to) const;
     EdgeId GetRouteEdge(RouteId route_id, size_t edge_idx) const;
     void ReleaseRoute(RouteId route_id);
 
@@ -178,6 +179,15 @@ namespace Graph {
     const size_t route_edge_count = edges.size();
     expanded_routes_cache_[route_id] = std::move(edges);
     return RouteInfo{route_id, weight, route_edge_count};
+  }
+
+  template <typename Weight>
+  std::optional<Weight> Router<Weight>::GetWeight(VertexId from, VertexId to) const {
+    const auto &route_internal_data_ = routes_internal_data_[from][to];
+    if (!route_internal_data_) {
+      return std::nullopt;
+    }
+    return route_internal_data_->weight;
   }
 
   template <typename Weight>

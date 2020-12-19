@@ -65,6 +65,11 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
   return router_->FindRoute(stop_from, stop_to);
 }
 
+optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const CompaniesFilter& filter) const {
+  const auto companies = yellow_pages_catalog_->FindCompanies(filter);
+  return router_->FindFastestRouteToAnyCompany(stop_from, companies);
+}
+
 string TransportCatalog::RenderMap() const {
   ostringstream out;
   map_.Render(out);
@@ -161,17 +166,11 @@ TransportCatalog TransportCatalog::Deserialize(const string& data) {
   return catalog;
 }
 
-vector<string> TransportCatalog::FilterCompanies(const vector<string>& names, const vector<string>& rubrics, const vector<string>& urls,
-                               const vector<YellowPages::Phone>& phones) const {
-  auto companies = yellow_pages_catalog_->Filter(names, rubrics, urls, phones);
-  vector<string> filtered_names;
-  transform(
-      companies.begin(), companies.end(), back_inserter(filtered_names), [](const YellowPages::Company* company) {
-        const auto& names = company->names();
-        return find_if(
-                   names.begin(), names.end(),
-                   [](const YellowPages::Name& name) { return name.type() == YellowPages::Name_Type::Name_Type_MAIN; })
-            ->value();
-      });
-  return filtered_names;
+vector<string> TransportCatalog::FindCompanies(const CompaniesFilter& filter) const {
+  const auto companies = yellow_pages_catalog_->FindCompanies(filter);
+  vector<string> names;
+  names.reserve(companies.size());
+  transform(companies.begin(), companies.end(), back_inserter(names),
+            [](const YellowPages::Company* company) { return GetMainCompanyName(*company); });
+  return names;
 }

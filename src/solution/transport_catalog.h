@@ -7,6 +7,8 @@
 #include "transport_router.h"
 #include "yellow_pages_catalog.h"
 #include "utils.h"
+#include "requests.h"
+#include "filters.h"
 
 #include <optional>
 #include <set>
@@ -45,13 +47,13 @@ public:
   const Bus* GetBus(const std::string& name) const;
 
   std::optional<TransportRouter::RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
+  std::optional<TransportRouter::RouteInfo> FindRoute(const std::string& stop_from, const CompaniesFilter& filter) const;
 
   std::string RenderMap() const;
   std::string RenderRoute(const TransportRouter::RouteInfo& route) const;
-  std::vector<std::string> FilterCompanies(const std::vector<std::string>& names,
-                                           const std::vector<std::string>& rubrics,
-                                           const std::vector<std::string>& urls,
-                                           const std::vector<YellowPages::Phone>& phones) const;
+
+  std::vector<std::string> FindCompanies(const CompaniesFilter& filter) const;
+
 
   std::string Serialize() const;
   static TransportCatalog Deserialize(const std::string& data);

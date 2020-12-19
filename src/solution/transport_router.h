@@ -1,6 +1,7 @@
 #pragma once
 
 #include "descriptions.h"
+#include "company.pb.h"
 #include "graph.h"
 #include "json.h"
 #include "router.h"
@@ -27,23 +28,30 @@ public:
   struct RouteInfo {
     double total_time;
 
-    struct BusItem {
+    struct RideBusItem {
       std::string bus_name;
       double time;
       size_t start_stop_idx;
       size_t finish_stop_idx;
       size_t span_count;
     };
-    struct WaitItem {
+    struct WaitBusItem {
       std::string stop_name;
       double time;
     };
 
-    using Item = std::variant<BusItem, WaitItem>;
+    struct WalkToCompanyItem {
+      std::string company;
+      std::string stop_name;
+      double time;
+    };
+
+    using Item = std::variant<RideBusItem, WaitBusItem, WalkToCompanyItem>;
     std::vector<Item> items;
   };
 
   std::optional<RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
+  std::optional<RouteInfo> FindFastestRouteToAnyCompany(const std::string& stop_from, const vector<const YellowPages::Company*>& companies) const;
 
 private:
   TransportRouter() = default;
@@ -51,6 +59,7 @@ private:
   struct RoutingSettings {
     int bus_wait_time;  // in minutes
     double bus_velocity;  // km/h
+    double pedestrian_velocity; // km/h
   };
 
   static RoutingSettings MakeRoutingSettings(const Json::Dict& json);

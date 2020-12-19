@@ -78,21 +78,18 @@ static bool MatchPhones(const YellowPages::Company& company, const vector<Yellow
   return false;
 }
  
-vector<const YellowPages::Company*> YellowPagesCatalog::Filter(const vector<string>& names,
-                                                               const vector<string>& rubrics,
-                                                               const vector<string>& urls,
-                                                               const vector<YellowPages::Phone>& phones) const {
+vector<const YellowPages::Company*> YellowPagesCatalog::FindCompanies(const CompaniesFilter& filter) const {
   vector<const YellowPages::Company*> items;
   vector<uint64_t> rubrics_ids;
 
-  for (auto& str : rubrics) {
+  for (auto& str : filter.rubrics) {
     rubrics_ids.push_back(reversed_rubrics_index_.at(str));
   }
   for (const auto& company : companies_) {
-    bool ok = MatchNames(company, names);
+    bool ok = MatchNames(company, filter.names);
     ok = ok && MatchRubrics(company, rubrics_ids);
-    ok = ok && MatchUrls(company, urls);
-    ok = ok && MatchPhones(company, phones);
+    ok = ok && MatchUrls(company, filter.urls);
+    ok = ok && MatchPhones(company, filter.phones);
     if (ok) {
       items.push_back(&company);
     }
@@ -124,4 +121,11 @@ void YellowPagesCatalog::Serialize(YellowPages::Database& proto) const {
 
 std::unique_ptr<YellowPagesCatalog> YellowPagesCatalog::Deserialize(YellowPages::Database proto) {
   return make_unique<YellowPagesCatalog>(move(proto));
+}
+
+const std::string &GetMainCompanyName(const YellowPages::Company& company) {
+  const auto& names = company.names();
+  return find_if(names.begin(), names.end(),
+                 [](const YellowPages::Name& name) { return name.type() == YellowPages::Name_Type::Name_Type_MAIN; })
+      ->value();
 }

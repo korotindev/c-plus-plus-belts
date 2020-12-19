@@ -57,8 +57,8 @@ std::unique_ptr<MapRenderer> MapRenderer::Deserialize(const TCProto::MapRenderer
   return renderer_holder;
 }
 
-using RouteBusItem = TransportRouter::RouteInfo::BusItem;
-using RouteWaitItem = TransportRouter::RouteInfo::WaitItem;
+using RouteBusItem = TransportRouter::RouteInfo::RideBusItem;
+using RouteWaitItem = TransportRouter::RouteInfo::WaitBusItem;
 
 void MapRenderer::RenderBusLines(Svg::Document& svg) const {
   for (const auto& [bus_name, bus] : buses_dict_) {

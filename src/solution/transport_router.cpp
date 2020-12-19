@@ -1,4 +1,5 @@
 #include "transport_router.h"
+#include "yellow_pages_catalog.h"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ TransportRouter::RoutingSettings TransportRouter::MakeRoutingSettings(const Json
   return {
       json.at("bus_wait_time").AsInt(),
       json.at("bus_velocity").AsDouble(),
+      json.at("pedestrian_velocity").AsDouble(),
   };
 }
 
@@ -77,6 +79,7 @@ void TransportRouter::Serialize(TCProto::TransportRouter& proto) const {
   auto& routing_settings_proto = *proto.mutable_routing_settings();
   routing_settings_proto.set_bus_wait_time(routing_settings_.bus_wait_time);
   routing_settings_proto.set_bus_velocity(routing_settings_.bus_velocity);
+  routing_settings_proto.set_pedestrian_velocity(routing_settings_.pedestrian_velocity);
 
   graph_.Serialize(*proto.mutable_graph());
   router_->Serialize(*proto.mutable_router());
@@ -113,6 +116,7 @@ unique_ptr<TransportRouter> TransportRouter::Deserialize(const TCProto::Transpor
   auto& routing_settings = router.routing_settings_;
   routing_settings.bus_wait_time = proto.routing_settings().bus_wait_time();
   routing_settings.bus_velocity = proto.routing_settings().bus_velocity();
+  routing_settings.pedestrian_velocity = proto.routing_settings().pedestrian_velocity();
 
   router.graph_ = BusGraph::Deserialize(proto.graph());
   router.router_ = Router::Deserialize(proto.router(), router.graph_);
@@ -163,7 +167,7 @@ optional<TransportRouter::RouteInfo> TransportRouter::FindRoute(const string& st
     const auto& edge_info = edges_info_[edge_id];
     if (holds_alternative<BusEdgeInfo>(edge_info)) {
       const BusEdgeInfo& bus_edge_info = get<BusEdgeInfo>(edge_info);
-      route_info.items.push_back(RouteInfo::BusItem{
+      route_info.items.push_back(RouteInfo::RideBusItem{
           .bus_name = bus_edge_info.bus_name,
           .time = edge.weight,
           .start_stop_idx = bus_edge_info.start_stop_idx,
@@ -172,7 +176,7 @@ optional<TransportRouter::RouteInfo> TransportRouter::FindRoute(const string& st
       });
     } else {
       const Graph::VertexId vertex_id = edge.from;
-      route_info.items.push_back(RouteInfo::WaitItem{
+      route_info.items.push_back(RouteInfo::WaitBusItem{
           .stop_name = vertices_info_[vertex_id].stop_name,
           .time = edge.weight,
       });
@@ -183,4 +187,45 @@ optional<TransportRouter::RouteInfo> TransportRouter::FindRoute(const string& st
   // but we do not expect exceptions in normal workflow
   router_->ReleaseRoute(route->id);
   return route_info;
+}
+
+namespace {
+  struct CompanyStop {
+    const YellowPages::Company* company_ptr;
+    Graph::VertexId vertex_to;
+    double edge_travel_time;
+    double whole_travel_time;
+  };
+}  // namespace
+
+std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAnyCompany(
+    const std::string& stop_from, const vector<const YellowPages::Company*>& companies) const {
+  const Graph::VertexId vertex_from = stops_vertex_ids_.at(stop_from).out;
+  vector<CompanyStop> companies_stops;
+  for(const auto company_ptr : companies) {
+    for(const auto &nearby_stop : company_ptr->nearby_stops()) {
+      const Graph::VertexId vertex_to = stops_vertex_ids_.at(nearby_stop.name()).out;
+      if (auto weight = router_->GetWeight(vertex_from, vertex_to)) {
+        double edge_travel_time = nearby_stop.meters() / (routing_settings_.pedestrian_velocity * 1000.0 / 60.0);
+        companies_stops.push_back(CompanyStop{company_ptr, vertex_to, edge_travel_time, *weight + edge_travel_time});
+      }
+    }
+  }
+  
+  if (companies_stops.empty())  {
+    return nullopt;
+  }
+
+  auto min_path_it = min_element(companies_stops.begin(), companies_stops.end(), [](const CompanyStop& lhs, const CompanyStop& rhs){
+   return lhs.whole_travel_time < rhs.whole_travel_time;
+  });
+
+  auto route = FindRoute(stop_from, vertices_info_[min_path_it->vertex_to].stop_name);
+  route->total_time = min_path_it->whole_travel_time;
+  route->items.push_back(RouteInfo::WalkToCompanyItem{
+    .company = GetMainCompanyName(*(min_path_it->company_ptr)),
+    .stop_name = vertices_info_[min_path_it->vertex_to].stop_name,
+    .time = min_path_it->edge_travel_time
+  });
+  return route;
 }

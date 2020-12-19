@@ -68,7 +68,9 @@
         "bitset": "cpp",
         "complex": "cpp",
         "filesystem": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "cerrno": "cpp",
+        "queue": "cpp"
     },
     "search.exclude": {
         "solutions/**": true,
