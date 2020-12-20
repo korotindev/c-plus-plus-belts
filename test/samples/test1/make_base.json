@@ -1,18 +1,21 @@
 {
     "serialization_settings": {
-        "file": "/tmp/tmpjyqkrtm8"
+        "file": "/tmp/tmp8h4r0nnk"
     },
     "routing_settings": {
         "bus_wait_time": 2,
-        "bus_velocity": 30
+        "bus_velocity": 30,
+        "pedestrian_velocity": 5
     },
     "render_settings": {
         "width": 1200,
         "height": 500,
         "padding": 50,
-        "outer_margin": 150,
+        "outer_margin": 200,
         "stop_radius": 5,
+        "company_radius": 6,
         "line_width": 14,
+        "company_line_width": 4,
         "bus_label_font_size": 20,
         "bus_label_offset": [
             7,
@@ -41,9 +44,12 @@
         ],
         "layers": [
             "bus_lines",
+            "company_lines",
             "bus_labels",
             "stop_points",
-            "stop_labels"
+            "company_points",
+            "stop_labels",
+            "company_labels"
         ]
     },
     "base_requests": [
@@ -191,6 +197,18 @@
                 ],
                 "rubrics": [
                     1
+                ],
+                "address": {
+                    "coords": {
+                        "lat": "43.585745",
+                        "lon": "39.716931"
+                    }
+                },
+                "nearby_stops": [
+                    {
+                        "name": "Ривьерский мост",
+                        "meters": 150
+                    }
                 ]
             },
             {
@@ -201,6 +219,18 @@
                 ],
                 "rubrics": [
                     1
+                ],
+                "address": {
+                    "coords": {
+                        "lat": "43.581303",
+                        "lon": "39.720118"
+                    }
+                },
+                "nearby_stops": [
+                    {
+                        "name": "Морской вокзал",
+                        "meters": 15
+                    }
                 ]
             }
         ]

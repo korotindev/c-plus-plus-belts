@@ -43,6 +43,7 @@ class MapRenderer {
   void RenderBusLabels(Svg::Document& svg) const;
   void RenderStopPoints(Svg::Document& svg) const;
   void RenderStopLabels(Svg::Document& svg) const;
+  void RenderDummy(Svg::Document& svg) const;
 
   void RenderRouteBusLines(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
   void RenderRouteBusLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;

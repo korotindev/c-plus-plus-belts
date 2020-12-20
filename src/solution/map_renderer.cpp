@@ -265,11 +265,16 @@ void MapRenderer::RenderRouteCompanyLabels(Svg::Document& svg, const TransportRo
   RenderStopLabel(svg, companies_coords_.at("company__" + walk.company->id()), walk.company->cached_full_name());
 }
 
+void MapRenderer::RenderDummy(Svg::Document&) const { }
+
 const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::MAP_LAYER_ACTIONS = {
     {"bus_lines", &MapRenderer::RenderBusLines},
     {"bus_labels", &MapRenderer::RenderBusLabels},
     {"stop_points", &MapRenderer::RenderStopPoints},
     {"stop_labels", &MapRenderer::RenderStopLabels},
+    {"company_lines", &MapRenderer::RenderDummy},
+    {"company_points", &MapRenderer::RenderDummy},
+    {"company_labels", &MapRenderer::RenderDummy},
 };
 
 const unordered_map<string, void (MapRenderer::*)(Svg::Document&, const TransportRouter::RouteInfo&) const>
