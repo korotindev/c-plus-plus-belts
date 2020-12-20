@@ -1,5 +1,7 @@
 #include "filters.h"
 
+using namespace std;
+
 CompaniesFilter::CompaniesFilter(const Json::Dict& attrs) {
   if (attrs.count("names")) {
     for (const auto& name : attrs.at("names").AsArray()) {

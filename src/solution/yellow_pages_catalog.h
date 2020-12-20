@@ -21,6 +21,3 @@ class YellowPagesCatalog {
   std::unordered_map<std::string, uint64_t> reversed_rubrics_index_;
   std::vector<YellowPages::Company> companies_;
 };
-
-const std::string &GetMainCompanyName(const YellowPages::Company& company);
-

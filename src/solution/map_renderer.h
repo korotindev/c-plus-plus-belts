@@ -9,12 +9,14 @@
 #include "json.h"
 #include "map_renderer.pb.h"
 #include "render_settings.h"
+#include "database.pb.h"
 #include "svg.h"
 #include "transport_router.h"
 
 class MapRenderer {
  public:
   MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+              const YellowPages::Database& yellow_pages,
               const Json::Dict& render_settings_json);
 
   void Serialize(TCProto::MapRenderer& proto);

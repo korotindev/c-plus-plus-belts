@@ -51,7 +51,7 @@ public:
   };
 
   std::optional<RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
-  std::optional<RouteInfo> FindFastestRouteToAnyCompany(const std::string& stop_from, const vector<const YellowPages::Company*>& companies) const;
+  std::optional<RouteInfo> FindFastestRouteToAnyCompany(const std::string& stop_from, const std::vector<const YellowPages::Company*>& companies) const;
 
 private:
   TransportRouter() = default;

@@ -30,6 +30,8 @@ void RenderSettings::Serialize(TCProto::RenderSettings& proto) const {
   proto.set_bus_label_font_size(bus_label_font_size);
   Svg::SerializePoint(stop_label_offset, *proto.mutable_stop_label_offset());
   proto.set_stop_label_font_size(stop_label_font_size);
+  proto.set_company_radius(company_radius);
+  proto.set_company_line_width(company_line_width);
 
   for (const string& layer : layers) {
     proto.add_layers(layer);
@@ -56,6 +58,8 @@ RenderSettings RenderSettings::Deserialize(const TCProto::RenderSettings& proto)
   settings.bus_label_font_size = proto.bus_label_font_size();
   settings.stop_label_offset = Svg::DeserializePoint(proto.stop_label_offset());
   settings.stop_label_font_size = proto.stop_label_font_size();
+  settings.company_radius = proto.company_radius();
+  settings.company_line_width = proto.company_line_width();
 
   settings.layers.reserve(proto.layers_size());
   for (const auto& layer : proto.layers()) {
@@ -80,6 +84,8 @@ RenderSettings RenderSettings::Parse(const Json::Dict& json) {
   result.bus_label_font_size = json.at("bus_label_font_size").AsInt();
   result.stop_label_offset = Svg::ParsePoint(json.at("stop_label_offset"));
   result.stop_label_font_size = json.at("stop_label_font_size").AsInt();
+  result.company_radius = json.at("company_radius").AsDouble();
+  result.company_line_width = json.at("company_line_width").AsDouble();
 
   const auto& layers_array = json.at("layers").AsArray();
   result.layers.reserve(layers_array.size());

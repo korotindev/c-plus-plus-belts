@@ -122,10 +122,3 @@ void YellowPagesCatalog::Serialize(YellowPages::Database& proto) const {
 std::unique_ptr<YellowPagesCatalog> YellowPagesCatalog::Deserialize(YellowPages::Database proto) {
   return make_unique<YellowPagesCatalog>(move(proto));
 }
-
-const std::string &GetMainCompanyName(const YellowPages::Company& company) {
-  const auto& names = company.names();
-  return find_if(names.begin(), names.end(),
-                 [](const YellowPages::Name& name) { return name.type() == YellowPages::Name_Type::Name_Type_MAIN; })
-      ->value();
-}

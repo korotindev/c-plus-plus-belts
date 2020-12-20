@@ -107,8 +107,7 @@ namespace Requests {
 
   Json::Dict RouteToCompany::Process(const TransportCatalog& db) const {
     Json::Dict dict;
-    const auto filtered_companies = db.FindCompanies(companies);
-    const auto route = db.FindRouteToCompany(stop_from, companies);
+    const auto route = db.FindRoute(stop_from, filter);
     if (!route) {
       dict["error_message"] = Json::Node("not found"s);
     } else {

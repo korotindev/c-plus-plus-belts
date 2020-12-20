@@ -35,51 +35,6 @@ namespace Descriptions {
     static Bus Deserialize(const TCProto::BusDescription& proto);
   };
 
-  // struct YellowPages {
-  //   struct Rubric {
-  //     uint64_t id;
-  //     std::string name;
-  //     std::vector<std::string> keywords;
-
-  //     static Rubric ParseFrom(const Json::Dict& attrs);
-  //   };
-
-  //   struct Company {
-  //     struct Name {
-  //       std::string value;
-  //       enum Type { MAIN, SYNONYM, SHORT } type;
-
-  //       static Name ParseFrom(const Json::Dict& attrs);
-  //     };
-  //     struct Phone {
-  //       std::string formatted;
-  //       enum Type { PHONE, FAX } type;
-  //       std::string country_code;
-  //       std::string local_code;
-  //       std::string number;
-  //       std::string extension;
-  //       std::string description;
-
-  //       static Phone ParseFrom(const Json::Dict& attrs);
-  //     };
-  //     struct Url {
-  //       std::string value;
-
-  //       static Url ParseFrom(const Json::Dict& attrs);
-  //     };
-
-  //     std::vector<Name> names;
-  //     std::vector<Phone> phones;
-  //     std::vector<Url> urls;
-  //     std::vector<uint64_t> rubric_ids;
-
-  //     static Company ParseFrom(const Json::Dict& attrs);
-  //   };
-
-  //   std::vector<Company> companies;
-  //   std::unordered_map<uint64_t, Rubric> rubrics;
-  // };
-
   using InputQuery = std::variant<Stop, Bus, YellowPages::Company>;
 
   std::vector<InputQuery> ReadDescriptions(const Json::Array& nodes);

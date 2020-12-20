@@ -1,5 +1,6 @@
 #include "transport_router.h"
 #include "yellow_pages_catalog.h"
+#include "yellow_pages_helpers.h"
 
 using namespace std;
 

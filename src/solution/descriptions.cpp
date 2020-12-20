@@ -160,6 +160,14 @@ namespace Descriptions {
       YellowPages::Company company;
       const auto& dict = company_node.AsMap();
 
+      {
+        YellowPages::Address addr;
+        const auto &attrs = dict.at("address").AsMap().at("coords").AsMap();
+        (*addr.mutable_coords()).set_lat(stod(attrs.at("lat").AsString()));
+        (*addr.mutable_coords()).set_lon(stod(attrs.at("lon").AsString()));
+        (*company.mutable_address()) = move(addr);
+      }
+
       for (const auto& name_node : dict.at("names").AsArray()) {
         *company.add_names() = ReadName(name_node.AsMap());
       }

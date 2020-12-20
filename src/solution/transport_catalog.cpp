@@ -2,6 +2,7 @@
 #include "utils.h"
 
 #include "transport_catalog.pb.h"
+#include "yellow_pages_helpers.h"
 
 #include <algorithm>
 #include <iterator>
@@ -48,7 +49,7 @@ TransportCatalog::TransportCatalog(
 
   router_ = make_unique<TransportRouter>(stops_dict, buses_dict, routing_settings_json);
 
-  map_renderer_ = make_unique<MapRenderer>(stops_dict, buses_dict, render_settings_json);
+  map_renderer_ = make_unique<MapRenderer>(stops_dict, buses_dict, yellow_pages, render_settings_json);
   map_ = map_renderer_->Render();
   yellow_pages_catalog_ = make_unique<YellowPagesCatalog>(move(yellow_pages));
 }

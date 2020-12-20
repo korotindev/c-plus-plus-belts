@@ -11,6 +11,7 @@ std::map<std::string, Descriptions::Bus> CopyBusesDict(const Descriptions::Buses
 
 std::map<std::string, Svg::Point> ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict,
                                                            const Descriptions::BusesDict& buses_dict,
+                                                           const YellowPages::Database& yellow_pages,
                                                            const RenderSettings& render_settings);
 
 std::unordered_map<std::string, Svg::Color> ChooseBusColors(const Descriptions::BusesDict& buses_dict,

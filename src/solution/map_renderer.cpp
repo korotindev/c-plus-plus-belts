@@ -10,9 +10,10 @@
 using namespace std;
 
 MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
+                         const YellowPages::Database& yellow_pages,
                          const Json::Dict& render_settings_json)
     : render_settings_(RenderSettings::Parse(render_settings_json)),
-      stops_coords_(ComputeStopsCoordsByGrid(stops_dict, buses_dict, render_settings_)),
+      stops_coords_(ComputeStopsCoordsByGrid(stops_dict, buses_dict, yellow_pages, render_settings_)),
       bus_colors_(ChooseBusColors(buses_dict, render_settings_)),
       buses_dict_(CopyBusesDict(buses_dict)) {}
 

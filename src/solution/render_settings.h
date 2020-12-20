@@ -19,6 +19,8 @@ struct RenderSettings {
   Svg::Point stop_label_offset;
   int stop_label_font_size;
   std::vector<std::string> layers;
+  double company_radius;
+  double company_line_width;
 
   void Serialize(TCProto::RenderSettings& proto) const;
   static RenderSettings Deserialize(const TCProto::RenderSettings& proto);
