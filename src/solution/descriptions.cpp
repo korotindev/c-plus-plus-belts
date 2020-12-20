@@ -148,6 +148,22 @@ namespace Descriptions {
     return name;
   }
 
+  static const std::string& GetMainCompanyName(const YellowPages::Company& company) {
+    const auto& names = company.names();
+    return find_if(names.begin(), names.end(),
+                   [](const YellowPages::Name& name) { return name.type() == YellowPages::Name_Type::Name_Type_MAIN; })
+        ->value();
+  }
+
+  static std::string GetFullCompanyName(const YellowPages::Database& database, const YellowPages::Company& company) {
+    const string& name = GetMainCompanyName(company);
+    if (company.rubrics_size() > 0) {
+      return database.rubrics().at(company.rubrics()[0]).name() + name;
+    }
+
+    return name;
+  }
+
   YellowPages::Database ReadYellowPages(const Json::Dict& attrs) {
     YellowPages::Database db;
     for (const auto& [id, rubric] : attrs.at("rubrics").AsMap()) {
@@ -156,8 +172,11 @@ namespace Descriptions {
       (*db.mutable_rubrics())[stoi(id)] = move(r);
     }
 
+    size_t id = 0;
+
     for (const auto& company_node : attrs.at("companies").AsArray()) {
       YellowPages::Company company;
+      company.set_id(to_string(id++));
       const auto& dict = company_node.AsMap();
 
       {
@@ -170,6 +189,8 @@ namespace Descriptions {
 
       for (const auto& name_node : dict.at("names").AsArray()) {
         *company.add_names() = ReadName(name_node.AsMap());
+        (*company.mutable_cached_main_name()) = GetMainCompanyName(company);
+        (*company.mutable_cached_full_name()) = GetFullCompanyName(db, company);
       }
 
       if (dict.count("rubrics")) {

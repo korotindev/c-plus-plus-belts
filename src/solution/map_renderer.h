@@ -30,6 +30,7 @@ class MapRenderer {
 
   RenderSettings render_settings_;
   std::map<std::string, Svg::Point> stops_coords_;
+  std::unordered_map<std::string, Svg::Point> companies_coords_;
   std::unordered_map<std::string, Svg::Color> bus_colors_;
   // TODO: move instead of copy
   std::map<std::string, Descriptions::Bus> buses_dict_;
@@ -47,6 +48,10 @@ class MapRenderer {
   void RenderRouteBusLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
   void RenderRouteStopPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
   void RenderRouteStopLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
+
+  void RenderRouteCompanyLines(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
+  void RenderRouteCompanyPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
+  void RenderRouteCompanyLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const;
 
   static const std::unordered_map<std::string, void (MapRenderer::*)(Svg::Document&) const> MAP_LAYER_ACTIONS;
 

@@ -1,6 +1,5 @@
 #include "map_renderer_helpers.h"
 #include "coords_compressor.h"
-#include "yellow_pages_helpers.h"
 
 using namespace std;
 
@@ -80,7 +79,7 @@ static unordered_map<string, Sphere::Point> ComputeInterpolatedStopsGeoCoords(
   
   for(int company_idx = 0; company_idx < yellow_pages.companies_size(); company_idx++) {
     const auto& company = yellow_pages.companies()[company_idx];
-    stops_coords["__company__" + to_string(company_idx)] = {
+    stops_coords["company__" + company.id()] = {
       company.address().coords().lat(),
       company.address().coords().lon()
     };
@@ -115,7 +114,7 @@ static NeighboursDicts BuildCoordNeighboursDicts(const unordered_map<string, Sph
 
   for(int company_idx = 0; company_idx < yellow_pages.companies_size(); company_idx++) {
     const auto& company = yellow_pages.companies()[company_idx];
-    const auto point_cur = stops_coords.at("__company__" + to_string(company_idx));
+    const auto point_cur = stops_coords.at("company__" + company.id());
 
     for(int nearby_stop_idx = 0; nearby_stop_idx < company.nearby_stops_size(); nearby_stop_idx++) {
       Sphere::Point point_prev = stops_coords.at(company.nearby_stops()[nearby_stop_idx].name());
@@ -136,7 +135,7 @@ static NeighboursDicts BuildCoordNeighboursDicts(const unordered_map<string, Sph
   return {move(neighbour_lats), move(neighbour_lons)};
 }
 
-map<string, Svg::Point> ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict,
+CoordsMapping ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict,
                                                  const Descriptions::BusesDict& buses_dict,
                                                  const YellowPages::Database& yellow_pages,
                                                  const RenderSettings& render_settings) {
@@ -148,12 +147,16 @@ map<string, Svg::Point> ComputeStopsCoordsByGrid(const Descriptions::StopsDict& 
   compressor.FillIndices(neighbour_lats, neighbour_lons);
   compressor.FillTargets(render_settings.max_width, render_settings.max_height, render_settings.padding);
 
-  map<string, Svg::Point> new_stops_coords;
+  CoordsMapping mapping;
   for (const auto& [stop_name, coord] : stops_coords) {
-    new_stops_coords[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};
+    if (stop_name.starts_with("company__")) {
+      mapping.companies[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};
+    } else {
+      mapping.stops[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};
+    }
   }
 
-  return new_stops_coords;
+  return mapping;
 }
 
 unordered_map<string, Svg::Color> ChooseBusColors(const Descriptions::BusesDict& buses_dict,

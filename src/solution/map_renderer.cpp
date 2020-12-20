@@ -10,12 +10,14 @@
 using namespace std;
 
 MapRenderer::MapRenderer(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
-                         const YellowPages::Database& yellow_pages,
-                         const Json::Dict& render_settings_json)
+                         const YellowPages::Database& yellow_pages, const Json::Dict& render_settings_json)
     : render_settings_(RenderSettings::Parse(render_settings_json)),
-      stops_coords_(ComputeStopsCoordsByGrid(stops_dict, buses_dict, yellow_pages, render_settings_)),
       bus_colors_(ChooseBusColors(buses_dict, render_settings_)),
-      buses_dict_(CopyBusesDict(buses_dict)) {}
+      buses_dict_(CopyBusesDict(buses_dict)) {
+  CoordsMapping mapping = ComputeStopsCoordsByGrid(stops_dict, buses_dict, yellow_pages, render_settings_);
+  stops_coords_ = move(mapping.stops);
+  companies_coords_ = move(mapping.companies);
+}
 
 void MapRenderer::Serialize(TCProto::MapRenderer& proto) {
   render_settings_.Serialize(*proto.mutable_render_settings());
@@ -226,6 +228,43 @@ void MapRenderer::RenderRouteStopLabels(Svg::Document& svg, const TransportRoute
   RenderStopLabel(svg, stops_coords_.at(last_stop_name), last_stop_name);
 }
 
+void MapRenderer::RenderRouteCompanyLines(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
+  if (holds_alternative<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back())) {
+    return;
+  }
+
+  Svg::Polyline line;
+  line.SetStrokeColor("black")
+      .SetStrokeWidth(render_settings_.company_line_width)
+      .SetStrokeLineCap("round")
+      .SetStrokeLineJoin("round");
+  const auto& walk = get<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back());
+  line.AddPoint(stops_coords_.at(walk.stop_name));
+  line.AddPoint(companies_coords_.at("company__" + walk.company->id()));
+  svg.Add(line); 
+}
+
+void MapRenderer::RenderRouteCompanyPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
+  if (holds_alternative<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back())) {
+    return;
+  }
+  const auto& walk = get<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back());
+
+  svg.Add(Svg::Circle{}
+              .SetCenter(companies_coords_.at("company__" + walk.company->id()))
+              .SetRadius(render_settings_.company_radius)
+              .SetFillColor("black"));
+}
+
+void MapRenderer::RenderRouteCompanyLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
+  if (holds_alternative<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back())) {
+    return;
+  }
+  const auto& walk = get<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back());
+
+  RenderStopLabel(svg, companies_coords_.at("company__" + walk.company->id()), walk.company->cached_full_name());
+}
+
 const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::MAP_LAYER_ACTIONS = {
     {"bus_lines", &MapRenderer::RenderBusLines},
     {"bus_labels", &MapRenderer::RenderBusLabels},
@@ -239,6 +278,10 @@ const unordered_map<string, void (MapRenderer::*)(Svg::Document&, const Transpor
         {"bus_labels", &MapRenderer::RenderRouteBusLabels},
         {"stop_points", &MapRenderer::RenderRouteStopPoints},
         {"stop_labels", &MapRenderer::RenderRouteStopLabels},
+        {"company_lines", &MapRenderer::RenderRouteCompanyLines},
+        {"company_points", &MapRenderer::RenderRouteCompanyPoints},
+        {"company_labels", &MapRenderer::RenderRouteCompanyLabels},
+
 };
 
 Svg::Document MapRenderer::Render() const {

@@ -41,7 +41,7 @@ public:
     };
 
     struct WalkToCompanyItem {
-      std::string company;
+      const YellowPages::Company* company;
       std::string stop_name;
       double time;
     };

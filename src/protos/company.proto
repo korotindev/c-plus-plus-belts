@@ -14,8 +14,11 @@ message NearbyStop {
 }
 
 message Company {
+  string id = 10;
   Address address = 1;
   repeated Name names = 2;
+  string cached_full_name = 8;
+  string cached_main_name = 9;
   repeated Phone phones = 3;
   repeated Url urls = 4;
   repeated uint64 rubrics = 5;

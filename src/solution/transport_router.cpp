@@ -1,6 +1,5 @@
 #include "transport_router.h"
 #include "yellow_pages_catalog.h"
-#include "yellow_pages_helpers.h"
 
 using namespace std;
 
@@ -224,7 +223,7 @@ std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAny
   auto route = FindRoute(stop_from, vertices_info_[min_path_it->vertex_to].stop_name);
   route->total_time = min_path_it->whole_travel_time;
   route->items.push_back(RouteInfo::WalkToCompanyItem{
-    .company = GetMainCompanyName(*(min_path_it->company_ptr)),
+    .company = min_path_it->company_ptr,
     .stop_name = vertices_info_[min_path_it->vertex_to].stop_name,
     .time = min_path_it->edge_travel_time
   });

@@ -2,7 +2,6 @@
 #include "utils.h"
 
 #include "transport_catalog.pb.h"
-#include "yellow_pages_helpers.h"
 
 #include <algorithm>
 #include <iterator>
@@ -172,6 +171,6 @@ vector<string> TransportCatalog::FindCompanies(const CompaniesFilter& filter) co
   vector<string> names;
   names.reserve(companies.size());
   transform(companies.begin(), companies.end(), back_inserter(names),
-            [](const YellowPages::Company* company) { return GetMainCompanyName(*company); });
+            [](const YellowPages::Company* company) { return company->cached_main_name(); });
   return names;
 }
