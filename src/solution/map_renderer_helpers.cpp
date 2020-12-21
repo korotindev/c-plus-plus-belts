@@ -8,6 +8,10 @@ struct NeighboursDicts {
   unordered_map<double, vector<double>> neighbour_lons;
 };
 
+string GetCompanyKey(const YellowPages::Company& company) {
+  return string(COMPANY_KEY_PREFIX) + company.id();
+}
+
 map<string, Descriptions::Bus> CopyBusesDict(const Descriptions::BusesDict& source) {
   map<string, Descriptions::Bus> target;
   for (const auto& [name, data_ptr] : source) {
@@ -77,9 +81,8 @@ static unordered_map<string, Sphere::Point> ComputeInterpolatedStopsGeoCoords(
     }
   }
   
-  for(int company_idx = 0; company_idx < yellow_pages.companies_size(); company_idx++) {
-    const auto& company = yellow_pages.companies()[company_idx];
-    stops_coords["company__" + company.id()] = {
+  for(const auto& company : yellow_pages.companies()) {
+    stops_coords[GetCompanyKey(company)] = {
       company.address().coords().lat(),
       company.address().coords().lon()
     };
@@ -112,12 +115,11 @@ static NeighboursDicts BuildCoordNeighboursDicts(const unordered_map<string, Sph
     }
   }
 
-  for(int company_idx = 0; company_idx < yellow_pages.companies_size(); company_idx++) {
-    const auto& company = yellow_pages.companies()[company_idx];
-    const auto point_cur = stops_coords.at("company__" + company.id());
+  for(const auto& company : yellow_pages.companies()) {
+    const auto point_cur = stops_coords.at(GetCompanyKey(company));
 
-    for(int nearby_stop_idx = 0; nearby_stop_idx < company.nearby_stops_size(); nearby_stop_idx++) {
-      Sphere::Point point_prev = stops_coords.at(company.nearby_stops()[nearby_stop_idx].name());
+    for(const auto& nearby_stop : company.nearby_stops()) {
+      Sphere::Point point_prev = stops_coords.at(nearby_stop.name());
       const auto [min_lat, max_lat] = minmax(point_prev.latitude, point_cur.latitude);
       const auto [min_lon, max_lon] = minmax(point_prev.longitude, point_cur.longitude);
       neighbour_lats[max_lat].push_back(min_lat);
@@ -149,7 +151,7 @@ CoordsMapping ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict
 
   CoordsMapping mapping;
   for (const auto& [stop_name, coord] : stops_coords) {
-    if (stop_name.find("company__") == 0) {
+    if (stop_name.find(COMPANY_KEY_PREFIX) == 0) {
       mapping.companies[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};
     } else {
       mapping.stops[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};

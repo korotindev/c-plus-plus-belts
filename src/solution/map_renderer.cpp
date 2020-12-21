@@ -257,7 +257,7 @@ void MapRenderer::RenderRouteCompanyLines(Svg::Document& svg, const TransportRou
       .SetStrokeLineJoin("round");
   const auto& walk = get<WalkToCompanyItem>(route.items.back());
   line.AddPoint(stops_coords_.at(walk.stop_name));
-  line.AddPoint(companies_coords_.at("company__" + walk.company->id()));
+  line.AddPoint(companies_coords_.at(GetCompanyKey(*walk.company)));
   svg.Add(line); 
 }
 
@@ -268,7 +268,7 @@ void MapRenderer::RenderRouteCompanyPoints(Svg::Document& svg, const TransportRo
   const auto& walk = get<WalkToCompanyItem>(route.items.back());
 
   svg.Add(Svg::Circle{}
-              .SetCenter(companies_coords_.at("company__" + walk.company->id()))
+              .SetCenter(companies_coords_.at(GetCompanyKey(*walk.company)))
               .SetRadius(render_settings_.company_radius)
               .SetFillColor("black"));
 }
@@ -279,7 +279,7 @@ void MapRenderer::RenderRouteCompanyLabels(Svg::Document& svg, const TransportRo
   }
   const auto& walk = get<WalkToCompanyItem>(route.items.back());
 
-  RenderStopLabel(svg, companies_coords_.at("company__" + walk.company->id()), walk.company->cached_full_name());
+  RenderStopLabel(svg, companies_coords_.at(GetCompanyKey(*walk.company)), walk.company->cached_full_name());
 }
 
 void MapRenderer::RenderDummy(Svg::Document&) const { }

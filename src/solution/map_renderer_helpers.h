@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <string_view>
 
 #include "descriptions.h"
 #include "render_settings.h"
@@ -11,6 +12,10 @@ struct CoordsMapping {
   std::map<std::string, Svg::Point> stops;
   std::unordered_map<std::string, Svg::Point> companies;
 };
+
+constexpr inline std::string_view COMPANY_KEY_PREFIX = "COMPANY__";
+
+std::string GetCompanyKey(const YellowPages::Company& company);
 
 std::map<std::string, Descriptions::Bus> CopyBusesDict(const Descriptions::BusesDict& source);
 
