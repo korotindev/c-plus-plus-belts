@@ -1,10 +1,11 @@
 {
     "serialization_settings": {
-        "file": "/tmp/tmptxbmhtnl"
+        "file": "/tmp/tmp2f3570x9"
     },
     "routing_settings": {
         "bus_wait_time": 2,
-        "bus_velocity": 30
+        "bus_velocity": 30,
+        "pedestrian_velocity": 4
     },
     "render_settings": {
         "width": 1500,
@@ -12,7 +13,9 @@
         "padding": 50,
         "outer_margin": 150,
         "stop_radius": 3,
+        "company_radius": 5,
         "line_width": 10,
+        "company_line_width": 2,
         "bus_label_font_size": 18,
         "bus_label_offset": [
             7,
@@ -39,9 +42,12 @@
         ],
         "layers": [
             "bus_lines",
+            "company_lines",
             "bus_labels",
             "stop_points",
-            "stop_labels"
+            "company_points",
+            "stop_labels",
+            "company_labels"
         ]
     },
     "base_requests": [
@@ -474,8 +480,8 @@
                 ],
                 "address": {
                     "coords": {
-                        "lat": 43.573226,
-                        "lon": 39.742947
+                        "lat": "43.573226",
+                        "lon": "39.742947"
                     }
                 },
                 "nearby_stops": [
@@ -510,8 +516,8 @@
                 ],
                 "address": {
                     "coords": {
-                        "lat": 43.567998,
-                        "lon": 39.734131
+                        "lat": "43.567998",
+                        "lon": "39.734131"
                     }
                 },
                 "nearby_stops": [

@@ -1,75 +1,50 @@
 {
     "serialization_settings": {
-        "file": "/tmp/tmptxbmhtnl"
+        "file": "/tmp/tmp2f3570x9"
     },
     "stat_requests": [
         {
-            "id": 80146768,
+            "id": 1804726714,
             "type": "Bus",
             "name": "13"
         },
         {
-            "id": 1571442892,
+            "id": 1601390749,
             "type": "Stop",
             "name": "Морской вокзал"
         },
         {
-            "id": 1490699931,
+            "id": 1804743431,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Парк"
+            ]
+        },
+        {
+            "id": 179918605,
             "type": "Route",
-            "from": "Пансионат Нева",
-            "to": "Улица Лысая Гора"
+            "from": "Краево-Греческая улица",
+            "to": "Органный зал"
         },
         {
-            "id": 684758285,
-            "type": "Map"
+            "id": 1578968634,
+            "type": "RouteToCompany",
+            "from": "Краево-Греческая улица",
+            "companies": {
+                "rubrics": [
+                    "Парк"
+                ]
+            }
         },
         {
-            "id": 1297727706,
-            "type": "Bus",
-            "name": "13"
-        },
-        {
-            "id": 749458699,
-            "type": "Stop",
-            "name": "Морской вокзал"
-        },
-        {
-            "id": 2053647165,
-            "type": "FindCompanies",
-            "rubrics": [
-                "Парк"
-            ]
-        },
-        {
-            "id": 866281987,
-            "type": "FindCompanies",
-            "rubrics": [
-                "Парк"
-            ],
-            "phones": [
-                {
-                    "number": "2671646"
-                }
-            ]
-        },
-        {
-            "id": 1306125210,
-            "type": "FindCompanies",
-            "phones": [
-                {
-                    "type": "PHONE",
-                    "number": "2671646"
-                }
-            ]
-        },
-        {
-            "id": 589984419,
-            "type": "FindCompanies",
-            "phones": [
-                {
-                    "type": "PHONE"
-                }
-            ]
+            "id": 1499333079,
+            "type": "RouteToCompany",
+            "from": "Цирк",
+            "companies": {
+                "rubrics": [
+                    "Парк"
+                ]
+            }
         }
     ]
 }
