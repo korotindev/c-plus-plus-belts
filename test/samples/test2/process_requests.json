@@ -45,6 +45,64 @@
                     "Парк"
                 ]
             }
+        },
+        {
+            "id": 80146768,
+            "type": "Bus",
+            "name": "13"
+        },
+        {
+            "id": 1571442892,
+            "type": "Stop",
+            "name": "Морской вокзал"
+        },
+        {
+            "id": 1297727706,
+            "type": "Bus",
+            "name": "13"
+        },
+        {
+            "id": 749458699,
+            "type": "Stop",
+            "name": "Морской вокзал"
+        },
+        {
+            "id": 2053647165,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Парк"
+            ]
+        },
+        {
+            "id": 866281987,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Парк"
+            ],
+            "phones": [
+                {
+                    "number": "2671646"
+                }
+            ]
+        },
+        {
+            "id": 1306125210,
+            "type": "FindCompanies",
+            "phones": [
+                {
+                    "type": "PHONE",
+                    "number": "2671646"
+                }
+            ]
+        },
+        {
+            "id": 589984419,
+            "type": "FindCompanies",
+            "phones": [
+                {
+                    "type": "PHONE"
+                }
+            ]
         }
     ]
 }
