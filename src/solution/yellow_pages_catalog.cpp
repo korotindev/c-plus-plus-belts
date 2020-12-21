@@ -103,9 +103,9 @@ YellowPagesCatalog::YellowPagesCatalog(YellowPages::Database proto) {
     companies_.push_back(move(company));
   }
 
-  for(auto &[id, rubric] : *proto.mutable_rubrics()) {
-    reversed_rubrics_index_[rubric.name()] = id;
-    rubrics_[id] = move(rubric);
+  for(auto& map_pair : *proto.mutable_rubrics()) {
+    reversed_rubrics_index_[map_pair.second.name()] = map_pair.first;
+    rubrics_[map_pair.first] = move(map_pair.second);
   }
 }
 
