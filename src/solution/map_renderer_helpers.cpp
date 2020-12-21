@@ -149,7 +149,7 @@ CoordsMapping ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict
 
   CoordsMapping mapping;
   for (const auto& [stop_name, coord] : stops_coords) {
-    if (stop_name.starts_with("company__")) {
+    if (stop_name.find("company__") == 0) {
       mapping.companies[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};
     } else {
       mapping.stops[stop_name] = {compressor.MapLon(coord.longitude), compressor.MapLat(coord.latitude)};
