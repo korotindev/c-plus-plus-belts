@@ -1,12 +1,11 @@
 #pragma once
 
-#include "json.h"
-#include "transport_catalog.h"
-#include "filters.h"
-
 #include <string>
 #include <variant>
 
+#include "filters.h"
+#include "json.h"
+#include "transport_catalog.h"
 
 namespace Requests {
   struct Stop {
@@ -37,7 +36,7 @@ namespace Requests {
 
     Json::Dict Process(const TransportCatalog& db) const;
   };
-  
+
   struct RouteToCompany {
     std::string stop_from;
     CompaniesFilter filter;
@@ -48,4 +47,4 @@ namespace Requests {
   std::variant<Stop, Bus, Route, Map, FindCompanies, RouteToCompany> Read(const Json::Dict& attrs);
 
   Json::Array ProcessAll(const TransportCatalog& db, const Json::Array& requests);
-}
+}  // namespace Requests

@@ -1,7 +1,8 @@
 #include "requests.h"
-#include "transport_router.h"
 
 #include <vector>
+
+#include "transport_router.h"
 
 using namespace std;
 
@@ -41,12 +42,10 @@ namespace Requests {
 
   struct RouteItemResponseBuilder {
     Json::Dict operator()(const TransportRouter::RouteInfo::RideBusItem& bus_item) const {
-      return Json::Dict{
-          {"type", Json::Node("RideBus"s)},
-          {"bus", Json::Node(bus_item.bus_name)},
-          {"time", Json::Node(bus_item.time)},
-          {"span_count", Json::Node(static_cast<int>(bus_item.span_count))}
-      };
+      return Json::Dict{{"type", Json::Node("RideBus"s)},
+                        {"bus", Json::Node(bus_item.bus_name)},
+                        {"time", Json::Node(bus_item.time)},
+                        {"span_count", Json::Node(static_cast<int>(bus_item.span_count))}};
     }
     Json::Dict operator()(const TransportRouter::RouteInfo::WaitBusItem& wait_item) const {
       return Json::Dict{
@@ -72,6 +71,7 @@ namespace Requests {
       dict["error_message"] = Json::Node("not found"s);
     } else {
       dict["total_time"] = Json::Node(route->total_time);
+
       Json::Array items;
       items.reserve(route->items.size());
       for (const auto& item : route->items) {
@@ -79,10 +79,8 @@ namespace Requests {
       }
 
       dict["items"] = move(items);
-
       dict["map"] = Json::Node(db.RenderRoute(*route));
     }
-
     return dict;
   }
 
@@ -92,17 +90,14 @@ namespace Requests {
     };
   }
 
-
   Json::Dict FindCompanies::Process(const TransportCatalog& db) const {
     const auto companies = db.FindCompanies(filter);
     Json::Array items;
     items.reserve(companies.size());
-    for(auto &company : companies){
+    for (auto& company : companies) {
       items.push_back(move(company));
     }
-    return Json::Dict{
-      {"companies", move(items)}
-    };
+    return Json::Dict{{"companies", move(items)}};
   }
 
   Json::Dict RouteToCompany::Process(const TransportCatalog& db) const {
@@ -142,18 +137,16 @@ namespace Requests {
       return Map{};
     }
   }
-   
+
   Json::Array ProcessAll(const TransportCatalog& db, const Json::Array& requests) {
     Json::Array responses;
     responses.reserve(requests.size());
     for (const Json::Node& request_node : requests) {
-      Json::Dict dict = visit([&db](const auto& request) {
-                                return request.Process(db);
-                              },
-                              Requests::Read(request_node.AsMap()));
+      Json::Dict dict =
+          visit([&db](const auto& request) { return request.Process(db); }, Requests::Read(request_node.AsMap()));
       dict["request_id"] = Json::Node(request_node.AsMap().at("id").AsInt());
       responses.push_back(Json::Node(dict));
     }
     return responses;
   }
-}
+}  // namespace Requests

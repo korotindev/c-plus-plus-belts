@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 #include <memory>
 #include <unordered_map>
 
@@ -10,9 +10,9 @@ class YellowPagesCatalog {
   YellowPagesCatalog(YellowPages::Database yellow_pages);
 
   // FIXME not safe for concurency, think about possible refs invalidation!!
-  std::vector<const YellowPages::Company*> FindCompanies(const CompaniesFilter &filter) const;
+  std::vector<const YellowPages::Company *> FindCompanies(const CompaniesFilter &filter) const;
 
-  void Serialize(YellowPages::Database &proto) const ;
+  void Serialize(YellowPages::Database &proto) const;
   static std::unique_ptr<YellowPagesCatalog> Deserialize(YellowPages::Database proto);
 
  private:

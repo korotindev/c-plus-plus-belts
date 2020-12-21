@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "phone.pb.h"
 #include "json.h"
+#include "phone.pb.h"
 
 struct CompaniesFilter {
   std::vector<std::string> names;

@@ -1,27 +1,27 @@
 #pragma once
 
-#include "graph.h"
-#include "graph.pb.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
-#include <type_traits>
 #include <vector>
+
+#include "graph.h"
+#include "graph.pb.h"
 
 namespace Graph {
 
   template <typename Weight>
   class Router {
-  private:
+   private:
     using Graph = DirectedWeightedGraph<Weight>;
 
-  public:
+   public:
     Router(const Graph& graph);
 
     void Serialize(GraphProto::Router& proto);
@@ -40,7 +40,7 @@ namespace Graph {
     EdgeId GetRouteEdge(RouteId route_id, size_t edge_idx) const;
     void ReleaseRoute(RouteId route_id);
 
-  private:
+   private:
     Router(const Graph& graph, const GraphProto::Router& proto);
 
     const Graph& graph_;
@@ -70,17 +70,12 @@ namespace Graph {
       }
     }
 
-    void RelaxRoute(VertexId vertex_from, VertexId vertex_to,
-                    const RouteInternalData& route_from, const RouteInternalData& route_to) {
+    void RelaxRoute(VertexId vertex_from, VertexId vertex_to, const RouteInternalData& route_from,
+                    const RouteInternalData& route_to) {
       auto& route_relaxing = routes_internal_data_[vertex_from][vertex_to];
       const Weight candidate_weight = route_from.weight + route_to.weight;
       if (!route_relaxing || candidate_weight < route_relaxing->weight) {
-        route_relaxing = {
-            candidate_weight,
-            route_to.prev_edge
-                ? route_to.prev_edge
-                : route_from.prev_edge
-        };
+        route_relaxing = {candidate_weight, route_to.prev_edge ? route_to.prev_edge : route_from.prev_edge};
       }
     }
 
@@ -99,12 +94,11 @@ namespace Graph {
     RoutesInternalData routes_internal_data_;
   };
 
-
   template <typename Weight>
   Router<Weight>::Router(const Graph& graph)
       : graph_(graph),
-        routes_internal_data_(graph.GetVertexCount(), std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount()))
-  {
+        routes_internal_data_(graph.GetVertexCount(),
+                              std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount())) {
     InitializeRoutesInternalData(graph);
 
     const size_t vertex_count = graph.GetVertexCount();
@@ -134,9 +128,7 @@ namespace Graph {
   }
 
   template <typename Weight>
-  Router<Weight>::Router(const Graph& graph, const GraphProto::Router& proto)
-      : graph_(graph)
-  {
+  Router<Weight>::Router(const Graph& graph, const GraphProto::Router& proto) : graph_(graph) {
     static_assert(std::is_same_v<Weight, double>, "Serialization is implemented only for double weights");
 
     routes_internal_data_.reserve(proto.sources_data_size());
@@ -168,8 +160,7 @@ namespace Graph {
     }
     const Weight weight = route_internal_data->weight;
     std::vector<EdgeId> edges;
-    for (std::optional<EdgeId> edge_id = route_internal_data->prev_edge;
-         edge_id;
+    for (std::optional<EdgeId> edge_id = route_internal_data->prev_edge; edge_id;
          edge_id = routes_internal_data_[from][graph_.GetEdge(*edge_id).from]->prev_edge) {
       edges.push_back(*edge_id);
     }
@@ -183,7 +174,7 @@ namespace Graph {
 
   template <typename Weight>
   std::optional<Weight> Router<Weight>::GetWeight(VertexId from, VertexId to) const {
-    const auto &route_internal_data_ = routes_internal_data_[from][to];
+    const auto& route_internal_data_ = routes_internal_data_[from][to];
     if (!route_internal_data_) {
       return std::nullopt;
     }
@@ -200,4 +191,4 @@ namespace Graph {
     expanded_routes_cache_.erase(route_id);
   }
 
-}
+}  // namespace Graph

@@ -77,7 +77,7 @@ static bool MatchPhones(const YellowPages::Company& company, const vector<Yellow
   }
   return false;
 }
- 
+
 vector<const YellowPages::Company*> YellowPagesCatalog::FindCompanies(const CompaniesFilter& filter) const {
   vector<const YellowPages::Company*> items;
   vector<uint64_t> rubrics_ids;
@@ -99,22 +99,22 @@ vector<const YellowPages::Company*> YellowPagesCatalog::FindCompanies(const Comp
 
 YellowPagesCatalog::YellowPagesCatalog(YellowPages::Database proto) {
   companies_.reserve(proto.companies_size());
-  for(auto& company : *proto.mutable_companies()) {
+  for (auto& company : *proto.mutable_companies()) {
     companies_.push_back(move(company));
   }
 
-  for(auto& map_pair : *proto.mutable_rubrics()) {
+  for (auto& map_pair : *proto.mutable_rubrics()) {
     reversed_rubrics_index_[map_pair.second.name()] = map_pair.first;
     rubrics_[map_pair.first] = move(map_pair.second);
   }
 }
 
 void YellowPagesCatalog::Serialize(YellowPages::Database& proto) const {
-  for(const auto& company : companies_) {
+  for (const auto& company : companies_) {
     *proto.add_companies() = company;
   }
 
-  for(const auto &[id, rubric] : rubrics_) {
+  for (const auto& [id, rubric] : rubrics_) {
     (*proto.mutable_rubrics())[id] = rubric;
   }
 }

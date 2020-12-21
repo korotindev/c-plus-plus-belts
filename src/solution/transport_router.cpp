@@ -1,4 +1,5 @@
 #include "transport_router.h"
+
 #include "yellow_pages_catalog.h"
 
 using namespace std;
@@ -202,8 +203,8 @@ std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAny
     const std::string& stop_from, const vector<const YellowPages::Company*>& companies) const {
   const Graph::VertexId vertex_from = stops_vertex_ids_.at(stop_from).out;
   vector<CompanyStop> companies_stops;
-  for(const auto company_ptr : companies) {
-    for(const auto &nearby_stop : company_ptr->nearby_stops()) {
+  for (const auto company_ptr : companies) {
+    for (const auto& nearby_stop : company_ptr->nearby_stops()) {
       const Graph::VertexId vertex_to = stops_vertex_ids_.at(nearby_stop.name()).out;
       if (auto weight = router_->GetWeight(vertex_from, vertex_to)) {
         double edge_travel_time = nearby_stop.meters() / (routing_settings_.pedestrian_velocity * 1000.0 / 60.0);
@@ -211,21 +212,19 @@ std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAny
       }
     }
   }
-  
-  if (companies_stops.empty())  {
+
+  if (companies_stops.empty()) {
     return nullopt;
   }
 
-  auto min_path_it = min_element(companies_stops.begin(), companies_stops.end(), [](const CompanyStop& lhs, const CompanyStop& rhs){
-   return lhs.whole_travel_time < rhs.whole_travel_time;
-  });
+  auto min_path_it = min_element(
+      companies_stops.begin(), companies_stops.end(),
+      [](const CompanyStop& lhs, const CompanyStop& rhs) { return lhs.whole_travel_time < rhs.whole_travel_time; });
 
   auto route = FindRoute(stop_from, vertices_info_[min_path_it->vertex_to].stop_name);
   route->total_time = min_path_it->whole_travel_time;
-  route->items.push_back(RouteInfo::WalkToCompanyItem{
-    .company = min_path_it->company_ptr,
-    .stop_name = vertices_info_[min_path_it->vertex_to].stop_name,
-    .time = min_path_it->edge_travel_time
-  });
+  route->items.push_back(RouteInfo::WalkToCompanyItem{.company = min_path_it->company_ptr,
+                                                      .stop_name = vertices_info_[min_path_it->vertex_to].stop_name,
+                                                      .time = min_path_it->edge_travel_time});
   return route;
 }

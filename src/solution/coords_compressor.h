@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "sphere.h"
 
@@ -30,7 +30,8 @@ class CoordsCompressor {
   std::vector<CoordInfo> lats_;
   std::vector<CoordInfo> lons_;
 
-  void FillCoordIndices(std::vector<CoordInfo>& coords, const std::unordered_map<double, std::vector<double>>& neighbour_values);
+  void FillCoordIndices(std::vector<CoordInfo>& coords,
+                        const std::unordered_map<double, std::vector<double>>& neighbour_values);
 
   static const CoordInfo& Find(const std::vector<CoordInfo>& sorted_values, double value,
                                std::optional<std::vector<CoordInfo>::const_iterator> end_it = std::nullopt);

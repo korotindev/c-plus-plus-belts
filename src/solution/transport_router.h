@@ -1,25 +1,23 @@
 #pragma once
 
-#include "descriptions.h"
-#include "company.pb.h"
-#include "graph.h"
-#include "json.h"
-#include "router.h"
-
-#include "transport_router.pb.h"
-
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
+#include "company.pb.h"
+#include "descriptions.h"
+#include "graph.h"
+#include "json.h"
+#include "router.h"
+#include "transport_router.pb.h"
+
 class TransportRouter {
-private:
+ private:
   using BusGraph = Graph::DirectedWeightedGraph<double>;
   using Router = Graph::Router<double>;
 
-public:
-  TransportRouter(const Descriptions::StopsDict& stops_dict,
-                  const Descriptions::BusesDict& buses_dict,
+ public:
+  TransportRouter(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict,
                   const Json::Dict& routing_settings_json);
 
   void Serialize(TCProto::TransportRouter& proto) const;
@@ -51,23 +49,23 @@ public:
   };
 
   std::optional<RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
-  std::optional<RouteInfo> FindFastestRouteToAnyCompany(const std::string& stop_from, const std::vector<const YellowPages::Company*>& companies) const;
+  std::optional<RouteInfo> FindFastestRouteToAnyCompany(
+      const std::string& stop_from, const std::vector<const YellowPages::Company*>& companies) const;
 
-private:
+ private:
   TransportRouter() = default;
 
   struct RoutingSettings {
-    int bus_wait_time;  // in minutes
-    double bus_velocity;  // km/h
-    double pedestrian_velocity; // km/h
+    int bus_wait_time;           // in minutes
+    double bus_velocity;         // km/h
+    double pedestrian_velocity;  // km/h
   };
 
   static RoutingSettings MakeRoutingSettings(const Json::Dict& json);
 
   void FillGraphWithStops(const Descriptions::StopsDict& stops_dict);
 
-  void FillGraphWithBuses(const Descriptions::StopsDict& stops_dict,
-                          const Descriptions::BusesDict& buses_dict);
+  void FillGraphWithBuses(const Descriptions::StopsDict& stops_dict, const Descriptions::BusesDict& buses_dict);
 
   struct StopVertexIds {
     Graph::VertexId in;

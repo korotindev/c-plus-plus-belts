@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <iterator>
 
+#include "map_renderer_helpers.h"
 #include "sphere.h"
 #include "svg_serialize.h"
-#include "map_renderer_helpers.h"
 
 using namespace std;
 
@@ -56,7 +56,8 @@ std::unique_ptr<MapRenderer> MapRenderer::Deserialize(const TCProto::MapRenderer
   }
 
   for (const auto& companies_coords_proto : proto.companies_coords()) {
-    renderer.companies_coords_.emplace(companies_coords_proto.name(), Svg::DeserializePoint(companies_coords_proto.point()));
+    renderer.companies_coords_.emplace(companies_coords_proto.name(),
+                                       Svg::DeserializePoint(companies_coords_proto.point()));
   }
 
   for (const auto& bus_color_proto : proto.bus_colors()) {
@@ -246,7 +247,7 @@ void MapRenderer::RenderRouteStopLabels(Svg::Document& svg, const TransportRoute
 }
 
 void MapRenderer::RenderRouteCompanyLines(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
-  if (!holds_alternative<WalkToCompanyItem>(route.items.back())) {
+  if (route.items.empty() || !holds_alternative<WalkToCompanyItem>(route.items.back())) {
     return;
   }
 
@@ -258,11 +259,11 @@ void MapRenderer::RenderRouteCompanyLines(Svg::Document& svg, const TransportRou
   const auto& walk = get<WalkToCompanyItem>(route.items.back());
   line.AddPoint(stops_coords_.at(walk.stop_name));
   line.AddPoint(companies_coords_.at(GetCompanyKey(*walk.company)));
-  svg.Add(line); 
+  svg.Add(line);
 }
 
 void MapRenderer::RenderRouteCompanyPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
-  if (!holds_alternative<WalkToCompanyItem>(route.items.back())) {
+  if (route.items.empty() || !holds_alternative<WalkToCompanyItem>(route.items.back())) {
     return;
   }
   const auto& walk = get<WalkToCompanyItem>(route.items.back());
@@ -274,7 +275,7 @@ void MapRenderer::RenderRouteCompanyPoints(Svg::Document& svg, const TransportRo
 }
 
 void MapRenderer::RenderRouteCompanyLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
-  if (!holds_alternative<WalkToCompanyItem>(route.items.back())) {
+  if (route.items.empty() || !holds_alternative<WalkToCompanyItem>(route.items.back())) {
     return;
   }
   const auto& walk = get<WalkToCompanyItem>(route.items.back());
@@ -282,15 +283,12 @@ void MapRenderer::RenderRouteCompanyLabels(Svg::Document& svg, const TransportRo
   RenderStopLabel(svg, companies_coords_.at(GetCompanyKey(*walk.company)), walk.company->cached_full_name());
 }
 
-void MapRenderer::RenderDummy(Svg::Document&) const { }
+void MapRenderer::RenderDummy(Svg::Document&) const {}
 
 const unordered_map<string, void (MapRenderer::*)(Svg::Document&) const> MapRenderer::MAP_LAYER_ACTIONS = {
-    {"bus_lines", &MapRenderer::RenderBusLines},
-    {"bus_labels", &MapRenderer::RenderBusLabels},
-    {"stop_points", &MapRenderer::RenderStopPoints},
-    {"stop_labels", &MapRenderer::RenderStopLabels},
-    {"company_lines", &MapRenderer::RenderDummy},
-    {"company_points", &MapRenderer::RenderDummy},
+    {"bus_lines", &MapRenderer::RenderBusLines},     {"bus_labels", &MapRenderer::RenderBusLabels},
+    {"stop_points", &MapRenderer::RenderStopPoints}, {"stop_labels", &MapRenderer::RenderStopLabels},
+    {"company_lines", &MapRenderer::RenderDummy},    {"company_points", &MapRenderer::RenderDummy},
     {"company_labels", &MapRenderer::RenderDummy},
 };
 

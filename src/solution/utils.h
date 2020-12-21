@@ -7,14 +7,14 @@
 
 template <typename It>
 class Range {
-public:
+ public:
   using ValueType = typename std::iterator_traits<It>::value_type;
 
   Range(It begin, It end) : begin_(begin), end_(end) {}
   It begin() const { return begin_; }
   It end() const { return end_; }
 
-private:
+ private:
   It begin_;
   It end_;
 };
@@ -26,9 +26,7 @@ auto AsRange(const C& container) {
 
 template <typename It>
 size_t ComputeUniqueItemsCount(Range<It> range) {
-  return std::unordered_set<typename Range<It>::ValueType>{
-      range.begin(), range.end()
-  }.size();
+  return std::unordered_set<typename Range<It>::ValueType>{range.begin(), range.end()}.size();
 }
 
 template <typename K, typename V>

@@ -65,9 +65,8 @@ void CoordsCompressor::FillCoordIndices(vector<CoordInfo>& coords,
   }
 }
 
-const CoordsCompressor::CoordInfo& CoordsCompressor::Find(
-    const vector<CoordInfo>& sorted_values, double value,
-    optional<vector<CoordInfo>::const_iterator> end_it) {
+const CoordsCompressor::CoordInfo& CoordsCompressor::Find(const vector<CoordInfo>& sorted_values, double value,
+                                                          optional<vector<CoordInfo>::const_iterator> end_it) {
   return *lower_bound(begin(sorted_values), end_it.value_or(end(sorted_values)), CoordInfo{value});
 }
 

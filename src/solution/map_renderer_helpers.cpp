@@ -1,4 +1,5 @@
 #include "map_renderer_helpers.h"
+
 #include "coords_compressor.h"
 
 using namespace std;
@@ -8,9 +9,7 @@ struct NeighboursDicts {
   unordered_map<double, vector<double>> neighbour_lons;
 };
 
-string GetCompanyKey(const YellowPages::Company& company) {
-  return string(COMPANY_KEY_PREFIX) + company.id();
-}
+string GetCompanyKey(const YellowPages::Company& company) { return string(COMPANY_KEY_PREFIX) + company.id(); }
 
 map<string, Descriptions::Bus> CopyBusesDict(const Descriptions::BusesDict& source) {
   map<string, Descriptions::Bus> target;
@@ -80,12 +79,9 @@ static unordered_map<string, Sphere::Point> ComputeInterpolatedStopsGeoCoords(
       }
     }
   }
-  
-  for(const auto& company : yellow_pages.companies()) {
-    stops_coords[GetCompanyKey(company)] = {
-      company.address().coords().lat(),
-      company.address().coords().lon()
-    };
+
+  for (const auto& company : yellow_pages.companies()) {
+    stops_coords[GetCompanyKey(company)] = {company.address().coords().lat(), company.address().coords().lon()};
   }
 
   return stops_coords;
@@ -115,10 +111,10 @@ static NeighboursDicts BuildCoordNeighboursDicts(const unordered_map<string, Sph
     }
   }
 
-  for(const auto& company : yellow_pages.companies()) {
+  for (const auto& company : yellow_pages.companies()) {
     const auto point_cur = stops_coords.at(GetCompanyKey(company));
 
-    for(const auto& nearby_stop : company.nearby_stops()) {
+    for (const auto& nearby_stop : company.nearby_stops()) {
       Sphere::Point point_prev = stops_coords.at(nearby_stop.name());
       const auto [min_lat, max_lat] = minmax(point_prev.latitude, point_cur.latitude);
       const auto [min_lon, max_lon] = minmax(point_prev.longitude, point_cur.longitude);
@@ -138,9 +134,9 @@ static NeighboursDicts BuildCoordNeighboursDicts(const unordered_map<string, Sph
 }
 
 CoordsMapping ComputeStopsCoordsByGrid(const Descriptions::StopsDict& stops_dict,
-                                                 const Descriptions::BusesDict& buses_dict,
-                                                 const YellowPages::Database& yellow_pages,
-                                                 const RenderSettings& render_settings) {
+                                       const Descriptions::BusesDict& buses_dict,
+                                       const YellowPages::Database& yellow_pages,
+                                       const RenderSettings& render_settings) {
   const auto stops_coords = ComputeInterpolatedStopsGeoCoords(stops_dict, buses_dict, yellow_pages);
 
   const auto [neighbour_lats, neighbour_lons] = BuildCoordNeighboursDicts(stops_coords, buses_dict, yellow_pages);

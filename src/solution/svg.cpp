@@ -4,30 +4,22 @@ using namespace std;
 
 namespace Svg {
 
-  void RenderColor(ostream& out, monostate) {
-    out << "none";
-  }
+  void RenderColor(ostream& out, monostate) { out << "none"; }
 
-  void RenderColor(ostream& out, const string& value) {
-    out << value;
-  }
+  void RenderColor(ostream& out, const string& value) { out << value; }
 
   void RenderColor(ostream& out, Rgb rgb) {
-    out << "rgb(" << static_cast<int>(rgb.red)
-        << "," << static_cast<int>(rgb.green)
-        << "," << static_cast<int>(rgb.blue) << ")";
+    out << "rgb(" << static_cast<int>(rgb.red) << "," << static_cast<int>(rgb.green) << ","
+        << static_cast<int>(rgb.blue) << ")";
   }
 
   void RenderColor(ostream& out, Rgba rgba) {
-    out << "rgba(" << static_cast<int>(rgba.red)
-        << "," << static_cast<int>(rgba.green)
-        << "," << static_cast<int>(rgba.blue)
-        << "," << rgba.opacity << ")";
+    out << "rgba(" << static_cast<int>(rgba.red) << "," << static_cast<int>(rgba.green) << ","
+        << static_cast<int>(rgba.blue) << "," << rgba.opacity << ")";
   }
 
   void RenderColor(ostream& out, const Color& color) {
-    visit([&out](const auto& value) { RenderColor(out, value); },
-          color);
+    visit([&out](const auto& value) { RenderColor(out, value); }, color);
   }
 
   Circle& Circle::SetCenter(Point point) {
@@ -121,10 +113,10 @@ namespace Svg {
     out << "dy=\"" << offset_.y << "\" ";
     out << "font-size=\"" << font_size_ << "\" ";
     if (font_family_) {
-        out << "font-family=\"" << *font_family_ << "\" ";
+      out << "font-family=\"" << *font_family_ << "\" ";
     }
     if (font_weight_) {
-        out << "font-weight=\"" << *font_weight_ << "\" ";
+      out << "font-weight=\"" << *font_weight_ << "\" ";
     }
     PathProps::RenderAttrs(out);
     out << ">";
@@ -156,4 +148,4 @@ namespace Svg {
     out << "</svg>";
   }
 
-}
+}  // namespace Svg

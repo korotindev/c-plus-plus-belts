@@ -7,9 +7,9 @@
 #include <variant>
 #include <vector>
 
-#include "descriptions.pb.h"
-#include "database.pb.h"
 #include "company.pb.h"
+#include "database.pb.h"
+#include "descriptions.pb.h"
 #include "json.h"
 #include "sphere.h"
 
