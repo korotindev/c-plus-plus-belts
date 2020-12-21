@@ -1,7 +1,4 @@
 #include "transport_catalog.h"
-#include "utils.h"
-
-#include "transport_catalog.pb.h"
 
 #include <algorithm>
 #include <iterator>
@@ -10,17 +7,15 @@
 #include <sstream>
 #include <unordered_map>
 
+#include "transport_catalog.pb.h"
+#include "utils.h"
+
 using namespace std;
 
-TransportCatalog::TransportCatalog(
-    vector<Descriptions::InputQuery> data,
-    YellowPages::Database yellow_pages,
-    const Json::Dict& routing_settings_json,
-    const Json::Dict& render_settings_json
-) {
-  auto stops_end = partition(begin(data), end(data), [](const auto& item) {
-    return holds_alternative<Descriptions::Stop>(item);
-  });
+TransportCatalog::TransportCatalog(vector<Descriptions::InputQuery> data, YellowPages::Database yellow_pages,
+                                   const Json::Dict& routing_settings_json, const Json::Dict& render_settings_json) {
+  auto stops_end =
+      partition(begin(data), end(data), [](const auto& item) { return holds_alternative<Descriptions::Stop>(item); });
 
   Descriptions::StopsDict stops_dict;
   for (const auto& item : Range{begin(data), stops_end}) {
@@ -34,12 +29,9 @@ TransportCatalog::TransportCatalog(
     const auto& bus = get<Descriptions::Bus>(item);
 
     buses_dict[bus.name] = &bus;
-    buses_[bus.name] = Bus{
-      bus.stops.size(),
-      ComputeUniqueItemsCount(AsRange(bus.stops)),
-      ComputeRoadRouteLength(bus.stops, stops_dict),
-      ComputeGeoRouteDistance(bus.stops, stops_dict)
-    };
+    buses_[bus.name] =
+        Bus{bus.stops.size(), ComputeUniqueItemsCount(AsRange(bus.stops)),
+            ComputeRoadRouteLength(bus.stops, stops_dict), ComputeGeoRouteDistance(bus.stops, stops_dict)};
 
     for (const string& stop_name : bus.stops) {
       stops_.at(stop_name).bus_names.insert(bus.name);
@@ -65,7 +57,8 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
   return router_->FindRoute(stop_from, stop_to);
 }
 
-optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from, const CompaniesFilter& filter) const {
+optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from,
+                                                                 const CompaniesFilter& filter) const {
   const auto companies = yellow_pages_catalog_->FindCompanies(filter);
   return router_->FindFastestRouteToAnyCompany(stop_from, companies);
 }
@@ -82,10 +75,8 @@ string TransportCatalog::RenderRoute(const TransportRouter::RouteInfo& route) co
   return out.str();
 }
 
-size_t TransportCatalog::ComputeRoadRouteLength(
-    const vector<string>& stops,
-    const Descriptions::StopsDict& stops_dict
-) {
+size_t TransportCatalog::ComputeRoadRouteLength(const vector<string>& stops,
+                                                const Descriptions::StopsDict& stops_dict) {
   size_t result = 0;
   for (size_t i = 1; i < stops.size(); ++i) {
     result += Descriptions::ComputeStopsDistance(*stops_dict.at(stops[i - 1]), *stops_dict.at(stops[i]));
@@ -93,15 +84,11 @@ size_t TransportCatalog::ComputeRoadRouteLength(
   return result;
 }
 
-double TransportCatalog::ComputeGeoRouteDistance(
-    const vector<string>& stops,
-    const Descriptions::StopsDict& stops_dict
-) {
+double TransportCatalog::ComputeGeoRouteDistance(const vector<string>& stops,
+                                                 const Descriptions::StopsDict& stops_dict) {
   double result = 0;
   for (size_t i = 1; i < stops.size(); ++i) {
-    result += Sphere::Distance(
-      stops_dict.at(stops[i - 1])->position, stops_dict.at(stops[i])->position
-    );
+    result += Sphere::Distance(stops_dict.at(stops[i - 1])->position, stops_dict.at(stops[i])->position);
   }
   return result;
 }
@@ -112,31 +99,26 @@ Svg::Document TransportCatalog::BuildRouteMap(const TransportRouter::RouteInfo& 
 
 string TransportCatalog::Serialize() const {
   TCProto::TransportCatalog db_proto;
-  try {
-    for (const auto& [name, stop] : stops_) {
-      TCProto::StopResponse& stop_proto = *db_proto.add_stops();
-      stop_proto.set_name(name);
-      for (const string& bus_name : stop.bus_names) {
-        stop_proto.add_bus_names(bus_name);
-      }
+  for (const auto& [name, stop] : stops_) {
+    TCProto::StopResponse& stop_proto = *db_proto.add_stops();
+    stop_proto.set_name(name);
+    for (const string& bus_name : stop.bus_names) {
+      stop_proto.add_bus_names(bus_name);
     }
-
-    for (const auto& [name, bus] : buses_) {
-      TCProto::BusResponse& bus_proto = *db_proto.add_buses();
-      bus_proto.set_name(name);
-      bus_proto.set_stop_count(bus.stop_count);
-      bus_proto.set_unique_stop_count(bus.unique_stop_count);
-      bus_proto.set_road_route_length(bus.road_route_length);
-      bus_proto.set_geo_route_length(bus.geo_route_length);
-    }
-
-    router_->Serialize(*db_proto.mutable_router());
-    map_renderer_->Serialize(*db_proto.mutable_renderer());
-    yellow_pages_catalog_->Serialize(*db_proto.mutable_yellow_pages());
-  } catch (std::exception& e) {
-    cerr << "Serialization error caught" << e.what() << endl;
-    throw;
   }
+
+  for (const auto& [name, bus] : buses_) {
+    TCProto::BusResponse& bus_proto = *db_proto.add_buses();
+    bus_proto.set_name(name);
+    bus_proto.set_stop_count(bus.stop_count);
+    bus_proto.set_unique_stop_count(bus.unique_stop_count);
+    bus_proto.set_road_route_length(bus.road_route_length);
+    bus_proto.set_geo_route_length(bus.geo_route_length);
+  }
+
+  router_->Serialize(*db_proto.mutable_router());
+  map_renderer_->Serialize(*db_proto.mutable_renderer());
+  yellow_pages_catalog_->Serialize(*db_proto.mutable_yellow_pages());
   return db_proto.SerializeAsString();
 }
 
