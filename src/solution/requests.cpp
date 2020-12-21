@@ -64,7 +64,7 @@ namespace Requests {
     }
     Json::Dict operator()(const TransportRouter::RouteInfo::WaitCompanyItem& wait_item) const {
       return Json::Dict{
-          {"type", Json::Node("WalkToCompany"s)},
+          {"type", Json::Node("WaitCompany"s)},
           {"company", Json::Node(wait_item.company->cached_main_name())},
           {"time", Json::Node(wait_item.time)},
       };

@@ -262,7 +262,7 @@ namespace Descriptions {
       }
 
       if(dict.count("working_time")) {
-        *company.mutable_working_time() = ReadWorkingTime(attrs.at("working_time").AsMap());
+        *company.mutable_working_time() = ReadWorkingTime(dict.at("working_time").AsMap());
       }
 
       *db.add_companies() = move(company);
