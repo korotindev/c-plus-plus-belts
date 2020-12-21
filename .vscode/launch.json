@@ -63,6 +63,6 @@
             ],
             "preLaunchTask": "Build",
             "envFile": "${workspaceFolder}/debug.env"
-        },
+        }
     ]
 }
