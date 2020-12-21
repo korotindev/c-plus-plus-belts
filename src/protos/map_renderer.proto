@@ -19,6 +19,7 @@ message BusColor {
 message MapRenderer {
   RenderSettings render_settings = 1;
   repeated StopCoords stops_coords = 2;
-  repeated BusColor bus_colors = 3;
-  repeated BusDescription bus_descriptions = 4;
+  repeated StopCoords companies_coords = 3;
+  repeated BusColor bus_colors = 4;
+  repeated BusDescription bus_descriptions = 5;
 }

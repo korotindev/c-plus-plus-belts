@@ -148,17 +148,25 @@ namespace Descriptions {
     return name;
   }
 
+  static YellowPages::NearbyStop ReadNearbyStop(const Json::Dict& attrs) {
+    YellowPages::NearbyStop stop;
+    stop.set_name(attrs.at("name").AsString());
+    stop.set_meters(attrs.at("meters").AsInt());
+    return stop;
+  }
+
   static const std::string& GetMainCompanyName(const YellowPages::Company& company) {
     const auto& names = company.names();
-    return find_if(names.begin(), names.end(),
+    const string& name = find_if(names.begin(), names.end(),
                    [](const YellowPages::Name& name) { return name.type() == YellowPages::Name_Type::Name_Type_MAIN; })
         ->value();
+    return name;
   }
 
   static std::string GetFullCompanyName(const YellowPages::Database& database, const YellowPages::Company& company) {
     const string& name = GetMainCompanyName(company);
     if (company.rubrics_size() > 0) {
-      return database.rubrics().at(company.rubrics()[0]).name() + name;
+      return database.rubrics().at(company.rubrics()[0]).name() + " " + name;
     }
 
     return name;
@@ -186,17 +194,17 @@ namespace Descriptions {
         (*addr.mutable_coords()).set_lon(stod(attrs.at("lon").AsString()));
         (*company.mutable_address()) = move(addr);
       }
+      
+      if (dict.count("rubrics")) {
+        for (const auto& rubric_id_node : dict.at("rubrics").AsArray()) {
+          company.add_rubrics(rubric_id_node.AsInt());
+        }
+      }
 
       for (const auto& name_node : dict.at("names").AsArray()) {
         *company.add_names() = ReadName(name_node.AsMap());
         (*company.mutable_cached_main_name()) = GetMainCompanyName(company);
         (*company.mutable_cached_full_name()) = GetFullCompanyName(db, company);
-      }
-
-      if (dict.count("rubrics")) {
-        for (const auto& rubric_id_node : dict.at("rubrics").AsArray()) {
-          company.add_rubrics(rubric_id_node.AsInt());
-        }
       }
 
       if (dict.count("urls")) {
@@ -210,6 +218,12 @@ namespace Descriptions {
       if (dict.count("phones")) {
         for (const auto& phone_node : dict.at("phones").AsArray()) {
           *company.add_phones() = ReadPhone(phone_node.AsMap());
+        }
+      }
+
+      if (dict.count("nearby_stops")) {
+        for (const auto& stop_node : dict.at("nearby_stops").AsArray()) {
+          *company.add_nearby_stops() = ReadNearbyStop(stop_node.AsMap());
         }
       }
 

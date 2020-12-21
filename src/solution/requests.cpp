@@ -59,7 +59,7 @@ namespace Requests {
       return Json::Dict{
           {"type", Json::Node("WalkToCompany"s)},
           {"stop_name", Json::Node(walk_item.stop_name)},
-          {"company", Json::Node(walk_item.company)},
+          {"company", Json::Node(walk_item.company->cached_main_name())},
           {"time", Json::Node(walk_item.time)},
       };
     }

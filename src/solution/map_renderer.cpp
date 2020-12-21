@@ -28,6 +28,12 @@ void MapRenderer::Serialize(TCProto::MapRenderer& proto) {
     Svg::SerializePoint(point, *stop_coords_proto.mutable_point());
   }
 
+  for (const auto& [name, point] : companies_coords_) {
+    auto& companies_coords_proto = *proto.add_companies_coords();
+    companies_coords_proto.set_name(name);
+    Svg::SerializePoint(point, *companies_coords_proto.mutable_point());
+  }
+
   for (const auto& [name, color] : bus_colors_) {
     auto& bus_color_proto = *proto.add_bus_colors();
     bus_color_proto.set_name(name);
@@ -49,6 +55,10 @@ std::unique_ptr<MapRenderer> MapRenderer::Deserialize(const TCProto::MapRenderer
     renderer.stops_coords_.emplace(stop_coords_proto.name(), Svg::DeserializePoint(stop_coords_proto.point()));
   }
 
+  for (const auto& companies_coords_proto : proto.companies_coords()) {
+    renderer.companies_coords_.emplace(companies_coords_proto.name(), Svg::DeserializePoint(companies_coords_proto.point()));
+  }
+
   for (const auto& bus_color_proto : proto.bus_colors()) {
     renderer.bus_colors_.emplace(bus_color_proto.name(), Svg::DeserializeColor(bus_color_proto.color()));
   }
@@ -62,6 +72,7 @@ std::unique_ptr<MapRenderer> MapRenderer::Deserialize(const TCProto::MapRenderer
 
 using RouteBusItem = TransportRouter::RouteInfo::RideBusItem;
 using RouteWaitItem = TransportRouter::RouteInfo::WaitBusItem;
+using WalkToCompanyItem = TransportRouter::RouteInfo::WalkToCompanyItem;
 
 void MapRenderer::RenderBusLines(Svg::Document& svg) const {
   for (const auto& [bus_name, bus] : buses_dict_) {
@@ -223,13 +234,19 @@ void MapRenderer::RenderRouteStopLabels(Svg::Document& svg, const TransportRoute
   }
 
   // draw stop label for last stop
-  const auto& last_bus_item = get<RouteBusItem>(route.items.back());
-  const string& last_stop_name = buses_dict_.at(last_bus_item.bus_name).stops[last_bus_item.finish_stop_idx];
-  RenderStopLabel(svg, stops_coords_.at(last_stop_name), last_stop_name);
+  if (holds_alternative<RouteBusItem>(route.items.back())) {
+    const auto& last_bus_item = get<RouteBusItem>(route.items.back());
+    const string& last_stop_name = buses_dict_.at(last_bus_item.bus_name).stops[last_bus_item.finish_stop_idx];
+    RenderStopLabel(svg, stops_coords_.at(last_stop_name), last_stop_name);
+  } else {
+    const auto& company_item = get<WalkToCompanyItem>(route.items.back());
+    const string& last_stop_name = company_item.stop_name;
+    RenderStopLabel(svg, stops_coords_.at(last_stop_name), last_stop_name);
+  }
 }
 
 void MapRenderer::RenderRouteCompanyLines(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
-  if (holds_alternative<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back())) {
+  if (!holds_alternative<WalkToCompanyItem>(route.items.back())) {
     return;
   }
 
@@ -238,17 +255,17 @@ void MapRenderer::RenderRouteCompanyLines(Svg::Document& svg, const TransportRou
       .SetStrokeWidth(render_settings_.company_line_width)
       .SetStrokeLineCap("round")
       .SetStrokeLineJoin("round");
-  const auto& walk = get<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back());
+  const auto& walk = get<WalkToCompanyItem>(route.items.back());
   line.AddPoint(stops_coords_.at(walk.stop_name));
   line.AddPoint(companies_coords_.at("company__" + walk.company->id()));
   svg.Add(line); 
 }
 
 void MapRenderer::RenderRouteCompanyPoints(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
-  if (holds_alternative<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back())) {
+  if (!holds_alternative<WalkToCompanyItem>(route.items.back())) {
     return;
   }
-  const auto& walk = get<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back());
+  const auto& walk = get<WalkToCompanyItem>(route.items.back());
 
   svg.Add(Svg::Circle{}
               .SetCenter(companies_coords_.at("company__" + walk.company->id()))
@@ -257,10 +274,10 @@ void MapRenderer::RenderRouteCompanyPoints(Svg::Document& svg, const TransportRo
 }
 
 void MapRenderer::RenderRouteCompanyLabels(Svg::Document& svg, const TransportRouter::RouteInfo& route) const {
-  if (holds_alternative<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back())) {
+  if (!holds_alternative<WalkToCompanyItem>(route.items.back())) {
     return;
   }
-  const auto& walk = get<TransportRouter::RouteInfo::WalkToCompanyItem>(route.items.back());
+  const auto& walk = get<WalkToCompanyItem>(route.items.back());
 
   RenderStopLabel(svg, companies_coords_.at("company__" + walk.company->id()), walk.company->cached_full_name());
 }
