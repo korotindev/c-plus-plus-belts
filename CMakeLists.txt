@@ -17,5 +17,5 @@ find_package(Protobuf REQUIRED)
 add_subdirectory(./src)
 
 include (cmake/clang-format.cmake)
-enable_testing()
+include(CTest)
 add_subdirectory(./test)
