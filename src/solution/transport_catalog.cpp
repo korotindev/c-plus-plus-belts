@@ -112,28 +112,31 @@ Svg::Document TransportCatalog::BuildRouteMap(const TransportRouter::RouteInfo& 
 
 string TransportCatalog::Serialize() const {
   TCProto::TransportCatalog db_proto;
-
-  for (const auto& [name, stop] : stops_) {
-    TCProto::StopResponse& stop_proto = *db_proto.add_stops();
-    stop_proto.set_name(name);
-    for (const string& bus_name : stop.bus_names) {
-      stop_proto.add_bus_names(bus_name);
+  try {
+    for (const auto& [name, stop] : stops_) {
+      TCProto::StopResponse& stop_proto = *db_proto.add_stops();
+      stop_proto.set_name(name);
+      for (const string& bus_name : stop.bus_names) {
+        stop_proto.add_bus_names(bus_name);
+      }
     }
-  }
 
-  for (const auto& [name, bus] : buses_) {
-    TCProto::BusResponse& bus_proto = *db_proto.add_buses();
-    bus_proto.set_name(name);
-    bus_proto.set_stop_count(bus.stop_count);
-    bus_proto.set_unique_stop_count(bus.unique_stop_count);
-    bus_proto.set_road_route_length(bus.road_route_length);
-    bus_proto.set_geo_route_length(bus.geo_route_length);
-  }
+    for (const auto& [name, bus] : buses_) {
+      TCProto::BusResponse& bus_proto = *db_proto.add_buses();
+      bus_proto.set_name(name);
+      bus_proto.set_stop_count(bus.stop_count);
+      bus_proto.set_unique_stop_count(bus.unique_stop_count);
+      bus_proto.set_road_route_length(bus.road_route_length);
+      bus_proto.set_geo_route_length(bus.geo_route_length);
+    }
 
-  router_->Serialize(*db_proto.mutable_router());
-  map_renderer_->Serialize(*db_proto.mutable_renderer());
-  yellow_pages_catalog_->Serialize(*db_proto.mutable_yellow_pages());
-  
+    router_->Serialize(*db_proto.mutable_router());
+    map_renderer_->Serialize(*db_proto.mutable_renderer());
+    yellow_pages_catalog_->Serialize(*db_proto.mutable_yellow_pages());
+  } catch (std::exception& e) {
+    cerr << "Serialization error caught" << e.what() << endl;
+    throw;
+  }
   return db_proto.SerializeAsString();
 }
 
