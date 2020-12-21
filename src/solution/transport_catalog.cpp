@@ -57,10 +57,10 @@ optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& s
   return router_->FindRoute(stop_from, stop_to);
 }
 
-optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const string& stop_from,
+optional<TransportRouter::RouteInfo> TransportCatalog::FindRoute(const DateTime& datetime, const string& stop_from,
                                                                  const CompaniesFilter& filter) const {
   const auto companies = yellow_pages_catalog_->FindCompanies(filter);
-  return router_->FindFastestRouteToAnyCompany(stop_from, companies);
+  return router_->FindFastestRouteToAnyCompany(datetime, stop_from, companies);
 }
 
 string TransportCatalog::RenderMap() const {

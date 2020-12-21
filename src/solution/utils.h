@@ -41,3 +41,5 @@ const V* GetValuePointer(const std::unordered_map<K, V>& map, const K& key) {
 std::string_view Strip(std::string_view line);
 
 bool IsZero(double x);
+
+std::pair<int, double> FractionateDouble(double d);

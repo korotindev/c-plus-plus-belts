@@ -62,6 +62,13 @@ namespace Requests {
           {"time", Json::Node(walk_item.time)},
       };
     }
+    Json::Dict operator()(const TransportRouter::RouteInfo::WaitCompanyItem& wait_item) const {
+      return Json::Dict{
+          {"type", Json::Node("WalkToCompany"s)},
+          {"company", Json::Node(wait_item.company->cached_main_name())},
+          {"time", Json::Node(wait_item.time)},
+      };
+    }
   };
 
   Json::Dict Route::Process(const TransportCatalog& db) const {
@@ -102,7 +109,7 @@ namespace Requests {
 
   Json::Dict RouteToCompany::Process(const TransportCatalog& db) const {
     Json::Dict dict;
-    const auto route = db.FindRoute(stop_from, filter);
+    auto route = db.FindRoute(datetime, stop_from, filter);
     if (!route) {
       dict["error_message"] = Json::Node("not found"s);
     } else {
@@ -114,6 +121,11 @@ namespace Requests {
       }
 
       dict["items"] = move(items);
+
+      if(!route->items.empty() && holds_alternative<TransportRouter::RouteInfo::WaitCompanyItem>(route->items.back())) {
+        // so, get rid of this hack :troll:
+        route->items.pop_back();
+      }
 
       dict["map"] = Json::Node(db.RenderRoute(*route));
     }
@@ -132,7 +144,9 @@ namespace Requests {
     } else if (type == "FindCompanies") {
       return FindCompanies{CompaniesFilter(attrs)};
     } else if (type == "RouteToCompany") {
-      return RouteToCompany{attrs.at("from").AsString(), CompaniesFilter(attrs.at("companies").AsMap())};
+      const auto& datetime = attrs.at("datetime").AsArray();
+      return RouteToCompany{attrs.at("from").AsString(), CompaniesFilter(attrs.at("companies").AsMap()),
+                            DateTime{datetime[0].AsInt(), datetime[1].AsInt(), datetime[2].AsInt()}};
     } else {
       return Map{};
     }

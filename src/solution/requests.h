@@ -6,6 +6,7 @@
 #include "filters.h"
 #include "json.h"
 #include "transport_catalog.h"
+#include "datetime.h"
 
 namespace Requests {
   struct Stop {
@@ -40,6 +41,7 @@ namespace Requests {
   struct RouteToCompany {
     std::string stop_from;
     CompaniesFilter filter;
+    DateTime datetime;
 
     Json::Dict Process(const TransportCatalog& db) const;
   };

@@ -1,6 +1,7 @@
 #include "transport_router.h"
 
 #include "yellow_pages_catalog.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -194,21 +195,29 @@ namespace {
   struct CompanyStop {
     const YellowPages::Company* company_ptr;
     Graph::VertexId vertex_to;
-    double edge_travel_time;
+    double walk_travel_time;
+    double wait_time;
     double whole_travel_time;
   };
 }  // namespace
 
 std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAnyCompany(
-    const std::string& stop_from, const vector<const YellowPages::Company*>& companies) const {
+    const DateTime& datetime, const std::string& stop_from,
+    const vector<const YellowPages::Company*>& companies) const {
   const Graph::VertexId vertex_from = stops_vertex_ids_.at(stop_from).out;
   vector<CompanyStop> companies_stops;
   for (const auto company_ptr : companies) {
     for (const auto& nearby_stop : company_ptr->nearby_stops()) {
       const Graph::VertexId vertex_to = stops_vertex_ids_.at(nearby_stop.name()).out;
       if (auto weight = router_->GetWeight(vertex_from, vertex_to)) {
-        double edge_travel_time = nearby_stop.meters() / (routing_settings_.pedestrian_velocity * 1000.0 / 60.0);
-        companies_stops.push_back(CompanyStop{company_ptr, vertex_to, edge_travel_time, *weight + edge_travel_time});
+        double walk_travel_time = nearby_stop.meters() / (routing_settings_.pedestrian_velocity * 1000.0 / 60.0);
+        auto [travel_minutes, epsilon] = FractionateDouble(*weight + walk_travel_time);
+        double wait_time = CalculateWaitTime(datetime + travel_minutes, company_ptr->working_time());
+        if (epsilon >= 0.00001) {
+          wait_time -= epsilon;
+        }
+        double whole_travel_time = *weight + walk_travel_time + wait_time;
+        companies_stops.push_back(CompanyStop{company_ptr, vertex_to, walk_travel_time, wait_time, whole_travel_time});
       }
     }
   }
@@ -225,6 +234,13 @@ std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAny
   route->total_time = min_path_it->whole_travel_time;
   route->items.push_back(RouteInfo::WalkToCompanyItem{.company = min_path_it->company_ptr,
                                                       .stop_name = vertices_info_[min_path_it->vertex_to].stop_name,
-                                                      .time = min_path_it->edge_travel_time});
+                                                      .time = min_path_it->walk_travel_time});
+  if (min_path_it->wait_time >= 0.00001) {
+    route->items.push_back(RouteInfo::WaitCompanyItem{
+      .company = min_path_it->company_ptr,
+      .time = min_path_it->wait_time
+    });
+  }
+  
   return route;
 }

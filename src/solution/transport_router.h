@@ -10,6 +10,7 @@
 #include "json.h"
 #include "router.h"
 #include "transport_router.pb.h"
+#include "datetime.h"
 
 class TransportRouter {
  private:
@@ -44,13 +45,19 @@ class TransportRouter {
       double time;
     };
 
-    using Item = std::variant<RideBusItem, WaitBusItem, WalkToCompanyItem>;
+    struct WaitCompanyItem {
+      const YellowPages::Company* company;
+      double time;
+    };
+
+    using Item = std::variant<RideBusItem, WaitBusItem, WalkToCompanyItem, WaitCompanyItem>;
     std::vector<Item> items;
   };
 
   std::optional<RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
   std::optional<RouteInfo> FindFastestRouteToAnyCompany(
-      const std::string& stop_from, const std::vector<const YellowPages::Company*>& companies) const;
+      const DateTime& datetime, const std::string& stop_from,
+      const std::vector<const YellowPages::Company*>& companies) const;
 
  private:
   TransportRouter() = default;

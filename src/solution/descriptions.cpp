@@ -165,6 +165,37 @@ namespace Descriptions {
     throw domain_error("name without appropriate types");
   }
 
+  static YellowPages::WorkingTimeInterval ReadWorkingTimeInterval(const Json::Dict& attrs) {
+    YellowPages::WorkingTimeInterval interval;
+    if (attrs.count("day")) {
+      YellowPages::WorkingTimeInterval::Day day;
+      YellowPages::WorkingTimeInterval::Day_Parse(attrs.at("day").AsString(), &day);
+      interval.set_day(move(day));
+    }
+    interval.set_minutes_from(attrs.at("minutes_from").AsInt());
+    interval.set_minutes_to(attrs.at("minutes_to").AsInt());
+    return interval;
+  }
+
+  static YellowPages::WorkingTime ReadWorkingTime(const Json::Dict& attrs) {
+    YellowPages::WorkingTime working_time;
+
+    if (!attrs.count("intervals")) {
+      return working_time;
+    }
+
+    const auto& nodes = attrs.at("intervals").AsArray();
+    if (nodes.empty()) {
+      return working_time;
+    }
+
+    for(auto &node : nodes) {
+      *working_time.add_intervals() = ReadWorkingTimeInterval(node.AsMap());
+    }
+
+    return working_time;
+  }
+
   static std::string GetFullCompanyName(const YellowPages::Database& database, const YellowPages::Company& company) {
     const string& name = GetMainCompanyName(company);
     if (company.rubrics_size() > 0) {
@@ -228,6 +259,10 @@ namespace Descriptions {
         for (const auto& stop_node : dict.at("nearby_stops").AsArray()) {
           *company.add_nearby_stops() = ReadNearbyStop(stop_node.AsMap());
         }
+      }
+
+      if(dict.count("working_time")) {
+        *company.mutable_working_time() = ReadWorkingTime(attrs.at("working_time").AsMap());
       }
 
       *db.add_companies() = move(company);

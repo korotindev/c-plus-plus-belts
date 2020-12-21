@@ -15,6 +15,7 @@
 #include "transport_router.h"
 #include "utils.h"
 #include "yellow_pages_catalog.h"
+#include "datetime.h"
 
 namespace Responses {
   struct Stop {
@@ -42,7 +43,7 @@ class TransportCatalog {
   const Bus* GetBus(const std::string& name) const;
 
   std::optional<TransportRouter::RouteInfo> FindRoute(const std::string& stop_from, const std::string& stop_to) const;
-  std::optional<TransportRouter::RouteInfo> FindRoute(const std::string& stop_from,
+  std::optional<TransportRouter::RouteInfo> FindRoute(const DateTime& datetime, const std::string& stop_from,
                                                       const CompaniesFilter& filter) const;
 
   std::string RenderMap() const;
