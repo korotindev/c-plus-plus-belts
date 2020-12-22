@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "descriptions.proto";
+import "svg.proto";
+import "render_settings.proto";
+
+package TCProto;
+
+message StopCoords {
+  string name = 1;
+  SvgProto.Point point = 2;
+}
+
+message BusColor {
+  string name = 1;
+  SvgProto.Color color = 2;
+}
+
+message MapRenderer {
+  RenderSettings render_settings = 1;
+  repeated StopCoords stops_coords = 2;
+  repeated StopCoords companies_coords = 3;
+  repeated BusColor bus_colors = 4;
+  repeated BusDescription bus_descriptions = 5;
+}
