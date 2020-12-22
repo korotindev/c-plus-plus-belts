@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
 
   if (argc > 1) {
     string test_folder = argv[1];
-    TestIntegration(test_folder, true);
-    // auto testor = bind(TestIntegration, test_folder, false);
-    // tr.RunTest(testor, "test from folder: " + test_folder);
+    //TestIntegration(test_folder, true);
+    auto testor = bind(TestIntegration, test_folder, false);
+    tr.RunTest(testor, "test from folder: " + test_folder);
   }
   return 0;
 }

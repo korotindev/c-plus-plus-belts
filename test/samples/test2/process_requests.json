@@ -1,107 +1,59 @@
 {
     "serialization_settings": {
-        "file": "/tmp/tmp2f3570x9"
+        "file": "/tmp/tmpqrfdop7w"
     },
     "stat_requests": [
         {
-            "id": 1804726714,
+            "id": 1976763663,
             "type": "Bus",
             "name": "13"
         },
         {
-            "id": 1601390749,
+            "id": 1208333195,
             "type": "Stop",
             "name": "Морской вокзал"
         },
         {
-            "id": 1804743431,
+            "id": 275341641,
             "type": "FindCompanies",
             "rubrics": [
                 "Парк"
             ]
         },
         {
-            "id": 179918605,
+            "id": 1142770959,
             "type": "Route",
             "from": "Краево-Греческая улица",
             "to": "Органный зал"
         },
         {
-            "id": 1578968634,
+            "id": 940120142,
             "type": "RouteToCompany",
             "from": "Краево-Греческая улица",
             "companies": {
                 "rubrics": [
                     "Парк"
                 ]
-            }
+            },
+            "datetime": [
+                6,
+                8,
+                35
+            ]
         },
         {
-            "id": 1499333079,
+            "id": 1054152420,
             "type": "RouteToCompany",
-            "from": "Цирк",
+            "from": "Краево-Греческая улица",
             "companies": {
                 "rubrics": [
                     "Парк"
                 ]
-            }
-        },
-        {
-            "id": 80146768,
-            "type": "Bus",
-            "name": "13"
-        },
-        {
-            "id": 1571442892,
-            "type": "Stop",
-            "name": "Морской вокзал"
-        },
-        {
-            "id": 1297727706,
-            "type": "Bus",
-            "name": "13"
-        },
-        {
-            "id": 749458699,
-            "type": "Stop",
-            "name": "Морской вокзал"
-        },
-        {
-            "id": 2053647165,
-            "type": "FindCompanies",
-            "rubrics": [
-                "Парк"
-            ]
-        },
-        {
-            "id": 866281987,
-            "type": "FindCompanies",
-            "rubrics": [
-                "Парк"
-            ],
-            "phones": [
-                {
-                    "number": "2671646"
-                }
-            ]
-        },
-        {
-            "id": 1306125210,
-            "type": "FindCompanies",
-            "phones": [
-                {
-                    "type": "PHONE",
-                    "number": "2671646"
-                }
-            ]
-        },
-        {
-            "id": 589984419,
-            "type": "FindCompanies",
-            "phones": [
-                {
-                    "type": "PHONE"
-                }
+            },
+            "datetime": [
+                6,
+                8,
+                40
             ]
         }
     ]

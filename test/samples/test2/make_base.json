@@ -1,6 +1,6 @@
 {
     "serialization_settings": {
-        "file": "/tmp/tmp2f3570x9"
+        "file": "/tmp/tmpqrfdop7w"
     },
     "routing_settings": {
         "bus_wait_time": 2,
@@ -503,7 +503,16 @@
                         "local_code": "862",
                         "number": "2671842"
                     }
-                ]
+                ],
+                "working_time": {
+                    "intervals": [
+                        {
+                            "day": "EVERYDAY",
+                            "minutes_from": 540,
+                            "minutes_to": 1020
+                        }
+                    ]
+                }
             },
             {
                 "names": [
