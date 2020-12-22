@@ -213,7 +213,7 @@ std::optional<TransportRouter::RouteInfo> TransportRouter::FindFastestRouteToAny
         double walk_travel_time = nearby_stop.meters() / (routing_settings_.pedestrian_velocity * 1000.0 / 60.0);
         auto [travel_minutes, epsilon] = FractionateDouble(*weight + walk_travel_time);
         double wait_time = CalculateWaitTime(datetime + travel_minutes, company_ptr->working_time());
-        if (epsilon >= 0.00001) {
+        if ( wait_time >= 0.00001 && epsilon >= 0.00001) {
           wait_time -= epsilon;
         }
         double whole_travel_time = *weight + walk_travel_time + wait_time;
