@@ -55,7 +55,7 @@ static int CalculateRegularScheduleWaitTime(DateTime dt, const YellowPages::Work
     return next_good_interval_it->minutes_from() - start_minutes;
   }
 
-  return 1440 - start_minutes + 1440 * (next_good_interval_it->day() - 1 - dt.week_day) +
+  return 1440 - start_minutes + 1440 * (next_good_interval_it->day() - 1 - dt.week_day - 1) +
          next_good_interval_it->minutes_from();
 }
 
@@ -69,6 +69,4 @@ int CalculateWaitTime(DateTime dt, const YellowPages::WorkingTime& working_time)
   } else {
     return CalculateRegularScheduleWaitTime(dt, working_time);
   }
-
-  return 0;
 }
