@@ -80,4 +80,10 @@
     "terminal.integrated.scrollback": 1000000,
     "files.eol": "\n",
     "cmake.configureOnOpen": true,
+    "antlr4.generation": {
+        "language": "Cpp",
+        "outputDir": "/workspaces/c-plus-plus-belts/src/grammar/",
+        "package": "DimaGeneratedGrammar",
+        "mode": "external"
+    },
 }

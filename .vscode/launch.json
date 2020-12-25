@@ -1,14 +1,17 @@
 {
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/belts-runner",
+            "program": "enter program name, for example ${workspaceFolder}/a.out",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -18,51 +21,18 @@
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "Build",
-            "envFile": "${workspaceFolder}/debug.env"
+            ]
         },
         {
-            "name": "(gdb) Launch Unit tests",
-            "type": "cppdbg",
+            "name": "Debug ANTLR4 grammar",
+            "type": "antlr-debug",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/belts-unit-tests",
-            "args": ["${workspaceFolder}/test/samples/test1"],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/test",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build",
-            "envFile": "${workspaceFolder}/debug.env"
-        },
-        {
-            "name": "(gdb) Launch Playground",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/bin/playground",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build",
-            "envFile": "${workspaceFolder}/debug.env"
+            "input": "${workspaceFolder}/src/grammar/input.txt",
+            "grammar": "${workspaceFolder}/src/grammar/SumMul.g4",
+            // "actionFile": "{workspaceFolder}/src/grammars/exampleActions.js",
+            "startRule": "main",
+            "printParseTree": true,
+            "visualParseTree": true
         }
     ]
 }

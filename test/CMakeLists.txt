@@ -1,7 +1,5 @@
 
-file(GLOB_RECURSE TEST_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/**/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/**/*.cpp" "*.h" "*.cpp")
-
-add_executable(belts-unit-tests ${TEST_SRCS})
+add_executable(belts-unit-tests main.cpp)
 
 target_link_libraries(belts-unit-tests PRIVATE belts)
 

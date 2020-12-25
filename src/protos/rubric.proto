@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package YellowPages;
-
-message Rubric {
-  string name = 1;
-  repeated string keywords = 2;
-}

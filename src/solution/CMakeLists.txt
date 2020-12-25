@@ -1,7 +1,5 @@
-file(GLOB_RECURSE BELTS_SRCS "*.h" "*.cpp")
-add_library(belts ${BELTS_SRCS})
+add_library(belts main.cpp)
 target_include_directories(belts PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(belts PUBLIC belts-protobuf grader)
 target_compile_options(belts PUBLIC 
     -Werror
     -Wall
