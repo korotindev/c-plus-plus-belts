@@ -1,0 +1,17 @@
+version: '3'
+services:
+  app:
+    user: vscode
+    build: 
+      context: .
+      args:
+        VARIANT: ubuntu-20.04
+    volumes:
+      - .:/workspace:cached
+      - ~/.ssh:/home/vscode/.ssh:ro
+      - ~/.gitconfig:/home/vscode/.gitconfig:ro
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    command: /bin/sh -c "while sleep 1000; do :; done" 
