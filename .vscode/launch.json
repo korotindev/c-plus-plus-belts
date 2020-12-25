@@ -23,16 +23,16 @@
                 }
             ]
         },
-        {
-            "name": "Debug ANTLR4 grammar",
-            "type": "antlr-debug",
-            "request": "launch",
-            "input": "${workspaceFolder}/src/grammar/input.txt",
-            "grammar": "${workspaceFolder}/src/grammar/SumMul.g4",
-            // "actionFile": "{workspaceFolder}/src/grammars/exampleActions.js",
-            "startRule": "main",
-            "printParseTree": true,
-            "visualParseTree": true
-        }
+        // {
+        //     "name": "Debug ANTLR4 grammar",
+        //     "type": "antlr-debug",
+        //     "request": "launch",
+        //     "input": "${workspaceFolder}/src/grammar/input.txt",
+        //     "grammar": "${workspaceFolder}/src/grammar/SumMul.g4",
+        //     // "actionFile": "{workspaceFolder}/src/grammars/exampleActions.js",
+        //     "startRule": "main",
+        //     "printParseTree": true,
+        //     "visualParseTree": true
+        // }
     ]
 }

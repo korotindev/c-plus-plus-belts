@@ -5,7 +5,7 @@ ARG VARIANT="buster"
 FROM mcr.microsoft.com/vscode/devcontainers/cpp:0-${VARIANT}
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends default-jdk default-jre
+    && apt-get -y install --no-install-recommends default-jdk default-jre ninja-build pkg-config uuid-dev
 
 RUN cd /usr/local/lib \
     && curl -O https://www.antlr.org/download/antlr-4.9-complete.jar \
