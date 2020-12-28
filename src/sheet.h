@@ -3,6 +3,7 @@
 #include "common.h"
 
 class Cell : public ICell {
+ public:
   Value GetValue() const override;
   std::string GetText() const override;
   std::vector<Position> GetReferencedCells() const override;
@@ -24,5 +25,5 @@ class Sheet : public ISheet {
 
  private:
   Size size_;
-  Cell tmp_cell_;
+  std::vector<std::vector<std::shared_ptr<Cell>>> cels;
 };
