@@ -17,9 +17,7 @@ namespace {
     }
   };
 
-  bool check_parens_needed(const FormulaParser::ParensContext *ctx) {
-    return true;
-  }
+  bool check_parens_needed(const FormulaParser::ParensContext* ctx) { return true; }
 
   class SpecificFormulaListener : public FormulaListener {
     stack<unique_ptr<Ast::Statement>> result;
@@ -66,7 +64,7 @@ namespace {
       auto lhs = move(result.top());
       result.pop();
 
-      using OPType =  Ast::OperationType;
+      using OPType = Ast::OperationType;
       OPType op_type;
 
       if (ctx->ADD()) {
@@ -76,7 +74,8 @@ namespace {
       } else if (ctx->DIV()) {
         op_type = OPType::Div;
       } else {
-        op_type = OPType::Mul;;
+        op_type = OPType::Mul;
+        ;
       }
 
       auto binary_op = make_unique<Ast::BinaryOperationStatement>();
@@ -91,31 +90,31 @@ namespace {
     virtual void visitTerminal(antlr4::tree::TerminalNode* /*node*/) override {}
     virtual void visitErrorNode(antlr4::tree::ErrorNode* /*node*/) override {}
 
-    public:
-     unique_ptr<Ast::Statement> GetResult() { return move(result.top()); }
+   public:
+    unique_ptr<Ast::Statement> GetResult() { return move(result.top()); }
   };
-}
+}  // namespace
 
 SpecificFormula::SpecificFormula(string expression) {
-    antlr4::ANTLRInputStream input(expression);
-    
-    FormulaLexer lexer(&input);
-    BailErrorListener error_listener;
-    lexer.removeErrorListeners();
-    lexer.addErrorListener(&error_listener);
+  antlr4::ANTLRInputStream input(expression);
 
-    antlr4::CommonTokenStream tokens(&lexer);
+  FormulaLexer lexer(&input);
+  BailErrorListener error_listener;
+  lexer.removeErrorListeners();
+  lexer.addErrorListener(&error_listener);
 
-    FormulaParser parser(&tokens);
-    auto error_handler = std::make_shared<antlr4::BailErrorStrategy>();
-    parser.setErrorHandler(error_handler);
-    parser.removeErrorListeners();
+  antlr4::CommonTokenStream tokens(&lexer);
 
-    antlr4::tree::ParseTree* tree = parser.main();  // метод соответствует корневому правилу
-    SpecificFormulaListener listener;
-    antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+  FormulaParser parser(&tokens);
+  auto error_handler = std::make_shared<antlr4::BailErrorStrategy>();
+  parser.setErrorHandler(error_handler);
+  parser.removeErrorListeners();
 
-    statement_ = listener.GetResult();
+  antlr4::tree::ParseTree* tree = parser.main();  // метод соответствует корневому правилу
+  SpecificFormulaListener listener;
+  antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+
+  statement_ = listener.GetResult();
 }
 
 IFormula::Value SpecificFormula::Evaluate(const ISheet& sheet) const { return statement_->Evaluate(sheet); }
