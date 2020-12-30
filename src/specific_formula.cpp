@@ -1,9 +1,9 @@
 #include "specific_formula.h"
 
-#include "antlr4-runtime.h"
 #include "FormulaLexer.h"
-#include "FormulaParser.h"
 #include "FormulaListener.h"
+#include "FormulaParser.h"
+#include "antlr4-runtime.h"
 
 using namespace std;
 
