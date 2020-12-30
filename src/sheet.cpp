@@ -11,7 +11,7 @@ namespace {
     }
   }
 
-  bool accessable_position(Position pos, Size size) { return pos.col < size.cols && pos.row < size.cols; }
+  bool accessable_position(Position pos, Size size) { return pos.col < size.cols && pos.row < size.rows; }
 }  // namespace
 
 Cell::Cell(const Sheet& sheet, string text) : sheet_(sheet) {
@@ -61,11 +61,17 @@ void Sheet::SetCell(Position pos, std::string text) {
 }
 const ICell* Sheet::GetCell(Position pos) const {
   validate_position(pos);
-  return cels[pos.row][pos.col].get();
+  if (accessable_position(pos, size_)) {
+    return cels[pos.row][pos.col].get();
+  }
+  return nullptr;
 }
 ICell* Sheet::GetCell(Position pos) {
   validate_position(pos);
-  return cels[pos.row][pos.col].get();
+  if (accessable_position(pos, size_)) {
+    return cels[pos.row][pos.col].get();
+  }
+  return nullptr;
 }
 void Sheet::ClearCell(Position pos) {
   validate_position(pos);

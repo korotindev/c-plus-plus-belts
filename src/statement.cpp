@@ -67,14 +67,21 @@ namespace Ast {
       return 0;
     }
 
-      const auto cell_val = sheet.GetCell(pos)->GetValue();
-      if (holds_alternative<double>(cell_val)) {
-        return get<double>(cell_val);
-      } else if (holds_alternative<string>(cell_val)) {
-        return stod(get<string>(cell_val));
-      } 
+    const auto cell_val = sheet.GetCell(pos)->GetValue();
+    if (holds_alternative<double>(cell_val)) {
+      return get<double>(cell_val);
+    } else if (holds_alternative<string>(cell_val)) {
+      const auto& str = get<string>(cell_val);
+      if (str.empty()) {
+        return 0;
+      } else {
+        return stod(str);
+      }
+    } else {
+      return get<FormulaError>(cell_val);
+    }
 
-      return 0;
+    return 0;
   }
 
   IFormula::Value ParensStatement::Evaluate(const ISheet& sheet) const {
