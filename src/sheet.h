@@ -1,9 +1,16 @@
 #pragma once
 
 #include "common.h"
+#include "formula.h"
+#include <variant>
+
+class Sheet;
 
 class Cell : public ICell {
+  const Sheet& sheet_;
+  std::variant<std::string, std::unique_ptr<IFormula>> data_;
  public:
+  Cell(const Sheet& sheet, std::string text);
   Value GetValue() const override;
   std::string GetText() const override;
   std::vector<Position> GetReferencedCells() const override;
@@ -24,6 +31,7 @@ class Sheet : public ISheet {
   void PrintTexts(std::ostream& output) const override;
 
  private:
+  void ExpandSize(Position pos);
   Size size_;
   std::vector<std::vector<std::shared_ptr<Cell>>> cels;
 };
