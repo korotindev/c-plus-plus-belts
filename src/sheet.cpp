@@ -1,12 +1,18 @@
 #include "sheet.h"
+
 #include <sstream>
 
 using namespace std;
 
-static void validate_position(Position pos) {
-  if (!pos.IsValid()) throw InvalidPositionException("can't use this position");
-}
+namespace {
+  void validate_position(Position pos) {
+    if (!pos.IsValid()) {
+      throw InvalidPositionException("invalid position");
+    }
+  }
 
+  bool accessable_position(Position pos, Size size) { return pos.col < size.cols && pos.row < size.cols; }
+}  // namespace
 
 Cell::Cell(const Sheet& sheet, string text) : sheet_(sheet) {
   if (text.empty() || text[0] != kFormulaSign) {
@@ -15,7 +21,7 @@ Cell::Cell(const Sheet& sheet, string text) : sheet_(sheet) {
     data_ = ParseFormula(move(text));
   }
 }
-ICell::Value Cell::GetValue() const { 
+ICell::Value Cell::GetValue() const {
   if (holds_alternative<string>(data_)) {
     string_view view = get<string>(data_);
     if (view.size() > 0 && view[0] == kEscapeSign) {
@@ -43,15 +49,15 @@ void Sheet::ExpandSize(Position pos) {
   size_.cols = max(pos.col + 1, size_.cols);
   size_.rows = max(pos.row + 1, size_.rows);
   cels.resize(size_.rows);
-  for(auto &row : cels) {
-    row.resize(size_.cols); 
+  for (auto& row : cels) {
+    row.resize(size_.cols);
   }
 }
 
 void Sheet::SetCell(Position pos, std::string text) {
   validate_position(pos);
   ExpandSize(pos);
-  cels[pos.row][pos.col] = make_unique<Cell>(*this, move(text)); 
+  cels[pos.row][pos.col] = make_unique<Cell>(*this, move(text));
 }
 const ICell* Sheet::GetCell(Position pos) const {
   validate_position(pos);
@@ -62,13 +68,15 @@ ICell* Sheet::GetCell(Position pos) {
   return cels[pos.row][pos.col].get();
 }
 void Sheet::ClearCell(Position pos) {
-    validate_position(pos);
+  validate_position(pos);
+  if (accessable_position(pos, size_)) {
     cels[pos.row][pos.col] = nullptr;
+  }
 }
 void Sheet::InsertRows(int before, int count) {}
 void Sheet::InsertCols(int before, int count) {}
 void Sheet::DeleteRows(int first, int count) {}
 void Sheet::DeleteCols(int first, int count) {}
-Size Sheet::GetPrintableSize() const { return size_; } // not sure, PRINTABLE!!!
+Size Sheet::GetPrintableSize() const { return size_; }  // not sure, PRINTABLE!!!
 void Sheet::PrintValues(std::ostream& output) const {}
 void Sheet::PrintTexts(std::ostream& output) const {}
