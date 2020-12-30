@@ -17,6 +17,10 @@ namespace {
     }
   };
 
+  bool check_parens_needed(const FormulaParser::ParensContext *ctx) {
+    return true;
+  }
+
   class SpecificFormulaListener : public FormulaListener {
     stack<unique_ptr<Ast::Statement>> result;
     virtual void enterMain(FormulaParser::MainContext* /*ctx*/) override {}
@@ -26,17 +30,19 @@ namespace {
     virtual void exitUnaryOp(FormulaParser::UnaryOpContext* ctx) override {
       auto unary_op = make_unique<Ast::UnaryOperationStatement>();
       unary_op->op_type = ctx->ADD() ? Ast::OperationType::Add : Ast::OperationType::Sub;
-      unary_op->lhs = move(result.top());
+      unary_op->rhs = move(result.top());
       result.pop();
       result.push(move(unary_op));
     }
 
     virtual void enterParens(FormulaParser::ParensContext* /*ctx*/) override {}
     virtual void exitParens(FormulaParser::ParensContext* ctx) override {
-      auto parens = make_unique<Ast::ParensStatement>();
-      parens->statement = move(result.top());
-      result.pop();
-      result.push(move(parens));
+      if (check_parens_needed(ctx)) {
+        auto parens = make_unique<Ast::ParensStatement>();
+        parens->statement = move(result.top());
+        result.pop();
+        result.push(move(parens));
+      }
     }
 
     virtual void enterLiteral(FormulaParser::LiteralContext* /*ctx*/) override {}
@@ -113,8 +119,11 @@ SpecificFormula::SpecificFormula(string expression) {
 }
 
 IFormula::Value SpecificFormula::Evaluate(const ISheet& sheet) const { return statement_->Evaluate(sheet); }
-std::string SpecificFormula::GetExpression() const { return ""; }
+
+std::string SpecificFormula::GetExpression() const { return statement_->ToString(); }
+
 std::vector<Position> SpecificFormula::GetReferencedCells() const { return {}; }
+
 IFormula::HandlingResult SpecificFormula::HandleInsertedRows(int before, int count) {
   return IFormula::HandlingResult::NothingChanged;
 }

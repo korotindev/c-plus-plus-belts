@@ -40,10 +40,16 @@ std::string Cell::GetText() const {
     string_view view = get<string>(data_);
     return string(view);
   } else {
-    return "FORMULA";
+    return get<unique_ptr<IFormula>>(data_)->GetExpression();
   }
 }
-std::vector<Position> Cell::GetReferencedCells() const { return {}; }
+std::vector<Position> Cell::GetReferencedCells() const { 
+  if (holds_alternative<string>(data_)) {
+    return {};
+  } else {
+    return get<unique_ptr<IFormula>>(data_)->GetReferencedCells();
+  }
+ }
 
 void Sheet::ExpandSize(Position pos) {
   size_.cols = max(pos.col + 1, size_.cols);

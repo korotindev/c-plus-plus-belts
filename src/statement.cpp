@@ -1,14 +1,30 @@
 #include "statement.h"
 
 #include <cmath>
+#include <sstream>
 #include <variant>
 
 using namespace std;
 
 namespace Ast {
   IFormula::Value ValueStatement::Evaluate(const ISheet&) const { return data; }
+
+  string ValueStatement::ToString() const {
+    stringstream ss;
+    ss << data;
+    return ss.str();
+  }
+
+  string UnaryOperationStatement::ToString() const {
+    if (op_type == OperationType::Sub) {
+      return "-" + rhs->ToString();
+    } else {
+      return rhs->ToString();
+    }
+  }
+
   IFormula::Value UnaryOperationStatement::Evaluate(const ISheet& sheet) const {
-    auto data = lhs->Evaluate(sheet);
+    auto data = rhs->Evaluate(sheet);
     if (holds_alternative<FormulaError>(data)) {
       return data;
     }
@@ -61,6 +77,35 @@ namespace Ast {
       return FormulaError(FormulaError::Category::Div0);
   }
 
+  string BinaryOperationStatement::ToString() const {
+    string result = lhs->ToString();
+
+    switch (op_type) {
+      case OperationType::Add: {
+        result.push_back('+');
+        break;
+      }
+      case OperationType::Sub: {
+        result.push_back('-');
+        break;
+      }
+      case OperationType::Mul: {
+        result.push_back('*');
+        break;
+      }
+      case OperationType::Div: {
+        result.push_back('/');
+        break;
+      }
+      default:
+        throw FormulaException("invalid operation type");
+    }
+
+    result += rhs->ToString();
+
+    return result;
+  }
+
   IFormula::Value CellStatement::Evaluate(const ISheet& sheet) const {
     auto cell_ptr = sheet.GetCell(pos);
     if (!cell_ptr) {
@@ -84,7 +129,15 @@ namespace Ast {
     return 0;
   }
 
+  string CellStatement::ToString() const {
+    return pos.ToString();
+  }
+
   IFormula::Value ParensStatement::Evaluate(const ISheet& sheet) const {
     return statement->Evaluate(sheet);
+  }
+
+  string ParensStatement::ToString() const {
+    return "(" + statement->ToString() + ")";
   }
 }  // namespace Ast
