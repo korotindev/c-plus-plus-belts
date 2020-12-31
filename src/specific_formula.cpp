@@ -4,6 +4,7 @@
 #include "FormulaListener.h"
 #include "FormulaParser.h"
 #include "antlr4-runtime.h"
+#include <memory>
 
 using namespace std;
 
@@ -113,8 +114,8 @@ SpecificFormula::SpecificFormula(string expression) {
   antlr4::tree::ParseTree* tree = parser.main();  // метод соответствует корневому правилу
   SpecificFormulaListener listener;
   antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
-
-  statement_ = listener.GetResult();
+  
+  statement_ = Ast::RemoveUnnecessaryParens(listener.GetResult());
 }
 
 IFormula::Value SpecificFormula::Evaluate(const ISheet& sheet) const { return statement_->Evaluate(sheet); }

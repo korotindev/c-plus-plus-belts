@@ -70,7 +70,8 @@
         "filesystem": "cpp",
         "codecvt": "cpp",
         "cerrno": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "cinttypes": "cpp"
     },
     "search.exclude": {
         "solutions/**": true,
