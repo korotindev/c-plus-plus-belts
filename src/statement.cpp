@@ -194,9 +194,9 @@ namespace Ast {
       case OperationType::Mul:
         return child_operation_priority >= mul_operation_priority;
       case OperationType::Div:
-        // left just for reading
-      default:
         return left_child && child_operation_priority >= mul_operation_priority;
+      default:
+        throw FormulaException("invalid operation type");
       }
     }
 
