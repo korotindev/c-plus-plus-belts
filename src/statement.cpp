@@ -130,7 +130,7 @@ namespace Ast {
 
       char *end = nullptr;
       double result = strtod(str.c_str(), &end);
-      if (end == str.c_str() || *end != '\0') {
+      if (*end != '\0') {
         return FormulaError::Category::Value;
       }
 
