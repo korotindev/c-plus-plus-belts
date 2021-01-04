@@ -7,6 +7,7 @@
 class Sheet;
 
 class Cell : public ICell {
+  friend Sheet;
   const Sheet& sheet_;
   std::variant<std::string, std::unique_ptr<IFormula>> data_;
  public:
@@ -33,5 +34,5 @@ class Sheet : public ISheet {
  private:
   void ExpandSize(Position pos);
   Size size_;
-  std::vector<std::vector<std::shared_ptr<Cell>>> cels;
+  std::vector<std::vector<std::shared_ptr<Cell>>> cells;
 };
