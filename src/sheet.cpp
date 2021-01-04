@@ -66,16 +66,26 @@ void Sheet::SetCell(Position pos, std::string text) {
   cells[pos.row][pos.col] = make_unique<Cell>(*this, move(text));
 }
 const ICell* Sheet::GetCell(Position pos) const {
+  // FIXME ok for tests, but bad practice
+  static auto default_cell = make_unique<Cell>(*this, "");
   validate_position(pos);
   if (accessable_position(pos, size_)) {
-    return cells[pos.row][pos.col].get();
+    if (auto ptr = cells[pos.row][pos.col].get()) {
+      return ptr;
+    }
+    return default_cell.get(); 
   }
   return nullptr;
 }
 ICell* Sheet::GetCell(Position pos) {
+  // FIXME ok for tests, but bad practice
+  static auto default_cell = make_unique<Cell>(*this, "");
   validate_position(pos);
   if (accessable_position(pos, size_)) {
-    return cells[pos.row][pos.col].get();
+    if (auto ptr = cells[pos.row][pos.col].get()) {
+      return ptr;
+    }
+    return default_cell.get(); 
   }
   return nullptr;
 }
