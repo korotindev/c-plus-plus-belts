@@ -229,4 +229,24 @@ namespace Ast {
 
     return root;
   }
+
+  void ModifyCellStatements(Statement* root, function<void(Position& pos)> func) {
+    switch (root->Type()) {
+      case StatementType::BinaryOp:
+        ModifyCellStatements(dynamic_cast<BinaryOperationStatement*>(root)->lhs.get(), func);
+        ModifyCellStatements(dynamic_cast<BinaryOperationStatement*>(root)->rhs.get(), func);
+        break;
+      case StatementType::UnaryOp:
+        ModifyCellStatements(dynamic_cast<UnaryOperationStatement*>(root)->rhs.get(), func);
+        break;
+      case StatementType::Parens:
+        ModifyCellStatements(dynamic_cast<ParensStatement*>(root)->statement.get(), func);
+        break;
+      case StatementType::Cell:
+        func(dynamic_cast<CellStatement*>(root)->pos);
+        break;
+      default:
+        break;
+    }
+  }
 }  // namespace Ast

@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "common.h"
+#include <functional>
 #include "formula.h"
 
 namespace Ast {
@@ -54,4 +55,5 @@ namespace Ast {
   };
 
   std::unique_ptr<Statement> RemoveUnnecessaryParens(std::unique_ptr<Statement> root);
+  void ModifyCellStatements(Statement* root, std::function<void(Position& pos)> func);
 }  // namespace Ast

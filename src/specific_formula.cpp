@@ -134,9 +134,42 @@ std::string SpecificFormula::GetExpression() const { return statement_->ToString
 std::vector<Position> SpecificFormula::GetReferencedCells() const { return references_; }
 
 IFormula::HandlingResult SpecificFormula::HandleInsertedRows(int before, int count) {
+  bool changed = false;
+  for(auto& pos : references_) {
+    if (pos.row >= before) {
+      pos.row += count;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    Ast::ModifyCellStatements(statement_.get(), [before, count](Position& pos) {
+      if (pos.row >= before) {
+        pos.row += count;
+      }
+    });
+    return IFormula::HandlingResult::ReferencesRenamedOnly;
+  }
+
   return IFormula::HandlingResult::NothingChanged;
 }
 IFormula::HandlingResult SpecificFormula::HandleInsertedCols(int before, int count) {
+  bool changed = false;
+  for(auto& pos : references_) {
+    if (pos.col >= before) {
+      pos.col += count;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    Ast::ModifyCellStatements(statement_.get(), [before, count](Position& pos) {
+      if (pos.col >= before) {
+        pos.col += count;
+      }
+    });
+    return IFormula::HandlingResult::ReferencesRenamedOnly;
+  }
   return IFormula::HandlingResult::NothingChanged;
 }
 IFormula::HandlingResult SpecificFormula::HandleDeletedRows(int first, int count) {
