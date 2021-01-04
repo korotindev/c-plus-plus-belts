@@ -4,6 +4,7 @@
 
 #include "formula.h"
 #include "statement.h"
+#include "common.h"
 
 class SpecificFormula : public IFormula {
  public:
@@ -18,4 +19,5 @@ class SpecificFormula : public IFormula {
 
  private:
   std::unique_ptr<Ast::Statement> statement_;
+  std::vector<Position> references_;
 };

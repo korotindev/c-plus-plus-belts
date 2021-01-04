@@ -21,7 +21,9 @@ namespace {
   bool check_parens_needed(const FormulaParser::ParensContext* ctx) { return true; }
 
   class SpecificFormulaListener : public FormulaListener {
-    stack<unique_ptr<Ast::Statement>> result;
+    stack<unique_ptr<Ast::Statement>> statement_;
+    vector<Position> references_;
+
     virtual void enterMain(FormulaParser::MainContext* /*ctx*/) override {}
     virtual void exitMain(FormulaParser::MainContext* /*ctx*/) override {}
 
@@ -29,18 +31,18 @@ namespace {
     virtual void exitUnaryOp(FormulaParser::UnaryOpContext* ctx) override {
       auto unary_op = make_unique<Ast::UnaryOperationStatement>();
       unary_op->op_type = ctx->ADD() ? Ast::OperationType::Add : Ast::OperationType::Sub;
-      unary_op->rhs = move(result.top());
-      result.pop();
-      result.push(move(unary_op));
+      unary_op->rhs = move(statement_.top());
+      statement_.pop();
+      statement_.push(move(unary_op));
     }
 
     virtual void enterParens(FormulaParser::ParensContext* /*ctx*/) override {}
     virtual void exitParens(FormulaParser::ParensContext* ctx) override {
       if (check_parens_needed(ctx)) {
         auto parens = make_unique<Ast::ParensStatement>();
-        parens->statement = move(result.top());
-        result.pop();
-        result.push(move(parens));
+        parens->statement = move(statement_.top());
+        statement_.pop();
+        statement_.push(move(parens));
       }
     }
 
@@ -48,22 +50,23 @@ namespace {
     virtual void exitLiteral(FormulaParser::LiteralContext* ctx) override {
       auto literal = make_unique<Ast::ValueStatement>();
       literal->data = stod(ctx->NUMBER()->getText());
-      result.push(move(literal));
+      statement_.push(move(literal));
     }
 
     virtual void enterCell(FormulaParser::CellContext* /*ctx*/) override {}
     virtual void exitCell(FormulaParser::CellContext* ctx) override {
       auto cell = make_unique<Ast::CellStatement>();
       cell->pos = Position::FromString(ctx->CELL()->getText());
-      result.push(move(cell));
+      references_.push_back(cell->pos);
+      statement_.push(move(cell));
     }
 
     virtual void enterBinaryOp(FormulaParser::BinaryOpContext* /*ctx*/) override {}
     virtual void exitBinaryOp(FormulaParser::BinaryOpContext* ctx) override {
-      auto rhs = move(result.top());
-      result.pop();
-      auto lhs = move(result.top());
-      result.pop();
+      auto rhs = move(statement_.top());
+      statement_.pop();
+      auto lhs = move(statement_.top());
+      statement_.pop();
 
       using OPType = Ast::OperationType;
       OPType op_type;
@@ -83,7 +86,7 @@ namespace {
       binary_op->lhs = move(lhs);
       binary_op->rhs = move(rhs);
       binary_op->op_type = op_type;
-      result.push(move(binary_op));
+      statement_.push(move(binary_op));
     }
 
     virtual void enterEveryRule(antlr4::ParserRuleContext* /*ctx*/) override {}
@@ -92,7 +95,12 @@ namespace {
     virtual void visitErrorNode(antlr4::tree::ErrorNode* /*node*/) override {}
 
    public:
-    unique_ptr<Ast::Statement> GetResult() { return move(result.top()); }
+    unique_ptr<Ast::Statement> TakeStatement() { return move(statement_.top()); }
+    vector<Position> GetReferences() { 
+      sort(references_.begin(), references_.end());
+      references_.erase(unique(references_.begin(), references_.end()), references_.end());
+      return references_;
+    }
   };
 }  // namespace
 
@@ -115,14 +123,15 @@ SpecificFormula::SpecificFormula(string expression) {
   SpecificFormulaListener listener;
   antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
   
-  statement_ = Ast::RemoveUnnecessaryParens(listener.GetResult());
+  statement_ = Ast::RemoveUnnecessaryParens(listener.TakeStatement());
+  references_ = listener.GetReferences();
 }
 
 IFormula::Value SpecificFormula::Evaluate(const ISheet& sheet) const { return statement_->Evaluate(sheet); }
 
 std::string SpecificFormula::GetExpression() const { return statement_->ToString(); }
 
-std::vector<Position> SpecificFormula::GetReferencedCells() const { return {}; }
+std::vector<Position> SpecificFormula::GetReferencedCells() const { return references_; }
 
 IFormula::HandlingResult SpecificFormula::HandleInsertedRows(int before, int count) {
   return IFormula::HandlingResult::NothingChanged;
