@@ -581,7 +581,6 @@ int main() {
   RUN_TEST(tr, TestFormulaExpressionFormatting);
   RUN_TEST(tr, TestFormulaReferencedCells);
   RUN_TEST(tr, TestFormulaHandleInsertion);
-  RUN_TEST(tr, TestInsertionOverflow);
   RUN_TEST(tr, TestFormulaHandleDeletion);
   RUN_TEST(tr, TestErrorValue);
   RUN_TEST(tr, TestErrorDiv0);
@@ -595,5 +594,6 @@ int main() {
   RUN_TEST(tr, TestCellReferences);
   RUN_TEST(tr, TestFormulaIncorrect);
   RUN_TEST(tr, TestCellCircularReferences);
+  RUN_TEST(tr, TestInsertionOverflow);
   return 0;
 }

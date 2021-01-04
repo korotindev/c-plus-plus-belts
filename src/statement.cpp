@@ -135,7 +135,12 @@ namespace Ast {
     return 0;
   }
 
-  string CellStatement::ToString() const { return pos.ToString(); }
+  string CellStatement::ToString() const {
+    if (pos.IsValid()) {
+      return pos.ToString();
+    }
+    return string(FormulaError(FormulaError::Category::Ref).ToString());
+  }
 
   StatementType CellStatement::Type() const { return StatementType::Cell; }
 
@@ -146,11 +151,6 @@ namespace Ast {
   StatementType ParensStatement::Type() const { return StatementType::Parens; }
 
   namespace {
-    void CollapseUnnecessaryParens(unique_ptr<Statement>& parens_node) {
-      auto child_node = move(dynamic_cast<ParensStatement*>(parens_node.get())->statement);
-      parens_node = move(child_node);
-    }
-
     bool NeedRemoveParensNode(unique_ptr<Statement>& parent, unique_ptr<Statement>& node) {        
       const auto node_type = node->Type();
       if (node_type != StatementType::Parens) {
@@ -202,7 +202,8 @@ namespace Ast {
 
     void RemoveUnnecessaryParens(unique_ptr<Statement>& parent, unique_ptr<Statement>& node) {
       while(NeedRemoveParensNode(parent, node)) {
-        CollapseUnnecessaryParens(node);
+        auto statement = move(dynamic_cast<ParensStatement*>(node.get())->statement);
+        node = move(statement);
       }
 
       switch (node->Type())
@@ -226,7 +227,6 @@ namespace Ast {
   unique_ptr<Statement> RemoveUnnecessaryParens(unique_ptr<Statement> root) {
     unique_ptr<Statement> parent;
     RemoveUnnecessaryParens(parent, root);
-
     return root;
   }
 

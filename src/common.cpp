@@ -77,7 +77,18 @@ bool Size::operator==(const Size& rhs) const { return rows == rhs.rows && cols =
 FormulaError::FormulaError(FormulaError::Category category) : category_(category) {}
 FormulaError::Category FormulaError::GetCategory() const { return category_; }
 bool FormulaError::operator==(FormulaError rhs) const { return category_ == rhs.category_; }
-string_view FormulaError::ToString() const { return ""; }
+string_view FormulaError::ToString() const {
+  switch (category_) {
+    case Category::Ref:
+      return "#REF!";
+    case Category::Div0:
+      return "#DIV/0!";
+    case Category::Value:
+      return "#VALUE!";
+    default:
+      return "";
+  }
+}
 ostream& operator<<(ostream& output, FormulaError fe) {
   output << fe.ToString();
   return output;
