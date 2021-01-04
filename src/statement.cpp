@@ -2,8 +2,9 @@
 
 #include <cmath>
 #include <sstream>
-#include <variant>
 #include <unordered_map>
+#include <variant>
+#include <cstdlib>
 
 using namespace std;
 
@@ -122,17 +123,21 @@ namespace Ast {
     const auto cell_val = sheet.GetCell(pos)->GetValue();
     if (holds_alternative<double>(cell_val)) {
       return get<double>(cell_val);
-    } else if (holds_alternative<string>(cell_val)) {
-      const auto& str = get<string>(cell_val);
-      if (str.empty()) {
-        return 0;
-      } else {
-        return stod(str);
-      }
-    } else {
-      return get<FormulaError>(cell_val);
     }
-    return 0;
+
+    if (holds_alternative<string>(cell_val)) {
+      const auto& str = get<string>(cell_val);
+
+      char *end = nullptr;
+      double result = strtod(str.c_str(), &end);
+      if (end == str.c_str() || *end != '\0') {
+        return FormulaError::Category::Value;
+      }
+
+      return result;
+    }
+
+    return get<FormulaError>(cell_val);
   }
 
   string CellStatement::ToString() const {
@@ -151,7 +156,7 @@ namespace Ast {
   StatementType ParensStatement::Type() const { return StatementType::Parens; }
 
   namespace {
-    bool NeedRemoveParensNode(unique_ptr<Statement>& parent, unique_ptr<Statement>& node) {        
+    bool NeedRemoveParensNode(unique_ptr<Statement>& parent, unique_ptr<Statement>& node) {
       const auto node_type = node->Type();
       if (node_type != StatementType::Parens) {
         return false;
@@ -173,11 +178,11 @@ namespace Ast {
         return child_ptr->op_type != OperationType::Add && child_ptr->op_type != OperationType::Sub;
       }
 
-      static const unordered_map<OperationType, int> operations_priority = {          
-        {OperationType::Add, 10},
-        {OperationType::Sub, 20},
-        {OperationType::Mul, 30},
-        {OperationType::Div, 40},
+      static const unordered_map<OperationType, int> operations_priority = {
+          {OperationType::Add, 10},
+          {OperationType::Sub, 20},
+          {OperationType::Mul, 30},
+          {OperationType::Div, 40},
       };
 
       const auto parent_ptr = dynamic_cast<BinaryOperationStatement*>(parent.get());
@@ -185,41 +190,39 @@ namespace Ast {
       const int child_operation_priority = operations_priority.at(child_ptr->op_type);
       bool left_child = parent_ptr->lhs.get() == parens_ptr;
 
-      switch (parent_ptr->op_type)
-      {
-      case OperationType::Add:
-        return true;
-      case OperationType::Sub:
-        return left_child || child_operation_priority >= mul_operation_priority;
-      case OperationType::Mul:
-        return child_operation_priority >= mul_operation_priority;
-      case OperationType::Div:
-        return left_child && child_operation_priority >= mul_operation_priority;
-      default:
-        throw FormulaException("invalid operation type");
+      switch (parent_ptr->op_type) {
+        case OperationType::Add:
+          return true;
+        case OperationType::Sub:
+          return left_child || child_operation_priority >= mul_operation_priority;
+        case OperationType::Mul:
+          return child_operation_priority >= mul_operation_priority;
+        case OperationType::Div:
+          return left_child && child_operation_priority >= mul_operation_priority;
+        default:
+          throw FormulaException("invalid operation type");
       }
     }
 
     void RemoveUnnecessaryParens(unique_ptr<Statement>& parent, unique_ptr<Statement>& node) {
-      while(NeedRemoveParensNode(parent, node)) {
+      while (NeedRemoveParensNode(parent, node)) {
         auto statement = move(dynamic_cast<ParensStatement*>(node.get())->statement);
         node = move(statement);
       }
 
-      switch (node->Type())
-      {
-      case StatementType::BinaryOp:
-        RemoveUnnecessaryParens(node, dynamic_cast<BinaryOperationStatement*>(node.get())->lhs);
-        RemoveUnnecessaryParens(node, dynamic_cast<BinaryOperationStatement*>(node.get())->rhs);
-        break;
-      case StatementType::UnaryOp:
-        RemoveUnnecessaryParens(node, dynamic_cast<UnaryOperationStatement*>(node.get())->rhs);
-        break;
-      case StatementType::Parens:
-        RemoveUnnecessaryParens(node, dynamic_cast<ParensStatement*>(node.get())->statement);
-        break;
-      default:
-        break;
+      switch (node->Type()) {
+        case StatementType::BinaryOp:
+          RemoveUnnecessaryParens(node, dynamic_cast<BinaryOperationStatement*>(node.get())->lhs);
+          RemoveUnnecessaryParens(node, dynamic_cast<BinaryOperationStatement*>(node.get())->rhs);
+          break;
+        case StatementType::UnaryOp:
+          RemoveUnnecessaryParens(node, dynamic_cast<UnaryOperationStatement*>(node.get())->rhs);
+          break;
+        case StatementType::Parens:
+          RemoveUnnecessaryParens(node, dynamic_cast<ParensStatement*>(node.get())->statement);
+          break;
+        default:
+          break;
       }
     }
   }  // namespace

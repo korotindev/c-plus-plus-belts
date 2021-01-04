@@ -30,9 +30,9 @@ ICell::Value Cell::GetValue() const {
     return string(view);
   } else {
     IFormula::Value formula_value = get<unique_ptr<IFormula>>(data_)->Evaluate(sheet_);
-    stringstream ss;
-    visit([&ss](auto val) { ss << val; }, formula_value);
-    return ss.str();
+    ICell::Value result;
+    visit([&result](auto val) { result = val; }, formula_value);
+    return result;
   }
 }
 std::string Cell::GetText() const {
