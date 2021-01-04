@@ -125,6 +125,11 @@ SpecificFormula::SpecificFormula(string expression) {
   
   statement_ = Ast::RemoveUnnecessaryParens(listener.TakeStatement());
   references_ = listener.GetReferences();
+  for(auto& ref : references_) {
+    if (!ref.IsValid()) {
+      throw FormulaException("invalid ref in formula");
+    }
+  }
 }
 
 IFormula::Value SpecificFormula::Evaluate(const ISheet& sheet) const { return statement_->Evaluate(sheet); }
