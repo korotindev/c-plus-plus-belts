@@ -115,6 +115,10 @@ namespace Ast {
   StatementType BinaryOperationStatement::Type() const { return StatementType::BinaryOp; }
 
   IFormula::Value CellStatement::Evaluate(const ISheet& sheet) const {
+    if (!pos.IsValid()) {
+      return FormulaError::Category::Ref;
+    }
+    
     auto cell_ptr = sheet.GetCell(pos);
     if (!cell_ptr) {
       return 0;
