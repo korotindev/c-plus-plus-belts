@@ -5,6 +5,7 @@
 #include "specific_formula.h"
 
 using namespace std;
+
 unique_ptr<IFormula> ParseFormula(string expression) {
   try {
     return make_unique<SpecificFormula>(move(expression));

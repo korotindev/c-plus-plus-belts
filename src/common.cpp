@@ -7,8 +7,11 @@
 using namespace std;
 
 bool Position::operator==(const Position& rhs) const { return row == rhs.row && col == rhs.col; }
+
 bool Position::operator<(const Position& rhs) const { return make_pair(row, col) < make_pair(rhs.row, rhs.col); }
+
 bool Position::IsValid() const { return 0 <= row && row < kMaxRows && 0 <= col && col < kMaxCols; }
+
 string Position::ToString() const {
   string str;
   if (!IsValid()) {
@@ -75,8 +78,11 @@ Position Position::FromString(string_view sv) {
 bool Size::operator==(const Size& rhs) const { return rows == rhs.rows && cols == rhs.cols; }
 
 FormulaError::FormulaError(FormulaError::Category category) : category_(category) {}
+
 FormulaError::Category FormulaError::GetCategory() const { return category_; }
+
 bool FormulaError::operator==(FormulaError rhs) const { return category_ == rhs.category_; }
+
 string_view FormulaError::ToString() const {
   switch (category_) {
     case Category::Ref:
@@ -89,6 +95,7 @@ string_view FormulaError::ToString() const {
       return "";
   }
 }
+
 ostream& operator<<(ostream& output, FormulaError fe) {
   output << fe.ToString();
   return output;
