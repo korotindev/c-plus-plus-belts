@@ -5,8 +5,6 @@
 #include <variant>
 #include <memory>
 
-class Sheet;
-
 class Cell : public ICell {
   const ISheet* sheet_;
   std::variant<std::string, std::unique_ptr<IFormula>> data_;
