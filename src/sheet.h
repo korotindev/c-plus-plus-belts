@@ -20,7 +20,8 @@ class Sheet : public ISheet {
   void PrintTexts(std::ostream& output) const override;
 
  private:
+  bool AccessablePosition(Position pos) const;
   void ExpandSize(Position pos);
-  Size size_;
+  std::pair<Position, Position> GetPrintableArea() const;
   std::vector<std::vector<std::shared_ptr<Cell>>> cells;
 };

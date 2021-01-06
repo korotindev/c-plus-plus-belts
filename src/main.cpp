@@ -501,6 +501,11 @@ namespace {
     std::ostringstream values;
     sheet->PrintValues(values);
     ASSERT_EQUAL(values.str(), "\t\nmeow\t35\n");
+
+    sheet->ClearCell("B2"_pos);
+    ASSERT_EQUAL(sheet->GetPrintableSize(), (Size{2, 1}));
+    sheet->ClearCell("A2"_pos);
+    ASSERT_EQUAL(sheet->GetPrintableSize(), (Size{0, 0}));
   }
 
   void TestCellReferences() {

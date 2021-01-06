@@ -14,8 +14,6 @@ namespace {
     }
   }
 
-  bool accessable_position(Position pos, Size size) { return pos.col < size.cols && pos.row < size.rows; }
-
   enum class DFSStatus { NotVisited, Processing, Visited };
 
   void ValidateNoCycles(const Sheet& sheet, Position pos, unordered_map<string, DFSStatus>& visited) {
@@ -49,12 +47,17 @@ namespace {
 }  // namespace
 
 void Sheet::ExpandSize(Position pos) {
-  size_.cols = max(pos.col + 1, size_.cols);
-  size_.rows = max(pos.row + 1, size_.rows);
-  cells.resize(size_.rows);
+  size_t new_rows = max(static_cast<size_t>(pos.row + 1), cells.size());
+  cells.resize(new_rows);
+
+  size_t new_cols = max(static_cast<size_t>(pos.col + 1), cells[0].size());
   for (auto& row : cells) {
-    row.resize(size_.cols);
+    row.resize(new_cols);
   }
+}
+
+bool Sheet::AccessablePosition(Position pos) const {
+  return static_cast<size_t>(pos.row) < cells.size() && static_cast<size_t>(pos.col) < cells[0].size();
 }
 
 void Sheet::SetCell(Position pos, std::string text) {
@@ -69,31 +72,34 @@ void Sheet::SetCell(Position pos, std::string text) {
   }
   cells[pos.row][pos.col] = move(cell_ptr);
 }
+
 const ICell* Sheet::GetCell(Position pos) const {
   validate_position(pos);
-  if (accessable_position(pos, size_)) {
+  if (AccessablePosition(pos)) {
     return cells[pos.row][pos.col].get();
   }
   return nullptr;
 }
+
 ICell* Sheet::GetCell(Position pos) {
   validate_position(pos);
-  if (accessable_position(pos, size_)) {
+  if (AccessablePosition(pos)) {
     return cells[pos.row][pos.col].get();
   }
   return nullptr;
 }
+
 void Sheet::ClearCell(Position pos) {
   validate_position(pos);
-  if (accessable_position(pos, size_)) {
+  if (AccessablePosition(pos)) {
     cells[pos.row][pos.col] = nullptr;
   }
 }
-void Sheet::InsertRows(int before, int count) {
-  if (size_.rows + count >= Position::kMaxRows) {
-    throw TableTooBigException("rows overflow");
-  }
 
+void Sheet::InsertRows(int before, int count) {
+  if (GetPrintableSize().rows + count >= Position::kMaxCols) {
+    throw TableTooBigException("cell col ref overflow");
+  }
   for (const auto& row : cells) {
     for (const auto& cell : row) {
       if (!cell) {
@@ -118,15 +124,13 @@ void Sheet::InsertRows(int before, int count) {
     }
   }
 
-  cells.insert(cells.begin() + before, count, vector(size_.cols, shared_ptr<Cell>()));
-  size_.rows += count;
+  cells.insert(cells.begin() + before, count, vector(cells[0].size(), shared_ptr<Cell>()));
 }
 
 void Sheet::InsertCols(int before, int count) {
-  if (size_.cols + count >= Position::kMaxCols) {
-    throw TableTooBigException("cols overflow");
+  if (GetPrintableSize().cols + count >= Position::kMaxCols) {
+    throw TableTooBigException("cell col ref overflow");
   }
-
   for (const auto& row : cells) {
     for (const auto& cell : row) {
       if (!cell) {
@@ -151,8 +155,8 @@ void Sheet::InsertCols(int before, int count) {
     }
     row.insert(row.begin() + before, count, shared_ptr<Cell>());
   }
-  size_.cols += count;
 }
+
 void Sheet::DeleteRows(int first, int count) {
   cells.erase(cells.begin() + first, cells.begin() + first + count);
   for (auto& row : cells) {
@@ -165,8 +169,8 @@ void Sheet::DeleteRows(int first, int count) {
       }
     }
   }
-  size_.rows -= count;
 }
+
 void Sheet::DeleteCols(int first, int count) {
   for (auto& row : cells) {
     row.erase(row.begin() + first, row.begin() + first + count);
@@ -179,12 +183,43 @@ void Sheet::DeleteCols(int first, int count) {
       }
     }
   }
-  size_.cols -= count;
 }
-Size Sheet::GetPrintableSize() const { return size_; }  // not sure, PRINTABLE!!!
+
+pair<Position, Position> Sheet::GetPrintableArea() const {
+  Position top_left{0, 0};
+  Position bottom_right{0, 0};
+
+  for (int i = 0; i < static_cast<int>(cells.size()); i++) {
+    for (int j = 0; j < static_cast<int>(cells[0].size()); j++) {
+      const auto& cell = cells[i][j];
+      if (!cell) continue;
+      if (!cell->ContainsFormula() && cell->GetText().empty()) continue;
+      if (top_left.IsValid()) {
+        // top_left.row = min(top_left.row, i);
+        // top_left.col = min(top_left.row, j);
+        bottom_right.row = max(bottom_right.row, i + 1);
+        bottom_right.col = max(bottom_right.col, j + 1);
+      } else {
+        // top_left.row = i;
+        // top_left.col = j;
+        bottom_right.row = i + 1;
+        bottom_right.col = j + 1;
+      }
+    }
+  }
+
+  return {top_left, bottom_right};
+}
+
+Size Sheet::GetPrintableSize() const {
+  auto [top_left, bottom_right] = GetPrintableArea();
+  return {bottom_right.row - top_left.row, bottom_right.col - top_left.col};
+}
+
 void Sheet::PrintValues(std::ostream& output) const {
-  for (int i = 0; i < size_.rows; i++) {
-    for (int j = 0; j < size_.cols; j++) {
+  auto [top_left, bottom_right] = GetPrintableArea();
+  for (int i = top_left.row; i < bottom_right.row; i++) {
+    for (int j = top_left.col; j < bottom_right.col; j++) {
       if (j > 0) output << '\t';
       if (const auto& ptr = cells[i][j]) {
         visit([&output](auto value) { output << value; }, ptr->GetValue());
@@ -193,9 +228,11 @@ void Sheet::PrintValues(std::ostream& output) const {
     output << '\n';
   }
 }
+
 void Sheet::PrintTexts(std::ostream& output) const {
-  for (int i = 0; i < size_.rows; i++) {
-    for (int j = 0; j < size_.cols; j++) {
+  auto [top_left, bottom_right] = GetPrintableArea();
+  for (int i = top_left.row; i < bottom_right.row; i++) {
+    for (int j = top_left.col; j < bottom_right.col; j++) {
       if (j > 0) output << '\t';
       if (const auto& ptr = cells[i][j]) {
         output << ptr->GetText();
