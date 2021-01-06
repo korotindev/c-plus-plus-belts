@@ -1,10 +1,11 @@
 #include "specific_formula.h"
 
+#include <memory>
+
 #include "FormulaLexer.h"
 #include "FormulaListener.h"
 #include "FormulaParser.h"
 #include "antlr4-runtime.h"
-#include <memory>
 
 using namespace std;
 
@@ -96,7 +97,7 @@ namespace {
 
    public:
     unique_ptr<Ast::Statement> TakeStatement() { return move(statement_.top()); }
-    vector<Position> GetReferences() { 
+    vector<Position> GetReferences() {
       sort(references_.begin(), references_.end());
       references_.erase(unique(references_.begin(), references_.end()), references_.end());
       return references_;
@@ -122,10 +123,10 @@ SpecificFormula::SpecificFormula(string expression) {
   antlr4::tree::ParseTree* tree = parser.main();  // метод соответствует корневому правилу
   SpecificFormulaListener listener;
   antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
-  
+
   statement_ = Ast::RemoveUnnecessaryParens(listener.TakeStatement());
   references_ = listener.GetReferences();
-  for(auto& ref : references_) {
+  for (auto& ref : references_) {
     if (!ref.IsValid()) {
       throw FormulaException("invalid ref in formula");
     }
@@ -140,7 +141,7 @@ std::vector<Position> SpecificFormula::GetReferencedCells() const { return refer
 
 IFormula::HandlingResult SpecificFormula::HandleInsertedRows(int before, int count) {
   bool changed = false;
-  for(auto& pos : references_) {
+  for (auto& pos : references_) {
     if (pos.row >= before) {
       pos.row += count;
       changed = true;
@@ -160,7 +161,7 @@ IFormula::HandlingResult SpecificFormula::HandleInsertedRows(int before, int cou
 }
 IFormula::HandlingResult SpecificFormula::HandleInsertedCols(int before, int count) {
   bool changed = false;
-  for(auto& pos : references_) {
+  for (auto& pos : references_) {
     if (pos.col >= before) {
       pos.col += count;
       changed = true;
@@ -180,7 +181,7 @@ IFormula::HandlingResult SpecificFormula::HandleInsertedCols(int before, int cou
 IFormula::HandlingResult SpecificFormula::HandleDeletedRows(int first, int count) {
   HandlingResult result = HandlingResult::NothingChanged;
 
-  for(auto& pos : references_) {
+  for (auto& pos : references_) {
     if (pos.row >= first + count) {
       pos.row -= count;
       if (result == HandlingResult::NothingChanged) {
@@ -211,7 +212,7 @@ IFormula::HandlingResult SpecificFormula::HandleDeletedRows(int first, int count
 IFormula::HandlingResult SpecificFormula::HandleDeletedCols(int first, int count) {
   HandlingResult result = HandlingResult::NothingChanged;
 
-  for(auto& pos : references_) {
+  for (auto& pos : references_) {
     if (pos.col >= first + count) {
       pos.col -= count;
       if (result == HandlingResult::NothingChanged) {

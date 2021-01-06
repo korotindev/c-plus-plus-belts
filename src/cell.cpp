@@ -45,4 +45,5 @@ std::vector<Position> Cell::GetReferencedCells() const {
 bool Cell::ContainsFormula() const { return holds_alternative<unique_ptr<IFormula>>(data_); }
 
 const IFormula* Cell::GetFormula() const { return get<unique_ptr<IFormula>>(data_).get(); }
+
 IFormula* Cell::GetFormula() { return get<unique_ptr<IFormula>>(data_).get(); }

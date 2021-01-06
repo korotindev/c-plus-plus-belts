@@ -1,8 +1,8 @@
 #pragma once
+#include <functional>
 #include <memory>
 
 #include "common.h"
-#include <functional>
 #include "formula.h"
 
 namespace Ast {

@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <sstream>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -18,7 +18,7 @@ namespace {
 
   enum class DFSStatus { NotVisited, Processing, Visited };
 
-  void ValidateNoCycles(const Sheet& sheet, Position pos, unordered_map<string, DFSStatus> &visited) {
+  void ValidateNoCycles(const Sheet& sheet, Position pos, unordered_map<string, DFSStatus>& visited) {
     auto& mark = visited[pos.ToString()];
     if (mark == DFSStatus::Processing) {
       throw CircularDependencyException("cycles not allowed: " + pos.ToString());
@@ -40,7 +40,7 @@ namespace {
     unordered_map<string, DFSStatus> visited;
     visited[pos.ToString()] = DFSStatus::Processing;
 
-    for(auto ref : ptr->GetReferencedCells()) {
+    for (auto ref : ptr->GetReferencedCells()) {
       auto status = visited[ref.ToString()];
       if (status == DFSStatus::Visited) continue;
       ValidateNoCycles(sheet, ref, visited);
@@ -62,7 +62,7 @@ void Sheet::SetCell(Position pos, std::string text) {
   ExpandSize(pos);
   auto cell_ptr = make_unique<Cell>(this, move(text));
   ValidateNoCyclesAfterInsertion(*this, pos, cell_ptr.get());
-  for(auto ref : cell_ptr->GetReferencedCells()) {
+  for (auto ref : cell_ptr->GetReferencedCells()) {
     if (!GetCell(ref)) {
       SetCell(ref, "");
     }
@@ -183,7 +183,7 @@ void Sheet::DeleteCols(int first, int count) {
 }
 Size Sheet::GetPrintableSize() const { return size_; }  // not sure, PRINTABLE!!!
 void Sheet::PrintValues(std::ostream& output) const {
-  for(int i = 0; i < size_.rows; i++) {
+  for (int i = 0; i < size_.rows; i++) {
     for (int j = 0; j < size_.cols; j++) {
       if (j > 0) output << '\t';
       if (const auto& ptr = cells[i][j]) {
@@ -194,7 +194,7 @@ void Sheet::PrintValues(std::ostream& output) const {
   }
 }
 void Sheet::PrintTexts(std::ostream& output) const {
-  for(int i = 0; i < size_.rows; i++) {
+  for (int i = 0; i < size_.rows; i++) {
     for (int j = 0; j < size_.cols; j++) {
       if (j > 0) output << '\t';
       if (const auto& ptr = cells[i][j]) {

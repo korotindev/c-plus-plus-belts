@@ -1,10 +1,10 @@
 #include "statement.h"
 
 #include <cmath>
+#include <cstdlib>
 #include <sstream>
 #include <unordered_map>
 #include <variant>
-#include <cstdlib>
 
 using namespace std;
 
@@ -118,7 +118,7 @@ namespace Ast {
     if (!pos.IsValid()) {
       return FormulaError::Category::Ref;
     }
-    
+
     auto cell_ptr = sheet.GetCell(pos);
     if (!cell_ptr) {
       return 0;
@@ -132,7 +132,7 @@ namespace Ast {
     if (holds_alternative<string>(cell_val)) {
       const auto& str = get<string>(cell_val);
 
-      char *end = nullptr;
+      char* end = nullptr;
       double result = strtod(str.c_str(), &end);
       if (*end != '\0') {
         return FormulaError::Category::Value;

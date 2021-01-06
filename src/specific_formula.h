@@ -2,9 +2,9 @@
 
 #include <string>
 
+#include "common.h"
 #include "formula.h"
 #include "statement.h"
-#include "common.h"
 
 class SpecificFormula : public IFormula {
  public:
