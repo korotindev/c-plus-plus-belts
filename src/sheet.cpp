@@ -48,43 +48,6 @@ namespace {
   }
 }  // namespace
 
-Cell::Cell(const Sheet& sheet, string text) : sheet_(sheet) {
-  if (text.empty() || text[0] != kFormulaSign) {
-    data_ = move(text);
-  } else {
-    data_ = ParseFormula(text.substr(1));
-  }
-}
-ICell::Value Cell::GetValue() const {
-  if (holds_alternative<string>(data_)) {
-    string_view view = get<string>(data_);
-    if (view.size() > 0 && view[0] == kEscapeSign) {
-      view = view.substr(1);
-    }
-    return string(view);
-  } else {
-    IFormula::Value formula_value = get<unique_ptr<IFormula>>(data_)->Evaluate(sheet_);
-    ICell::Value result;
-    visit([&result](auto val) { result = val; }, formula_value);
-    return result;
-  }
-}
-std::string Cell::GetText() const {
-  if (holds_alternative<string>(data_)) {
-    string_view view = get<string>(data_);
-    return string(view);
-  } else {
-    return "=" + get<unique_ptr<IFormula>>(data_)->GetExpression();
-  }
-}
-std::vector<Position> Cell::GetReferencedCells() const {
-  if (holds_alternative<string>(data_)) {
-    return {};
-  } else {
-    return get<unique_ptr<IFormula>>(data_)->GetReferencedCells();
-  }
-}
-
 void Sheet::ExpandSize(Position pos) {
   size_.cols = max(pos.col + 1, size_.cols);
   size_.rows = max(pos.row + 1, size_.rows);
@@ -97,7 +60,7 @@ void Sheet::ExpandSize(Position pos) {
 void Sheet::SetCell(Position pos, std::string text) {
   validate_position(pos);
   ExpandSize(pos);
-  auto cell_ptr = make_unique<Cell>(*this, move(text));
+  auto cell_ptr = make_unique<Cell>(this, move(text));
   ValidateNoCyclesAfterInsertion(*this, pos, cell_ptr.get());
   for(auto ref : cell_ptr->GetReferencedCells()) {
     if (!GetCell(ref)) {
@@ -149,8 +112,8 @@ void Sheet::InsertRows(int before, int count) {
       if (!cell) {
         continue;
       }
-      if (holds_alternative<unique_ptr<IFormula>>(cell->data_)) {
-        get<unique_ptr<IFormula>>(cell->data_)->HandleInsertedRows(before, count);
+      if (cell->ContainsFormula()) {
+        cell->GetFormula()->HandleInsertedRows(before, count);
       }
     }
   }
@@ -182,8 +145,8 @@ void Sheet::InsertCols(int before, int count) {
       if (!cell) {
         continue;
       }
-      if (holds_alternative<unique_ptr<IFormula>>(cell->data_)) {
-        get<unique_ptr<IFormula>>(cell->data_)->HandleInsertedCols(before, count);
+      if (cell->ContainsFormula()) {
+        cell->GetFormula()->HandleInsertedCols(before, count);
       }
     }
     row.insert(row.begin() + before, count, shared_ptr<Cell>());
@@ -197,8 +160,8 @@ void Sheet::DeleteRows(int first, int count) {
       if (!cell) {
         continue;
       }
-      if (holds_alternative<unique_ptr<IFormula>>(cell->data_)) {
-        get<unique_ptr<IFormula>>(cell->data_)->HandleDeletedRows(first, count);
+      if (cell->ContainsFormula()) {
+        cell->GetFormula()->HandleDeletedRows(first, count);
       }
     }
   }
@@ -211,8 +174,8 @@ void Sheet::DeleteCols(int first, int count) {
       if (!cell) {
         continue;
       }
-      if (holds_alternative<unique_ptr<IFormula>>(cell->data_)) {
-        get<unique_ptr<IFormula>>(cell->data_)->HandleDeletedCols(first, count);
+      if (cell->ContainsFormula()) {
+        cell->GetFormula()->HandleDeletedCols(first, count);
       }
     }
   }
