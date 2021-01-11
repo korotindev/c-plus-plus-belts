@@ -10,10 +10,17 @@ using namespace std;
 namespace {
   template <typename T>
   void PushElementsApart(vector<T>& vec, int before, int count) {
-    int i = vec.size() - 1; 
-    while(i - count >= before) {
+    int i = vec.size() - 1;
+    while (i - count >= before) {
       vec[i] = move(vec[i - count]);
       i--;
+    }
+  }
+
+  template <typename T>
+  void PushElementsCloser(vector<T>& vec, int first, int count) {
+    for (size_t i = first; i + count < vec.size(); i++) {
+      vec[i] = move(vec[i + count]);
     }
   }
 
@@ -55,17 +62,11 @@ namespace {
   }
 }  // namespace
 
-Sheet::Sheet() {
-  data.resize(Position::kMaxRows);
-}
+Sheet::Sheet() { data.resize(Position::kMaxRows); }
 
-void Sheet::ExpandRow(Position pos) {
-  data[pos.row].resize(Position::kMaxCols);
-}
+void Sheet::ExpandRow(Position pos) { data[pos.row].resize(Position::kMaxCols); }
 
-bool Sheet::AccessablePosition(Position pos) const {
-  return static_cast<size_t>(pos.col) < data[pos.row].size();
-}
+bool Sheet::AccessablePosition(Position pos) const { return static_cast<size_t>(pos.col) < data[pos.row].size(); }
 
 void Sheet::SetCell(Position pos, std::string text) {
   ValidatePosition(pos);
@@ -119,17 +120,19 @@ void Sheet::IterateOverTableCells(function<void(CellPtr& cell, Position pos)> fu
 
 void Sheet::InsertRows(int before, int count) {
   PushElementsApart(data, before, count);
-  IterateOverTableCells([before, count](CellPtr& cell, Position){
-   if (cell && cell->ContainsFormula()) {
-     cell->GetFormula()->HandleInsertedRows(before, count);
-   }
+
+  IterateOverTableCells([before, count](CellPtr& cell, Position) {
+    if (cell && cell->ContainsFormula()) {
+      cell->GetFormula()->HandleInsertedRows(before, count);
+    }
   });
 }
 
 void Sheet::InsertCols(int before, int count) {
-  for(auto& row : data) {
+  IterateOverTableRows([before, count](Row& row, size_t){
+    if (row.empty()) return;
     PushElementsApart(row, before, count);
-  }
+  });
 
   IterateOverTableCells([before, count](CellPtr& cell, Position) {
     if (cell && cell->ContainsFormula()) {
@@ -138,9 +141,28 @@ void Sheet::InsertCols(int before, int count) {
   });
 }
 
-void Sheet::DeleteRows(int first, int count) { }
+void Sheet::DeleteRows(int first, int count) {
+  PushElementsCloser(data, first, count);
 
-void Sheet::DeleteCols(int first, int count) { }
+  IterateOverTableCells([first, count](CellPtr& cell, Position) {
+    if (cell && cell->ContainsFormula()) {
+      cell->GetFormula()->HandleDeletedRows(first, count);
+    }
+  });
+}
+
+void Sheet::DeleteCols(int first, int count) {
+  IterateOverTableRows([first, count](Row& row, size_t) {
+    if (row.empty()) return;
+    PushElementsCloser(row, first, count);
+  });
+
+  IterateOverTableCells([first, count](CellPtr& cell, Position) {
+    if (cell && cell->ContainsFormula()) {
+      cell->GetFormula()->HandleDeletedCols(first, count);
+    }
+  });
+}
 
 pair<Position, Position> Sheet::GetPrintableArea() const {
   Position top_left{0, 0};
