@@ -4,9 +4,11 @@
 #include "formula.h"
 #include "cell.h"
 #include <variant>
+#include <functional>
 
 class Sheet : public ISheet {
  public:
+  Sheet();
   void SetCell(Position pos, std::string text) override;
   const ICell* GetCell(Position pos) const override;
   ICell* GetCell(Position pos) override;
@@ -20,8 +22,12 @@ class Sheet : public ISheet {
   void PrintTexts(std::ostream& output) const override;
 
  private:
+  using CellPtr = std::shared_ptr<Cell>;
+  using Row = std::vector<CellPtr>;
   bool AccessablePosition(Position pos) const;
-  void ExpandSize(Position pos);
+  void ExpandRow(Position pos);
+  void IterateOverTableRows(std::function<void(Row& row, size_t row_id)> f);
+  void IterateOverTableCells(std::function<void(CellPtr& ptr, Position pos)> f);
   std::pair<Position, Position> GetPrintableArea() const;
-  std::vector<std::vector<std::shared_ptr<Cell>>> cells;
+  std::vector<Row> data;
 };

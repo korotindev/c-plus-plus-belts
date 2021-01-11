@@ -487,6 +487,48 @@ namespace {
     sheet->DeleteCols(0);
   }
 
+  void TestCellsInsertionSimple() {
+    auto sheet = CreateSheet();
+    sheet->SetCell("A1"_pos, "1");
+    sheet->SetCell("A2"_pos, "2");
+    sheet->SetCell("A3"_pos, "3");
+    sheet->InsertRows(1, 2);
+    sheet->InsertRows(4, 2);
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), "1");
+    ASSERT_EQUAL(sheet->GetCell("A4"_pos)->GetText(), "2");
+    ASSERT_EQUAL(sheet->GetCell("A7"_pos)->GetText(), "3");
+
+    sheet = CreateSheet();
+    sheet->SetCell("A1"_pos, "1");
+    sheet->SetCell("B2"_pos, "2");
+    sheet->SetCell("C3"_pos, "3");
+    sheet->InsertCols(1, 2);
+    sheet->InsertCols(4, 2);
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), "1");
+    ASSERT_EQUAL(sheet->GetCell("D2"_pos)->GetText(), "2");
+    ASSERT_EQUAL(sheet->GetCell("G3"_pos)->GetText(), "3");
+  }
+
+  void TestCellsInsertion() {
+    auto sheet = CreateSheet();
+    sheet->SetCell("A1"_pos, "=1");
+    sheet->SetCell("A2"_pos, "=A1");
+    sheet->SetCell("A3"_pos, "=A2");
+    sheet->SetCell("B3"_pos, "=A1+A3");
+    sheet->InsertRows(1);
+    ASSERT_EQUAL(sheet->GetCell("B4"_pos)->GetText(), "=A1+A4");
+    ASSERT_EQUAL(sheet->GetCell("B4"_pos)->GetValue(), ICell::Value(2.0));
+
+    sheet = CreateSheet();
+    sheet->SetCell("A1"_pos, "=1");
+    sheet->SetCell("B1"_pos, "=A1");
+    sheet->SetCell("C1"_pos, "=B1");
+    sheet->SetCell("C2"_pos, "=A1+C1");
+    sheet->InsertCols(1);
+    ASSERT_EQUAL(sheet->GetCell("D2"_pos)->GetText(), "=A1+D1");
+    ASSERT_EQUAL(sheet->GetCell("D2"_pos)->GetValue(), ICell::Value(2.0));
+  }
+
   void TestPrint() {
     auto sheet = CreateSheet();
     sheet->SetCell("A2"_pos, "meow");
@@ -586,6 +628,7 @@ int main() {
   RUN_TEST(tr, TestFormulaExpressionFormatting);
   RUN_TEST(tr, TestFormulaReferencedCells);
   RUN_TEST(tr, TestFormulaHandleInsertion);
+  RUN_TEST(tr, TestInsertionOverflow);
   RUN_TEST(tr, TestFormulaHandleDeletion);
   RUN_TEST(tr, TestErrorValue);
   RUN_TEST(tr, TestErrorDiv0);
@@ -595,10 +638,11 @@ int main() {
   RUN_TEST(tr, TestCellsDeletionSimple);
   RUN_TEST(tr, TestCellsDeletion);
   RUN_TEST(tr, TestCellsDeletionAdjacent);
+  RUN_TEST(tr, TestCellsInsertionSimple);
+  RUN_TEST(tr, TestCellsInsertion);
   RUN_TEST(tr, TestPrint);
   RUN_TEST(tr, TestCellReferences);
   RUN_TEST(tr, TestFormulaIncorrect);
   RUN_TEST(tr, TestCellCircularReferences);
-  RUN_TEST(tr, TestInsertionOverflow);
   return 0;
 }
