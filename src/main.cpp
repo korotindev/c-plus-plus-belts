@@ -615,7 +615,7 @@ namespace {
   }
 }
 
-void TestPerformance() {
+void TestGetValueCachingPerformance() {
   TotalDuration total;
   {
     ADD_DURATION(total);
@@ -677,6 +677,6 @@ int main() {
   RUN_TEST(tr, TestCellReferences);
   RUN_TEST(tr, TestFormulaIncorrect);
   RUN_TEST(tr, TestCellCircularReferences);
-  RUN_TEST(tr, TestPerformance);
+  RUN_TEST(tr, TestGetValueCachingPerformance);
   return 0;
 }
