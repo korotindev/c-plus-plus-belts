@@ -38,6 +38,9 @@ struct TotalDuration {
     os << message << std::chrono::duration_cast<std::chrono::milliseconds>(value).count() << " ms" << std::endl;
     std::cerr << os.str();
   }
+  void Print(std::ostream& out) const {
+    out << std::chrono::duration_cast<std::chrono::milliseconds>(value).count() << " ms";
+  }
 };
 class AddDuration {
  public:
