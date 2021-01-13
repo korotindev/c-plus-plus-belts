@@ -10,7 +10,7 @@ if(MSVC)
 else()
   set(
     CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-attributes"
+    "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror -Wno-unused-parameter -Wno-implicit-fallthrough -Wno-attributes -fext-numeric-literals"
   )
 endif()
 

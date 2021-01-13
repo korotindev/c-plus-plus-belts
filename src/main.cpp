@@ -1,6 +1,8 @@
 #include "common.h"
 #include "formula.h"
 #include "test_runner.h"
+#include "profile.h"
+#include <sstream>
 
 std::ostream& operator<<(std::ostream& output, Position pos) {
   return output << "(" << pos.row << ", " << pos.col << ")";
@@ -614,6 +616,43 @@ namespace {
   }
 }
 
+void TestPerformance() {
+  TotalDuration total;
+  {
+    ADD_DURATION(total);
+    auto sheet = CreateSheet();
+
+    int pascal_triangle_size = 20;
+    sheet->SetCell("A1"_pos, "1");
+    for (int i = 1; i <= pascal_triangle_size; i++) {
+      sheet->SetCell(Position{i, 0}, "=" + Position{i - 1, 0}.ToString());
+    }
+    for (int i = 1; i <= pascal_triangle_size; i++) {
+      for (int j = 1; j <= i; j++) {
+        sheet->SetCell(Position{i, j}, "=" + Position{i - 1, j - 1}.ToString() + "+" + Position{i - 1, j}.ToString());
+      }
+    }
+    std::stringstream ss;
+    ss << "Table:\n";
+    sheet->PrintTexts(ss);
+    ss << "Values:\n";
+    sheet->PrintValues(ss);
+    ss << "\n";
+  }
+
+  using namespace std::chrono;
+  duration<double> real_time = total.value;
+  duration<double> time_limit;
+  time_limit += 1s + 500ms;
+
+  if (real_time >= time_limit) {
+    std::stringstream err;
+    err.precision(2);
+    err << "Time limit: " << std::fixed << real_time.count() << "/" << time_limit.count();
+    Assert(false, err.str()); 
+  }
+}
+
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestPositionAndStringConversion);
@@ -644,5 +683,6 @@ int main() {
   RUN_TEST(tr, TestCellReferences);
   RUN_TEST(tr, TestFormulaIncorrect);
   RUN_TEST(tr, TestCellCircularReferences);
+  RUN_TEST(tr, TestPerformance);
   return 0;
 }

@@ -6,7 +6,7 @@
         {
             "label": "Prepare For Coursera",
             "type": "shell",
-            "command": "rm -rf ./build/archive.zip && zip -r ./build/archive.zip src/* -x ./src/.antlr -x \"./src/antlr4_runtime*\" -x ./src/antlr-4.7.2-complete.jar -x ./src/common.h -x ./src/formula.h -x ./src/test_runner.h -x ./src/Formula.txt -x ./src/FindANTLR.cmake -x ./src/CMakeLists.txt -x ./src/Formula.g4"
+            "command": "rm -rf ./build/archive.zip && zip -r ./build/archive.zip src/* -x ./src/.antlr -x \"./src/antlr4_runtime*\" -x ./src/antlr-4.7.2-complete.jar -x ./src/common.h -x ./src/formula.h -x ./src/test_runner.h -x ./src/Formula.txt -x ./src/FindANTLR.cmake -x ./src/CMakeLists.txt -x ./src/Formula.g4 -x ./src/profile.h"
         }
     ]
 }
