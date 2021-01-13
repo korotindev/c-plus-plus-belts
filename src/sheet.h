@@ -34,7 +34,6 @@ class Sheet : public ISheet {
   void CollectCellStat(Position pos);
   void RemoveCellFromStat(Position pos);
 
-  std::pair<Position, Position> GetPrintableArea() const;
   std::vector<Row> data;
   std::vector<int> row_stat;
   std::vector<int> col_stat;

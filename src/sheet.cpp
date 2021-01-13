@@ -218,41 +218,26 @@ void Sheet::DeleteCols(int first, int count) {
   });
 }
 
-pair<Position, Position> Sheet::GetPrintableArea() const {
-  Position top_left{0, 0};
-  Position bottom_right{0, 0};
+Size Sheet::GetPrintableSize() const {
+  Size size;
 
   for (int i = 0; i < static_cast<int>(data.size()); i++) {
     for (int j = 0; j < static_cast<int>(data[i].size()); j++) {
       const auto& cell = data[i][j];
       if (!cell) continue;
       if (!cell->ContainsFormula() && cell->GetText().empty()) continue;
-      if (top_left.IsValid()) {
-        // top_left.row = min(top_left.row, i);
-        // top_left.col = min(top_left.row, j);
-        bottom_right.row = max(bottom_right.row, i + 1);
-        bottom_right.col = max(bottom_right.col, j + 1);
-      } else {
-        // top_left.row = i;
-        // top_left.col = j;
-        bottom_right.row = i + 1;
-        bottom_right.col = j + 1;
-      }
+      size.rows = max(size.rows, i + 1);
+      size.cols = max(size.cols, j + 1);
     }
   }
 
-  return {top_left, bottom_right};
-}
-
-Size Sheet::GetPrintableSize() const {
-  auto [top_left, bottom_right] = GetPrintableArea();
-  return {bottom_right.row - top_left.row, bottom_right.col - top_left.col};
+  return size;
 }
 
 void Sheet::PrintValues(std::ostream& output) const {
-  auto [top_left, bottom_right] = GetPrintableArea();
-  for (int i = top_left.row; i < bottom_right.row; i++) {
-    for (int j = top_left.col; j < bottom_right.col; j++) {
+  auto size = GetPrintableSize();
+  for (int i = 0; i < size.rows; i++) {
+    for (int j = 0; j < size.cols; j++) {
       if (j > 0) output << '\t';
       if (data[i].size() <= static_cast<size_t>(j)) continue;
       if (const auto& ptr = data[i][j]) {
@@ -264,9 +249,9 @@ void Sheet::PrintValues(std::ostream& output) const {
 }
 
 void Sheet::PrintTexts(std::ostream& output) const {
-  auto [top_left, bottom_right] = GetPrintableArea();
-  for (int i = top_left.row; i < bottom_right.row; i++) {
-    for (int j = top_left.col; j < bottom_right.col; j++) {
+  auto size = GetPrintableSize();
+  for (int i = 0; i < size.rows; i++) {
+    for (int j = 0; j < size.cols; j++) {
       if (j > 0) output << '\t';
       if (data[i].size() <= static_cast<size_t>(j)) continue;
       if (const auto& ptr = data[i][j]) {
