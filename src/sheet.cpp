@@ -60,9 +60,40 @@ namespace {
       ValidateNoCycles(sheet, ref, visited);
     }
   }
+
+  void ValidateInsertionStat(const vector<int>& stat, int before, int count, string_view err_msg) {
+    auto last_non_zero_it = find_if(stat.rbegin(), stat.rend(), [](int x) { return x != 0; });
+    if (last_non_zero_it == stat.rend()) {
+      return;
+    }
+
+    auto last_non_zero_idx = distance(stat.begin(), last_non_zero_it.base());
+
+    if (last_non_zero_idx + static_cast<size_t>(count) >= stat.size()) {
+      throw TableTooBigException(to_string(last_non_zero_idx) + ":" + string(err_msg));
+    }
+  }
 }  // namespace
 
-Sheet::Sheet() { data.resize(Position::kMaxRows); }
+Sheet::Sheet() {
+  data.resize(Position::kMaxRows);
+  ClearCellsStat();
+}
+
+void Sheet::ClearCellsStat() {
+  row_stat.assign(Position::kMaxRows, 0);
+  col_stat.assign(Position::kMaxCols, 0);
+}
+
+void Sheet::CollectCellStat(Position pos) {
+  col_stat[pos.col]++;
+  row_stat[pos.row]++;
+}
+
+void Sheet::RemoveCellFromStat(Position pos) {
+  col_stat[pos.col]--;
+  row_stat[pos.row]--;
+}
 
 void Sheet::ExpandRow(Position pos) { data[pos.row].resize(Position::kMaxCols); }
 
@@ -78,7 +109,11 @@ void Sheet::SetCell(Position pos, std::string text) {
       SetCell(ref, "");
     }
   }
-  data[pos.row][pos.col] = move(cell_ptr);
+  auto &cell = data[pos.row][pos.col];
+  if (!cell) {
+    CollectCellStat(pos);
+  }
+  cell = move(cell_ptr);
 }
 
 const ICell* Sheet::GetCell(Position pos) const {
@@ -102,6 +137,7 @@ void Sheet::ClearCell(Position pos) {
   if (AccessablePosition(pos)) {
     data[pos.row][pos.col] = nullptr;
   }
+  RemoveCellFromStat(pos);
 }
 
 void Sheet::IterateOverTableRows(function<void(Row& row, size_t row_id)> func) {
@@ -118,36 +154,52 @@ void Sheet::IterateOverTableCells(function<void(CellPtr& cell, Position pos)> fu
   });
 }
 
-void Sheet::InsertRows(int before, int count) {
-  PushElementsApart(data, before, count);
+void Sheet::ValidateRowsInsertion(int before, int count) const {
+  ValidateInsertionStat(row_stat, before, count, "error in row");
+}
 
-  IterateOverTableCells([before, count](CellPtr& cell, Position) {
-    if (cell && cell->ContainsFormula()) {
-      cell->GetFormula()->HandleInsertedRows(before, count);
-    }
+void Sheet::ValidateColsInsertion(int before, int count) const {
+  ValidateInsertionStat(col_stat, before, count, "error in col");
+}
+
+void Sheet::InsertRows(int before, int count) {
+  ValidateRowsInsertion(before, count);
+  PushElementsApart(data, before, count);
+  ClearCellsStat(); 
+
+  IterateOverTableCells([this, before, count](CellPtr& cell, Position pos) {
+    if (!cell) return;
+    CollectCellStat(pos);
+    if (!cell->ContainsFormula()) return;
+    cell->GetFormula()->HandleInsertedRows(before, count);
   });
 }
 
 void Sheet::InsertCols(int before, int count) {
+  ValidateColsInsertion(before, count);
   IterateOverTableRows([before, count](Row& row, size_t){
     if (row.empty()) return;
     PushElementsApart(row, before, count);
   });
+  ClearCellsStat();
 
-  IterateOverTableCells([before, count](CellPtr& cell, Position) {
-    if (cell && cell->ContainsFormula()) {
-      cell->GetFormula()->HandleInsertedCols(before, count);
-    }
+  IterateOverTableCells([this, before, count](CellPtr& cell, Position pos) {
+    if (!cell) return;
+    CollectCellStat(pos);
+    if (!cell->ContainsFormula()) return;
+    cell->GetFormula()->HandleInsertedCols(before, count);
   });
 }
 
 void Sheet::DeleteRows(int first, int count) {
   PushElementsCloser(data, first, count);
+  ClearCellsStat();
 
-  IterateOverTableCells([first, count](CellPtr& cell, Position) {
-    if (cell && cell->ContainsFormula()) {
-      cell->GetFormula()->HandleDeletedRows(first, count);
-    }
+  IterateOverTableCells([this, first, count](CellPtr& cell, Position pos) {
+    if (!cell) return;
+    CollectCellStat(pos);
+    if (!cell->ContainsFormula()) return;
+    cell->GetFormula()->HandleDeletedRows(first, count);
   });
 }
 
@@ -156,11 +208,13 @@ void Sheet::DeleteCols(int first, int count) {
     if (row.empty()) return;
     PushElementsCloser(row, first, count);
   });
+  ClearCellsStat();
 
-  IterateOverTableCells([first, count](CellPtr& cell, Position) {
-    if (cell && cell->ContainsFormula()) {
-      cell->GetFormula()->HandleDeletedCols(first, count);
-    }
+  IterateOverTableCells([this, first, count](CellPtr& cell, Position pos) {
+    if (!cell) return;
+    CollectCellStat(pos);
+    if (!cell->ContainsFormula()) return;
+    cell->GetFormula()->HandleDeletedCols(first, count);
   });
 }
 

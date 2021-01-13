@@ -28,6 +28,14 @@ class Sheet : public ISheet {
   void ExpandRow(Position pos);
   void IterateOverTableRows(std::function<void(Row& row, size_t row_id)> f);
   void IterateOverTableCells(std::function<void(CellPtr& ptr, Position pos)> f);
+  void ValidateRowsInsertion(int before, int count) const;
+  void ValidateColsInsertion(int before, int count) const;
+  void ClearCellsStat();
+  void CollectCellStat(Position pos);
+  void RemoveCellFromStat(Position pos);
+
   std::pair<Position, Position> GetPrintableArea() const;
   std::vector<Row> data;
+  std::vector<int> row_stat;
+  std::vector<int> col_stat;
 };
