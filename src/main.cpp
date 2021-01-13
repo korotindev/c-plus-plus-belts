@@ -1,7 +1,6 @@
 #include "common.h"
 #include "formula.h"
 #include "test_runner.h"
-#include "profile.h"
 #include <sstream>
 
 std::ostream& operator<<(std::ostream& output, Position pos) {
@@ -645,12 +644,7 @@ void TestPerformance() {
   duration<double> time_limit;
   time_limit += 1s + 500ms;
 
-  if (real_time >= time_limit) {
-    std::stringstream err;
-    err.precision(2);
-    err << "Time limit: " << std::fixed << real_time.count() << "/" << time_limit.count();
-    Assert(false, err.str()); 
-  }
+  ASSERT_TIME_LIMIT(real_time, time_limit);
 }
 
 int main() {

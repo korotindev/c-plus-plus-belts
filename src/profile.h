@@ -52,3 +52,9 @@ class AddDuration {
 };
 
 #define ADD_DURATION(value) AddDuration UNIQ_ID(__LINE__){value};
+
+template<class T>
+struct is_duration : std::false_type {};
+
+template<class Rep, class Period>
+struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};

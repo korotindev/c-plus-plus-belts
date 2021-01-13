@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "profile.h"
 
 namespace TestRunnerPrivate {
   template <typename K, typename V, template <typename, typename> class Map>
@@ -79,6 +80,22 @@ inline void Assert(bool b, const std::string& hint) {
   AssertEqual(b, true, hint);
 }
 
+template <class Dur1, class Dur2>
+void AssertTimeLimit(Dur1 lhs, Dur2 limit, const std::string& hint = {}) {
+  static_assert(is_duration<Dur1>::value, "must be duration");
+  static_assert(is_duration<Dur2>::value, "must be duration");
+
+  if (lhs >= limit) {
+    std::ostringstream os;
+    os.precision(2);
+    os << "Time assertion failed: " << std::fixed << lhs.count() << "/" << limit.count();
+    if (!hint.empty()) {
+      os << " hint: " << hint;
+    }
+    throw std::runtime_error(os.str());
+  }
+}
+
 class TestRunner {
 public:
   template <class TestFunc>
@@ -126,5 +143,14 @@ private:
                         << __LINE__;                               \
     Assert(x, __assert_private_os.str());                          \
   }
+
+#define ASSERT_TIME_LIMIT(x, y)                                               \
+  {                                                                           \
+    std::ostringstream __assert_private_os;                                   \
+    __assert_private_os << #x << " >= " << #y << ", " << FILE_NAME << ":" \
+                        << __LINE__;                                          \
+    AssertTimeLimit(x, y, __assert_private_os.str());                         \
+  }
+
 
 #define RUN_TEST(tr, func) tr.RunTest(func, #func)
