@@ -170,8 +170,7 @@ void Sheet::InsertRows(int before, int count) {
   IterateOverTableCells([this, before, count](CellPtr& cell, Position pos) {
     if (!cell) return;
     CollectCellStat(pos);
-    if (!cell->ContainsFormula()) return;
-    cell->GetFormula()->HandleInsertedRows(before, count);
+    cell->HandleInsertedRows(before, count);
   });
 }
 
@@ -186,8 +185,7 @@ void Sheet::InsertCols(int before, int count) {
   IterateOverTableCells([this, before, count](CellPtr& cell, Position pos) {
     if (!cell) return;
     CollectCellStat(pos);
-    if (!cell->ContainsFormula()) return;
-    cell->GetFormula()->HandleInsertedCols(before, count);
+    cell->HandleInsertedCols(before, count);
   });
 }
 
@@ -198,8 +196,7 @@ void Sheet::DeleteRows(int first, int count) {
   IterateOverTableCells([this, first, count](CellPtr& cell, Position pos) {
     if (!cell) return;
     CollectCellStat(pos);
-    if (!cell->ContainsFormula()) return;
-    cell->GetFormula()->HandleDeletedRows(first, count);
+    cell->HandleDeletedRows(first, count);
   });
 }
 
@@ -213,8 +210,7 @@ void Sheet::DeleteCols(int first, int count) {
   IterateOverTableCells([this, first, count](CellPtr& cell, Position pos) {
     if (!cell) return;
     CollectCellStat(pos);
-    if (!cell->ContainsFormula()) return;
-    cell->GetFormula()->HandleDeletedCols(first, count);
+    cell->HandleDeletedCols(first, count);
   });
 }
 
