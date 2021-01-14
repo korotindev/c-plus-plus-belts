@@ -1,15 +1,14 @@
+#include <sstream>
+
 #include "common.h"
 #include "formula.h"
 #include "test_runner.h"
-#include <sstream>
 
 std::ostream& operator<<(std::ostream& output, Position pos) {
   return output << "(" << pos.row << ", " << pos.col << ")";
 }
 
-Position operator"" _pos(const char* str, std::size_t) {
-  return Position::FromString(str);
-}
+Position operator"" _pos(const char* str, std::size_t) { return Position::FromString(str); }
 
 std::ostream& operator<<(std::ostream& output, Size size) {
   return output << "(" << size.rows << ", " << size.cols << ")";
@@ -32,14 +31,10 @@ std::string_view ToString(IFormula::HandlingResult hr) {
   return "";
 }
 
-std::ostream& operator<<(std::ostream& output, IFormula::HandlingResult hr) {
-  return output << ToString(hr);
-}
+std::ostream& operator<<(std::ostream& output, IFormula::HandlingResult hr) { return output << ToString(hr); }
 
 namespace {
-  std::string ToString(FormulaError::Category category) {
-    return std::string(FormulaError(category).ToString());
-  }
+  std::string ToString(FormulaError::Category category) { return std::string(FormulaError(category).ToString()); }
 
   void TestPositionAndStringConversion() {
     auto testSingle = [](Position pos, std::string_view str) {
@@ -64,8 +59,7 @@ namespace {
     testSingle(Position{0, 701}, "ZZ1");
     testSingle(Position{0, 702}, "AAA1");
     testSingle(Position{136, 2}, "C137");
-    testSingle(Position{Position::kMaxRows - 1, Position::kMaxCols - 1},
-               "XFD16384");
+    testSingle(Position{Position::kMaxRows - 1, Position::kMaxCols - 1}, "XFD16384");
   }
 
   void TestPositionToStringInvalid() {
@@ -149,9 +143,7 @@ namespace {
 
   void TestFormulaArithmetic() {
     auto sheet = CreateSheet();
-    auto evaluate = [&](std::string expr) {
-      return std::get<double>(ParseFormula(std::move(expr))->Evaluate(*sheet));
-    };
+    auto evaluate = [&](std::string expr) { return std::get<double>(ParseFormula(std::move(expr))->Evaluate(*sheet)); };
 
     ASSERT_EQUAL(evaluate("1"), 1);
     ASSERT_EQUAL(evaluate("42"), 42);
@@ -164,9 +156,7 @@ namespace {
 
   void TestFormulaReferences() {
     auto sheet = CreateSheet();
-    auto evaluate = [&](std::string expr) {
-      return std::get<double>(ParseFormula(std::move(expr))->Evaluate(*sheet));
-    };
+    auto evaluate = [&](std::string expr) { return std::get<double>(ParseFormula(std::move(expr))->Evaluate(*sheet)); };
 
     sheet->SetCell("A1"_pos, "1");
     ASSERT_EQUAL(evaluate("A1"), 1);
@@ -181,9 +171,7 @@ namespace {
   }
 
   void TestFormulaExpressionFormatting() {
-    auto reformat = [](std::string expr) {
-      return ParseFormula(std::move(expr))->GetExpression();
-    };
+    auto reformat = [](std::string expr) { return ParseFormula(std::move(expr))->GetExpression(); };
 
     ASSERT_EQUAL(reformat("  1  "), "1");
     ASSERT_EQUAL(reformat("  -1  "), "-1");
@@ -208,8 +196,7 @@ namespace {
 
     auto tricky = ParseFormula("A1 + A2 + A1 + A3 + A1 + A2 + A1");
     ASSERT_EQUAL(tricky->GetExpression(), "A1+A2+A1+A3+A1+A2+A1");
-    ASSERT_EQUAL(tricky->GetReferencedCells(),
-                 (std::vector{"A1"_pos, "A2"_pos, "A3"_pos}));
+    ASSERT_EQUAL(tricky->GetReferencedCells(), (std::vector{"A1"_pos, "A2"_pos, "A3"_pos}));
   }
 
   void TestFormulaHandleInsertion() {
@@ -264,7 +251,7 @@ namespace {
     sheet->SetCell(maxp, text);
     try {
       sheet->InsertCols(1);
-      ASSERT(false); // InsertCols must throw exception
+      ASSERT(false);  // InsertCols must throw exception
     } catch (const TableTooBigException&) {
       ASSERT_EQUAL(sheet->GetCell(maxp)->GetText(), text);
     }
@@ -279,13 +266,13 @@ namespace {
     sheet->SetCell("A1"_pos, text);
     try {
       sheet->InsertCols(1);
-      ASSERT(false); // InsertCols must throw exception
+      ASSERT(false);  // InsertCols must throw exception
     } catch (const TableTooBigException&) {
       ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), text);
     }
     try {
       sheet->InsertRows(1);
-      ASSERT(false); // InsertRows must throw exception
+      ASSERT(false);  // InsertRows must throw exception
     } catch (const TableTooBigException&) {
       ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), text);
     }
@@ -335,12 +322,10 @@ namespace {
     auto sheet = CreateSheet();
     sheet->SetCell("E2"_pos, "A1");
     sheet->SetCell("E4"_pos, "=E2");
-    ASSERT_EQUAL(sheet->GetCell("E4"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Value));
+    ASSERT_EQUAL(sheet->GetCell("E4"_pos)->GetValue(), ICell::Value(FormulaError::Category::Value));
 
     sheet->SetCell("E2"_pos, "3D");
-    ASSERT_EQUAL(sheet->GetCell("E4"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Value));
+    ASSERT_EQUAL(sheet->GetCell("E4"_pos)->GetValue(), ICell::Value(FormulaError::Category::Value));
   }
 
   void TestErrorDiv0() {
@@ -349,39 +334,33 @@ namespace {
     constexpr double max = std::numeric_limits<double>::max();
 
     sheet->SetCell("A1"_pos, "=1/0");
-    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Div0));
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Div0));
 
     sheet->SetCell("A1"_pos, "=1e+200/1e-200");
-    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Div0));
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Div0));
 
     sheet->SetCell("A1"_pos, "=0/0");
-    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Div0));
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Div0));
 
     {
       std::ostringstream formula;
       formula << '=' << max << '+' << max;
       sheet->SetCell("A1"_pos, formula.str());
-      ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                   ICell::Value(FormulaError::Category::Div0));
+      ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Div0));
     }
 
     {
       std::ostringstream formula;
       formula << '=' << -max << '-' << max;
       sheet->SetCell("A1"_pos, formula.str());
-      ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                   ICell::Value(FormulaError::Category::Div0));
+      ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Div0));
     }
 
     {
       std::ostringstream formula;
       formula << '=' << max << '*' << max;
       sheet->SetCell("A1"_pos, formula.str());
-      ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                   ICell::Value(FormulaError::Category::Div0));
+      ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Div0));
     }
   }
 
@@ -418,20 +397,16 @@ namespace {
     sheet->SetCell("A3"_pos, "=A2");
     sheet->DeleteRows(0);
 
-    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Ref));
-    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(),
-                 "=" + ToString(FormulaError::Category::Ref));
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Ref));
+    ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), "=" + ToString(FormulaError::Category::Ref));
 
-    ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Ref));
+    ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(), ICell::Value(FormulaError::Category::Ref));
     ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetText(), "=A1");
 
     sheet->SetCell("B1"_pos, "=1/0");
     sheet->SetCell("A2"_pos, "=A1+B1");
     auto value = sheet->GetCell("A2"_pos)->GetValue();
-    ASSERT(value == ICell::Value(FormulaError::Category::Ref) ||
-           value == ICell::Value(FormulaError::Category::Div0));
+    ASSERT(value == ICell::Value(FormulaError::Category::Ref) || value == ICell::Value(FormulaError::Category::Div0));
   }
 
   void TestCellsDeletionSimple() {
@@ -460,8 +435,7 @@ namespace {
     sheet->SetCell("B3"_pos, "=A1+A3");
     sheet->DeleteRows(1);
     ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), "=1");
-    ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Ref));
+    ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(), ICell::Value(FormulaError::Category::Ref));
     ASSERT_EQUAL(sheet->GetCell("B2"_pos)->GetText(), "=A1+A2");
 
     sheet = CreateSheet();
@@ -471,8 +445,7 @@ namespace {
     sheet->SetCell("C2"_pos, "=A1+C1");
     sheet->DeleteCols(1);
     ASSERT_EQUAL(sheet->GetCell("A1"_pos)->GetText(), "=1");
-    ASSERT_EQUAL(sheet->GetCell("B1"_pos)->GetValue(),
-                 ICell::Value(FormulaError::Category::Ref));
+    ASSERT_EQUAL(sheet->GetCell("B1"_pos)->GetValue(), ICell::Value(FormulaError::Category::Ref));
     ASSERT_EQUAL(sheet->GetCell("B2"_pos)->GetText(), "=A1+B1");
   }
 
@@ -558,16 +531,13 @@ namespace {
     sheet->SetCell("B2"_pos, "=A1");
 
     ASSERT(sheet->GetCell("A1"_pos)->GetReferencedCells().empty());
-    ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetReferencedCells(),
-                 std::vector{"A1"_pos});
-    ASSERT_EQUAL(sheet->GetCell("B2"_pos)->GetReferencedCells(),
-                 std::vector{"A1"_pos});
+    ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetReferencedCells(), std::vector{"A1"_pos});
+    ASSERT_EQUAL(sheet->GetCell("B2"_pos)->GetReferencedCells(), std::vector{"A1"_pos});
 
     // Ссылка на пустую ячейку
     sheet->SetCell("B2"_pos, "=B1");
     ASSERT(sheet->GetCell("B1"_pos)->GetReferencedCells().empty());
-    ASSERT_EQUAL(sheet->GetCell("B2"_pos)->GetReferencedCells(),
-                 std::vector{"B1"_pos});
+    ASSERT_EQUAL(sheet->GetCell("B2"_pos)->GetReferencedCells(), std::vector{"B1"_pos});
 
     sheet->SetCell("A2"_pos, "");
     ASSERT(sheet->GetCell("A1"_pos)->GetReferencedCells().empty());
@@ -575,8 +545,7 @@ namespace {
 
     // Ссылка на ячейку за пределами таблицы
     sheet->SetCell("B1"_pos, "=C3");
-    ASSERT_EQUAL(sheet->GetCell("B1"_pos)->GetReferencedCells(),
-                 std::vector{"C3"_pos});
+    ASSERT_EQUAL(sheet->GetCell("B1"_pos)->GetReferencedCells(), std::vector{"C3"_pos});
   }
 
   void TestFormulaIncorrect() {
@@ -613,38 +582,63 @@ namespace {
     ASSERT(caught);
     ASSERT_EQUAL(sheet->GetCell("M6"_pos)->GetText(), "Ready");
   }
+}  // namespace
+
+std::unique_ptr<ISheet> GenerateLargeTable() {
+  auto sheet = CreateSheet();
+
+  int pascal_triangle_size = 20;
+  sheet->SetCell("A1"_pos, "1");
+  for (int i = 1; i <= pascal_triangle_size; i++) {
+    sheet->SetCell(Position{i, 0}, "=" + Position{i - 1, 0}.ToString());
+  }
+  for (int i = 1; i <= pascal_triangle_size; i++) {
+    for (int j = 1; j <= i; j++) {
+      sheet->SetCell(Position{i, j}, "=" + Position{i - 1, j - 1}.ToString() + "+" + Position{i - 1, j}.ToString());
+    }
+  }
+  return sheet;
+}
+
+std::stringstream PrintTable(const std::unique_ptr<ISheet>& sheet) {
+  std::stringstream ss;
+  ss << "Table:\n";
+  sheet->PrintTexts(ss);
+  ss << "Values:\n";
+  sheet->PrintValues(ss);
+  ss << "\n";
+  return ss;
 }
 
 void TestGetValueCachingPerformance() {
   TotalDuration total;
+  auto sheet = GenerateLargeTable();
   {
     ADD_DURATION(total);
-    auto sheet = CreateSheet();
-
-    int pascal_triangle_size = 20;
-    sheet->SetCell("A1"_pos, "1");
-    for (int i = 1; i <= pascal_triangle_size; i++) {
-      sheet->SetCell(Position{i, 0}, "=" + Position{i - 1, 0}.ToString());
-    }
-    for (int i = 1; i <= pascal_triangle_size; i++) {
-      for (int j = 1; j <= i; j++) {
-        sheet->SetCell(Position{i, j}, "=" + Position{i - 1, j - 1}.ToString() + "+" + Position{i - 1, j}.ToString());
-      }
-    }
-    std::stringstream ss;
-    ss << "Table:\n";
-    sheet->PrintTexts(ss);
-    ss << "Values:\n";
-    sheet->PrintValues(ss);
-    ss << "\n";
+    PrintTable(sheet);
   }
 
   using namespace std::chrono;
   duration<double> real_time = total.value;
-  duration<double> time_limit;
-  time_limit += 1s + 500ms;
 
-  ASSERT_TIME_LIMIT(real_time, time_limit);
+  ASSERT_TIME_LIMIT(real_time, 100ms);
+}
+
+void TestCacheInvalidationPerformance() {
+  TotalDuration total;
+  auto sheet = GenerateLargeTable();
+  {
+    ADD_DURATION(total);
+    PrintTable(sheet);
+    sheet->SetCell("A1"_pos, "2");
+    auto ss = PrintTable(sheet);
+  }
+  ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(), ICell::Value("2"));
+
+  using namespace std::chrono;
+  duration<double> real_time = total.value;
+
+  ASSERT_TIME_LIMIT(real_time, 200ms);
 }
 
 int main() {
@@ -678,5 +672,6 @@ int main() {
   RUN_TEST(tr, TestFormulaIncorrect);
   RUN_TEST(tr, TestCellCircularReferences);
   RUN_TEST(tr, TestGetValueCachingPerformance);
+  RUN_TEST(tr, TestCacheInvalidationPerformance);
   return 0;
 }
