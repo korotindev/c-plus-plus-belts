@@ -109,7 +109,7 @@ void Sheet::SetCell(Position pos, std::string text) {
       SetCell(ref, "");
     }
   }
-  auto &cell = data[pos.row][pos.col];
+  auto &cell = GetCellImpl(pos);
   if (!cell) {
     CollectCellStat(pos);
   }
@@ -119,7 +119,7 @@ void Sheet::SetCell(Position pos, std::string text) {
 const ICell* Sheet::GetCell(Position pos) const {
   ValidatePosition(pos);
   if (AccessablePosition(pos)) {
-    return data[pos.row][pos.col].get();
+    return GetCellImpl(pos).get();
   }
   return nullptr;
 }
@@ -127,7 +127,7 @@ const ICell* Sheet::GetCell(Position pos) const {
 ICell* Sheet::GetCell(Position pos) {
   ValidatePosition(pos);
   if (AccessablePosition(pos)) {
-    return data[pos.row][pos.col].get();
+    return GetCellImpl(pos).get();
   }
   return nullptr;
 }
@@ -135,7 +135,7 @@ ICell* Sheet::GetCell(Position pos) {
 void Sheet::ClearCell(Position pos) {
   ValidatePosition(pos);
   if (AccessablePosition(pos)) {
-    data[pos.row][pos.col] = nullptr;
+    GetCellImpl(pos) = nullptr;
   }
   RemoveCellFromStat(pos);
 }
@@ -235,7 +235,7 @@ void Sheet::PrintValues(std::ostream& output) const {
   for (int i = 0; i < size.rows; i++) {
     for (int j = 0; j < size.cols; j++) {
       if (j > 0) output << '\t';
-      if (data[i].size() <= static_cast<size_t>(j)) continue;
+      if (data[i].empty()) continue;
       if (const auto& ptr = data[i][j]) {
         visit([&output](auto value) { output << value; }, ptr->GetValue());
       }
@@ -249,11 +249,19 @@ void Sheet::PrintTexts(std::ostream& output) const {
   for (int i = 0; i < size.rows; i++) {
     for (int j = 0; j < size.cols; j++) {
       if (j > 0) output << '\t';
-      if (data[i].size() <= static_cast<size_t>(j)) continue;
+      if (data[i].empty()) continue;
       if (const auto& ptr = data[i][j]) {
         output << ptr->GetText();
       }
     }
     output << '\n';
   }
+}
+
+const Sheet::CellPtr& Sheet::GetCellImpl(Position pos) const {
+  return data[pos.row][pos.col];
+}
+
+Sheet::CellPtr& Sheet::GetCellImpl(Position pos) {
+  return data[pos.row][pos.col];
 }
