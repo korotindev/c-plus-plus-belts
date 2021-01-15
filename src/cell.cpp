@@ -4,33 +4,30 @@ using namespace std;
 
 Cell::Cell(const ISheet* sheet, string text) : sheet_(sheet) {
   if (text.empty() || text[0] != kFormulaSign) {
-    data_ = move(text);
+    raw_text_ = move(text);
   } else {
-    data_ = ParseFormula(text.substr(1));
+    formula_ = ParseFormula(text.substr(1));
+    raw_text_ = '=' + formula_->GetExpression();
   }
-  cached_text_ = BuildText();
 }
 
 ICell::Value Cell::GetValue() const {
-  if (!IsCached()) {
-    if (ContainsFormula()) {
-      IFormula::Value formula_value = GetFormula()->Evaluate(*sheet_);
-      ICell::Value result;
-      visit([&result](auto val) { result = val; }, formula_value);
-      cached_value_ = result;
-    } else {
-      string_view view = get<string>(data_);
-      if (view.size() > 0 && view[0] == kEscapeSign) {
-        view = view.substr(1);
-      }
-      cached_value_ = string(view);
+  if (ContainsFormula()) {
+    if (!IsCached()) {
+      auto result = formula_->Evaluate(*sheet_);
+      visit([this](auto& elem) { cached_formula_value_ = move(elem); }, result);
     }
+    return cached_formula_value_.value();
+  } else {
+    string_view sv = raw_text_;
+    if (sv.size() > 0 && sv[0] == kEscapeSign) {
+      sv = sv.substr(1);
+    }
+    return string(sv);
   }
-
-  return cached_value_.value();
 }
 
-std::string Cell::GetText() const { return cached_text_; }
+std::string Cell::GetText() const { return raw_text_; }
 
 std::vector<Position> Cell::GetReferencedCells() const {
   if (ContainsFormula()) {
@@ -40,19 +37,10 @@ std::vector<Position> Cell::GetReferencedCells() const {
   }
 }
 
-string Cell::BuildText() {
-  if (ContainsFormula()) {
-    return "=" + GetFormula()->GetExpression();
-  } else {
-    string_view view = get<string>(data_);
-    return string(view);
-  }
-}
-
 void Cell::RebuildText(IFormula::HandlingResult result) {
   if (result == IFormula::HandlingResult::NothingChanged) return;
 
-  cached_text_ = BuildText();
+  raw_text_ = '=' + formula_->GetExpression();
 }
 
 IFormula::HandlingResult Cell::HandleInsertedRows(int before, int count) {
@@ -93,11 +81,11 @@ IFormula::HandlingResult Cell::HandleDeletedCols(int first, int count) {
   return result;
 }
 
-bool Cell::ContainsFormula() const { return holds_alternative<unique_ptr<IFormula>>(data_); }
+bool Cell::ContainsFormula() const { return formula_ != nullptr; }
 
-const IFormula* Cell::GetFormula() const { return get<unique_ptr<IFormula>>(data_).get(); }
+const IFormula* Cell::GetFormula() const { return formula_.get(); }
 
-IFormula* Cell::GetFormula() { return get<unique_ptr<IFormula>>(data_).get(); }
+IFormula* Cell::GetFormula() { return formula_.get(); }
 
 void Cell::AddExternalDep(Position pos) { external_deps_.insert(pos); }
 
@@ -105,12 +93,13 @@ void Cell::RemoveExternalDep(Position pos) { external_deps_.erase(pos); }
 
 const PositionSet& Cell::ExternalDeps() const { return external_deps_; }
 
-bool Cell::IsCached() const { return cached_value_.has_value(); }
+bool Cell::IsCached() const { return cached_formula_value_.has_value() || formula_ == nullptr; }
 
-void Cell::InvalidateCache() { cached_value_.reset(); }
+void Cell::InvalidateCache() { cached_formula_value_.reset(); }
 
 void Cell::RebuildExternalDepsWith(function<void(vector<Position>&)> func) {
   vector<Position> positions(external_deps_.begin(), external_deps_.end());
+  external_deps_.clear();
   func(positions);
   external_deps_ = PositionSet(positions.begin(), positions.end());
 }

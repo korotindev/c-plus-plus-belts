@@ -12,9 +12,9 @@
 
 class Cell : public ICell {
   const ISheet* sheet_;
-  std::variant<std::string, std::unique_ptr<IFormula>> data_;
-  std::string cached_text_;
-  mutable std::optional<ICell::Value> cached_value_;
+  std::string raw_text_;
+  std::unique_ptr<IFormula> formula_;
+  mutable std::optional<ICell::Value> cached_formula_value_;
   PositionSet external_deps_;
 
  public:
@@ -39,7 +39,6 @@ class Cell : public ICell {
 
  private:
   IFormula* GetFormula();
-  std::string BuildText();
   void RebuildText(IFormula::HandlingResult result);
   void RebuildExternalDepsWith(std::function<void(std::vector<Position>& pos)>);
 };
