@@ -162,8 +162,11 @@ void Sheet::ClearCell(Position pos) {
   ValidatePosition(pos);
   if (AccessablePosition(pos)) {
     GetCellImpl(pos) = nullptr;
+    RemoveCellFromStat(pos);
   }
-  RemoveCellFromStat(pos);
+  if (row_stat[pos.row] == 0) {
+    data[pos.row].clear();
+  }
 }
 
 void Sheet::IterateOverTableRows(function<void(Row& row, size_t row_id)> func) {
@@ -224,6 +227,8 @@ void Sheet::DeleteRows(int first, int count) {
     CollectCellStat(pos);
     cell->HandleDeletedRows(first, count);
   });
+
+  FitRows();
 }
 
 void Sheet::DeleteCols(int first, int count) {
@@ -238,6 +243,8 @@ void Sheet::DeleteCols(int first, int count) {
     CollectCellStat(pos);
     cell->HandleDeletedCols(first, count);
   });
+
+  FitRows();
 }
 
 Size Sheet::GetPrintableSize() const {
@@ -299,6 +306,14 @@ void Sheet::InvalidateCache(Position pos) {
     cell_ptr->InvalidateCache();
     for (const auto& ref : cell_ptr->ExternalDeps()) {
       InvalidateCache(ref);
+    }
+  }
+}
+
+void Sheet::FitRows() {
+  for(size_t i = 0; i < row_stat.size(); i++) {
+    if (row_stat[i] == 0) {
+      data[i].clear();
     }
   }
 }

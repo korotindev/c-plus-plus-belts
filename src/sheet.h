@@ -36,6 +36,7 @@ class Sheet : public ISheet {
   void CollectCellStat(Position pos);
   void RemoveCellFromStat(Position pos);
   void InvalidateCache(Position pos);
+  void FitRows();
 
   std::vector<Row> data;
   std::vector<int> row_stat;
