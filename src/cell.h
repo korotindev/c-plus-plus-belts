@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <variant>
+#include <optional>
 #include <unordered_set>
 #include <functional>
 
@@ -13,6 +14,7 @@ class Cell : public ICell {
   const ISheet* sheet_;
   std::variant<std::string, std::unique_ptr<IFormula>> data_;
   std::string cached_text_;
+  mutable std::optional<ICell::Value> cached_value_;
   PositionSet external_deps_;
 
  public:

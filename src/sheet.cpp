@@ -283,12 +283,10 @@ void Sheet::InvalidateCache(Position pos) {
     return;
   }
   auto& cell_ptr = GetCellImpl(pos);
-  if (cell_ptr->IsCached()) {
-    return;
-  }
-
-  cell_ptr->InvalidateCache();
-  for (const auto& ref : cell_ptr->ExternalDeps()) {
-    InvalidateCache(ref);
+  if (cell_ptr && cell_ptr->IsCached()) {
+    cell_ptr->InvalidateCache();
+    for (const auto& ref : cell_ptr->ExternalDeps()) {
+      InvalidateCache(ref);
+    }
   }
 }

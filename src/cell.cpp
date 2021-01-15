@@ -12,18 +12,22 @@ Cell::Cell(const ISheet* sheet, string text) : sheet_(sheet) {
 }
 
 ICell::Value Cell::GetValue() const {
-  if (ContainsFormula()) {
-    IFormula::Value formula_value = GetFormula()->Evaluate(*sheet_);
-    ICell::Value result;
-    visit([&result](auto val) { result = val; }, formula_value);
-    return result;
-  } else {
-    string_view view = get<string>(data_);
-    if (view.size() > 0 && view[0] == kEscapeSign) {
-      view = view.substr(1);
+  if (!IsCached()) {
+    if (ContainsFormula()) {
+      IFormula::Value formula_value = GetFormula()->Evaluate(*sheet_);
+      ICell::Value result;
+      visit([&result](auto val) { result = val; }, formula_value);
+      cached_value_ = result;
+    } else {
+      string_view view = get<string>(data_);
+      if (view.size() > 0 && view[0] == kEscapeSign) {
+        view = view.substr(1);
+      }
+      cached_value_ = string(view);
     }
-    return string(view);
   }
+
+  return cached_value_.value();
 }
 
 std::string Cell::GetText() const { return cached_text_; }
@@ -101,9 +105,9 @@ void Cell::RemoveExternalDep(Position pos) { external_deps_.erase(pos); }
 
 const PositionSet& Cell::ExternalDeps() const { return external_deps_; }
 
-bool Cell::IsCached() const { return true; }
+bool Cell::IsCached() const { return cached_value_.has_value(); }
 
-void Cell::InvalidateCache() {}
+void Cell::InvalidateCache() { cached_value_.reset(); }
 
 void Cell::RebuildExternalDepsWith(function<void(vector<Position>&)> func) {
   vector<Position> positions(external_deps_.begin(), external_deps_.end());
