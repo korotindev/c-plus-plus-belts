@@ -73,6 +73,14 @@ namespace {
       throw TableTooBigException(to_string(last_non_zero_idx) + ":" + string(err_msg));
     }
   }
+
+  void ValidateNoSelfLinks(Position pos, const unique_ptr<Cell>& cell) {
+    for(auto ref : cell->GetReferencedCells()) {
+      if (ref == pos) {
+        throw CircularDependencyException("cycles not allowed!");
+      }
+    }
+  }
 }  // namespace
 
 Sheet::Sheet() {
@@ -106,8 +114,11 @@ void Sheet::SetCell(Position pos, std::string text) {
   auto new_cell = make_unique<Cell>(this, move(text));
 
   if (prev_cell) {
-    ValidateNoCyclesAfterInsertion(*this, pos, new_cell.get());
+    if (prev_cell->GetText() == new_cell->GetText()) {
+      return;
+    }
 
+    ValidateNoCyclesAfterInsertion(*this, pos, new_cell.get());
     for(auto ref : prev_cell->GetReferencedCells()) {
       GetCellImpl(ref)->RemoveExternalDep(pos);
     }
@@ -117,6 +128,7 @@ void Sheet::SetCell(Position pos, std::string text) {
     }
   } else {
     CollectCellStat(pos);
+    ValidateNoSelfLinks(pos, new_cell);
   }
 
   for (auto ref : new_cell->GetReferencedCells()) {

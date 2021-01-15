@@ -581,6 +581,12 @@ namespace {
 
     ASSERT(caught);
     ASSERT_EQUAL(sheet->GetCell("M6"_pos)->GetText(), "Ready");
+
+    try {
+      sheet->SetCell("M22"_pos, "=M22");
+      ASSERT(false);
+    } catch (const CircularDependencyException&) {
+    }
   }
 }  // namespace
 
