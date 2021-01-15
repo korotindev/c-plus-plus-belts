@@ -619,9 +619,7 @@ void TestGetValueCachingPerformance() {
   }
 
   using namespace std::chrono;
-  duration<double> real_time = total.value;
-
-  ASSERT_TIME_LIMIT(real_time, 100ms);
+  ASSERT_TIME_LIMIT(total.value, 100ms);
 }
 
 void TestCacheInvalidationPerformance() {
@@ -633,12 +631,9 @@ void TestCacheInvalidationPerformance() {
     sheet->SetCell("A1"_pos, "2");
     auto ss = PrintTable(sheet);
   }
-  ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(), ICell::Value("2"));
-
+  ASSERT_EQUAL(sheet->GetCell("A2"_pos)->GetValue(), ICell::Value(2));
   using namespace std::chrono;
-  duration<double> real_time = total.value;
-
-  ASSERT_TIME_LIMIT(real_time, 200ms);
+  ASSERT_TIME_LIMIT(total.value, 200ms);
 }
 
 int main() {
