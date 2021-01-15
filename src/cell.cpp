@@ -26,9 +26,7 @@ ICell::Value Cell::GetValue() const {
   }
 }
 
-std::string Cell::GetText() const {
-  return cached_text_;
-}
+std::string Cell::GetText() const { return cached_text_; }
 
 std::vector<Position> Cell::GetReferencedCells() const {
   if (ContainsFormula()) {
@@ -50,13 +48,16 @@ string Cell::BuildText() {
 void Cell::RebuildText(IFormula::HandlingResult result) {
   if (result == IFormula::HandlingResult::NothingChanged) return;
 
-  cached_text_ = BuildText();    
+  cached_text_ = BuildText();
 }
 
 IFormula::HandlingResult Cell::HandleInsertedRows(int before, int count) {
   if (!ContainsFormula()) return IFormula::HandlingResult::NothingChanged;
   auto result = GetFormula()->HandleInsertedRows(before, count);
   RebuildText(result);
+  RebuildExternalDepsWith([before, count](vector<Position>& positions) {
+    PositionModifiers::HandleInsertedRows(positions, before, count);
+  });
   return result;
 }
 
@@ -64,6 +65,9 @@ IFormula::HandlingResult Cell::HandleInsertedCols(int before, int count) {
   if (!ContainsFormula()) return IFormula::HandlingResult::NothingChanged;
   auto result = GetFormula()->HandleInsertedCols(before, count);
   RebuildText(result);
+  RebuildExternalDepsWith([before, count](vector<Position>& positions) {
+    PositionModifiers::HandleInsertedCols(positions, before, count);
+  });
   return result;
 }
 
@@ -71,6 +75,8 @@ IFormula::HandlingResult Cell::HandleDeletedRows(int first, int count) {
   if (!ContainsFormula()) return IFormula::HandlingResult::NothingChanged;
   auto result = GetFormula()->HandleDeletedRows(first, count);
   RebuildText(result);
+  RebuildExternalDepsWith(
+      [first, count](vector<Position>& positions) { PositionModifiers::HandleDeletedRows(positions, first, count); });
   return result;
 }
 
@@ -78,10 +84,29 @@ IFormula::HandlingResult Cell::HandleDeletedCols(int first, int count) {
   if (!ContainsFormula()) return IFormula::HandlingResult::NothingChanged;
   auto result = GetFormula()->HandleDeletedCols(first, count);
   RebuildText(result);
+  RebuildExternalDepsWith(
+      [first, count](vector<Position>& positions) { PositionModifiers::HandleDeletedCols(positions, first, count); });
   return result;
 }
 
 bool Cell::ContainsFormula() const { return holds_alternative<unique_ptr<IFormula>>(data_); }
 
 const IFormula* Cell::GetFormula() const { return get<unique_ptr<IFormula>>(data_).get(); }
+
 IFormula* Cell::GetFormula() { return get<unique_ptr<IFormula>>(data_).get(); }
+
+void Cell::AddExternalDep(Position pos) { external_deps_.insert(pos); }
+
+void Cell::RemoveExternalDep(Position pos) { external_deps_.erase(pos); }
+
+const PositionSet& Cell::ExternalDeps() const { return external_deps_; }
+
+bool Cell::IsCached() const { return true; }
+
+void Cell::InvalidateCache() {}
+
+void Cell::RebuildExternalDepsWith(function<void(vector<Position>&)> func) {
+  vector<Position> positions(external_deps_.begin(), external_deps_.end());
+  func(positions);
+  external_deps_ = PositionSet(positions.begin(), positions.end());
+}

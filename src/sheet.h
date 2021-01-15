@@ -24,8 +24,8 @@ class Sheet : public ISheet {
  private:
   using CellPtr = std::shared_ptr<Cell>;
   using Row = std::vector<CellPtr>;
-  const CellPtr& GetCellImpl(Position pos) const;
-  CellPtr& GetCellImpl(Position pos);
+  inline const CellPtr& GetCellImpl(Position pos) const;
+  inline CellPtr& GetCellImpl(Position pos);
   bool AccessablePosition(Position pos) const;
   void ExpandRow(Position pos);
   void IterateOverTableRows(std::function<void(Row& row, size_t row_id)> f);
@@ -35,6 +35,7 @@ class Sheet : public ISheet {
   void ClearCellsStat();
   void CollectCellStat(Position pos);
   void RemoveCellFromStat(Position pos);
+  void InvalidateCache(Position pos);
 
   std::vector<Row> data;
   std::vector<int> row_stat;

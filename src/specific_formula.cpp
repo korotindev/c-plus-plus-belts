@@ -6,6 +6,7 @@
 #include "FormulaListener.h"
 #include "FormulaParser.h"
 #include "antlr4-runtime.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -140,102 +141,45 @@ std::string SpecificFormula::GetExpression() const { return statement_->ToString
 std::vector<Position> SpecificFormula::GetReferencedCells() const { return references_; }
 
 IFormula::HandlingResult SpecificFormula::HandleInsertedRows(int before, int count) {
-  bool changed = false;
-  for (auto& pos : references_) {
-    if (pos.row >= before) {
-      pos.row += count;
-      changed = true;
-    }
-  }
+  auto result = PositionModifiers::HandleInsertedRows(references_, before, count);
 
-  if (changed) {
+  if (result != IFormula::HandlingResult::NothingChanged) {
     Ast::ModifyCellStatements(statement_.get(), [before, count](Position& pos) {
-      if (pos.row >= before) {
-        pos.row += count;
-      }
+      PositionModifiers::HandleInsertedRows(pos, before, count);
     });
-    return IFormula::HandlingResult::ReferencesRenamedOnly;
   }
 
-  return IFormula::HandlingResult::NothingChanged;
+  return result;
 }
 IFormula::HandlingResult SpecificFormula::HandleInsertedCols(int before, int count) {
-  bool changed = false;
-  for (auto& pos : references_) {
-    if (pos.col >= before) {
-      pos.col += count;
-      changed = true;
-    }
+  auto result = PositionModifiers::HandleInsertedCols(references_, before, count);
+
+  if (result != IFormula::HandlingResult::NothingChanged) {
+    Ast::ModifyCellStatements(statement_.get(), [before, count](Position& pos) {
+      PositionModifiers::HandleInsertedCols(pos, before, count);
+    });
   }
 
-  if (changed) {
-    Ast::ModifyCellStatements(statement_.get(), [before, count](Position& pos) {
-      if (pos.col >= before) {
-        pos.col += count;
-      }
-    });
-    return IFormula::HandlingResult::ReferencesRenamedOnly;
-  }
-  return IFormula::HandlingResult::NothingChanged;
+  return result;
 }
 IFormula::HandlingResult SpecificFormula::HandleDeletedRows(int first, int count) {
-  HandlingResult result = HandlingResult::NothingChanged;
-
-  for (auto& pos : references_) {
-    if (pos.row >= first + count) {
-      pos.row -= count;
-      if (result == HandlingResult::NothingChanged) {
-        result = HandlingResult::ReferencesRenamedOnly;
-      }
-    } else if (pos.row >= first) {
-      pos.row = -1;
-      result = HandlingResult::ReferencesChanged;
-    }
-  }
+  auto result = PositionModifiers::HandleDeletedRows(references_, first, count);
 
   if (result != HandlingResult::NothingChanged) {
     Ast::ModifyCellStatements(statement_.get(), [first, count](Position& pos) {
-      if (pos.row >= first + count) {
-        pos.row -= count;
-      } else if (pos.row >= first) {
-        pos.row = -1;
-      }
+      PositionModifiers::HandleDeletedRows(pos, first, count);
     });
-
-    references_.erase(
-        remove_if(references_.begin(), references_.end(), [](const Position& pos) { return !pos.IsValid(); }),
-        references_.end());
   }
 
   return result;
 }
 IFormula::HandlingResult SpecificFormula::HandleDeletedCols(int first, int count) {
-  HandlingResult result = HandlingResult::NothingChanged;
-
-  for (auto& pos : references_) {
-    if (pos.col >= first + count) {
-      pos.col -= count;
-      if (result == HandlingResult::NothingChanged) {
-        result = HandlingResult::ReferencesRenamedOnly;
-      }
-    } else if (pos.col >= first) {
-      pos.col = -1;
-      result = HandlingResult::ReferencesChanged;
-    }
-  }
+  auto result = PositionModifiers::HandleDeletedCols(references_, first, count);
 
   if (result != HandlingResult::NothingChanged) {
     Ast::ModifyCellStatements(statement_.get(), [first, count](Position& pos) {
-      if (pos.col >= first + count) {
-        pos.col -= count;
-      } else if (pos.col >= first) {
-        pos.col = -1;
-      }
+      PositionModifiers::HandleDeletedCols(pos, first, count);
     });
-
-    references_.erase(
-        remove_if(references_.begin(), references_.end(), [](const Position& pos) { return !pos.IsValid(); }),
-        references_.end());
   }
 
   return result;

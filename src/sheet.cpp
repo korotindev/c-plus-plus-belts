@@ -102,18 +102,32 @@ bool Sheet::AccessablePosition(Position pos) const { return static_cast<size_t>(
 void Sheet::SetCell(Position pos, std::string text) {
   ValidatePosition(pos);
   ExpandRow(pos);
-  auto cell_ptr = make_unique<Cell>(this, move(text));
-  ValidateNoCyclesAfterInsertion(*this, pos, cell_ptr.get());
-  for (auto ref : cell_ptr->GetReferencedCells()) {
+  auto &prev_cell = GetCellImpl(pos);
+  auto new_cell = make_unique<Cell>(this, move(text));
+
+  if (prev_cell) {
+    ValidateNoCyclesAfterInsertion(*this, pos, new_cell.get());
+
+    for(auto ref : prev_cell->GetReferencedCells()) {
+      GetCellImpl(ref)->RemoveExternalDep(pos);
+    }
+
+    for(const auto& ref : prev_cell->ExternalDeps()) {
+      new_cell->AddExternalDep(ref);
+    }
+  } else {
+    CollectCellStat(pos);
+  }
+
+  for (auto ref : new_cell->GetReferencedCells()) {
     if (!GetCell(ref)) {
       SetCell(ref, "");
     }
+    GetCellImpl(ref)->AddExternalDep(pos);
   }
-  auto &cell = GetCellImpl(pos);
-  if (!cell) {
-    CollectCellStat(pos);
-  }
-  cell = move(cell_ptr);
+
+  InvalidateCache(pos);
+  prev_cell = move(new_cell);
 }
 
 const ICell* Sheet::GetCell(Position pos) const {
@@ -258,10 +272,23 @@ void Sheet::PrintTexts(std::ostream& output) const {
   }
 }
 
-const Sheet::CellPtr& Sheet::GetCellImpl(Position pos) const {
+inline const Sheet::CellPtr& Sheet::GetCellImpl(Position pos) const {
   return data[pos.row][pos.col];
 }
 
-Sheet::CellPtr& Sheet::GetCellImpl(Position pos) {
-  return data[pos.row][pos.col];
+inline Sheet::CellPtr& Sheet::GetCellImpl(Position pos) { return data[pos.row][pos.col]; }
+
+void Sheet::InvalidateCache(Position pos) {
+  if (!AccessablePosition(pos)) {
+    return;
+  }
+  auto& cell_ptr = GetCellImpl(pos);
+  if (cell_ptr->IsCached()) {
+    return;
+  }
+
+  cell_ptr->InvalidateCache();
+  for (const auto& ref : cell_ptr->ExternalDeps()) {
+    InvalidateCache(ref);
+  }
 }
