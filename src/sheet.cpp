@@ -10,18 +10,14 @@ using namespace std;
 namespace {
   template <typename T>
   void PushElementsApart(vector<T>& vec, int before, int count) {
-    int i = vec.size() - 1;
-    while (i - count >= before) {
-      vec[i] = move(vec[i - count]);
-      i--;
-    }
+    if (static_cast<size_t>(before) >= vec.size()) return;
+    vector<T> tmp(count);
+    vec.insert(vec.begin() + before, move_iterator(tmp.begin()), move_iterator(tmp.end()));
   }
 
   template <typename T>
   void PushElementsCloser(vector<T>& vec, int first, int count) {
-    for (size_t i = first; i + count < vec.size(); i++) {
-      vec[i] = move(vec[i + count]);
-    }
+    vec.erase(vec.begin() + first, vec.begin() + first + count);
   }
 
   void ValidatePosition(Position pos) {
@@ -74,7 +70,7 @@ namespace {
     }
   }
 
-  void ValidateNoSelfLinks(Position pos, const unique_ptr<Cell>& cell) {
+  void ValidateNoSelfLinks(Position pos, const ICell* cell) {
     for(auto ref : cell->GetReferencedCells()) {
       if (ref == pos) {
         throw CircularDependencyException("cycles not allowed!");
@@ -103,7 +99,12 @@ void Sheet::RemoveCellFromStat(Position pos) {
   row_stat[pos.row]--;
 }
 
-void Sheet::ExpandRow(Position pos) { data[pos.row].resize(Position::kMaxCols); }
+void Sheet::ExpandRow(Position pos) { 
+  auto &row = data[pos.row];
+  if (row.size() <= static_cast<size_t>(pos.col)) {
+    row.resize(pos.col + 1);
+  }
+}
 
 bool Sheet::AccessablePosition(Position pos) const { return static_cast<size_t>(pos.col) < data[pos.row].size(); }
 
@@ -128,7 +129,7 @@ void Sheet::SetCell(Position pos, std::string text) {
     }
   } else {
     CollectCellStat(pos);
-    ValidateNoSelfLinks(pos, new_cell);
+    ValidateNoSelfLinks(pos, new_cell.get());
   }
 
   for (auto ref : new_cell->GetReferencedCells()) {
@@ -268,7 +269,7 @@ void Sheet::PrintValues(std::ostream& output) const {
   for (int i = 0; i < size.rows; i++) {
     for (int j = 0; j < size.cols; j++) {
       if (j > 0) output << '\t';
-      if (data[i].empty()) continue;
+      if (static_cast<size_t>(j) >= data[i].size()) continue;
       if (const auto& ptr = data[i][j]) {
         visit([&output](auto value) { output << value; }, ptr->GetValue());
       }
@@ -282,7 +283,7 @@ void Sheet::PrintTexts(std::ostream& output) const {
   for (int i = 0; i < size.rows; i++) {
     for (int j = 0; j < size.cols; j++) {
       if (j > 0) output << '\t';
-      if (data[i].empty()) continue;
+      if (static_cast<size_t>(j) >= data[i].size()) continue;
       if (const auto& ptr = data[i][j]) {
         output << ptr->GetText();
       }

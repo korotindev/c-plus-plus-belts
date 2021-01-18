@@ -8,6 +8,8 @@
 
 class Sheet : public ISheet {
  public:
+  using CellPtr = std::unique_ptr<Cell>;
+  using Row = std::vector<CellPtr>;
   Sheet();
   void SetCell(Position pos, std::string text) override;
   const ICell* GetCell(Position pos) const override;
@@ -22,8 +24,6 @@ class Sheet : public ISheet {
   void PrintTexts(std::ostream& output) const override;
 
  private:
-  using CellPtr = std::unique_ptr<Cell>;
-  using Row = std::vector<CellPtr>;
   inline const CellPtr& GetCellImpl(Position pos) const;
   inline CellPtr& GetCellImpl(Position pos);
   bool AccessablePosition(Position pos) const;
