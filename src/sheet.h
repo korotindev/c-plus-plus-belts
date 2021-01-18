@@ -22,7 +22,7 @@ class Sheet : public ISheet {
   void PrintTexts(std::ostream& output) const override;
 
  private:
-  using CellPtr = std::shared_ptr<Cell>;
+  using CellPtr = std::unique_ptr<Cell>;
   using Row = std::vector<CellPtr>;
   inline const CellPtr& GetCellImpl(Position pos) const;
   inline CellPtr& GetCellImpl(Position pos);
